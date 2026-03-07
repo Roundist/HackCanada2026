@@ -16,7 +16,6 @@ import { useWebSocket } from "./hooks/useWebSocket";
 import { useTariffRates } from "./hooks/useTariffRates";
 import { startAnalysis } from "./api/client";
 import { runDemoSimulation } from "./api/demo";
-import { businessProfiles } from "./data/businessProfiles";
 import type { BusinessProfile } from "./data/businessProfiles";
 
 type View = "input" | "analyzing" | "results";
@@ -24,7 +23,7 @@ type View = "input" | "analyzing" | "results";
 export default function App() {
   const [view, setView] = useState<View>("input");
   const [selectedAgent, setSelectedAgent] = useState<string | null>(null);
-  const [selectedProfile, setSelectedProfile] = useState<BusinessProfile | null>(() => businessProfiles[0] ?? null);
+  const [selectedProfile, setSelectedProfile] = useState<BusinessProfile | null>(null);
   const [tariffRatePct, setTariffRatePct] = useState(25);
   const [isDemoMode, setIsDemoMode] = useState(false);
   const [sessionId, setSessionId] = useState<string | null>(null);
@@ -140,7 +139,7 @@ export default function App() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="min-h-full flex bg-gray-100"
+              className="absolute inset-0 flex bg-gray-100"
             >
               {/* LEFT — Context only (secondary): selected profile + supply chain */}
               <div className="w-[280px] shrink-0 border-r border-gray-200 flex flex-col min-h-full bg-white/80 px-3 py-4 overflow-y-auto">
@@ -149,7 +148,8 @@ export default function App() {
               </div>
 
               {/* CENTER — Primary: one clear place for the eye to land */}
-              <div className="flex-1 flex items-start justify-center min-w-0 py-6 px-6 overflow-y-auto">
+              <div className="flex-1 overflow-y-auto min-w-0">
+                <div className="min-h-full flex justify-center py-6 px-6">
                 <div className="w-full max-w-xl bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-5">
                   <div>
                     <h1 className="text-lg font-semibold text-gray-900">
@@ -167,6 +167,7 @@ export default function App() {
                     variant="light"
                   />
                   <ProductSearch variant="light" />
+                </div>
                 </div>
               </div>
 
