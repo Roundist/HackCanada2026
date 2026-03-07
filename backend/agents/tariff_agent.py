@@ -81,6 +81,8 @@ class TariffCalculatorAgent(BaseAgent):
 
     async def run(self):
         """Run tariff calculation; on timeout or API error use fallback so pipeline continues."""
+        import time as _time
+        t0 = _time.time()
         try:
             await self.wait_for_dependencies()
             self.status = AgentStatus.WORKING
@@ -92,6 +94,7 @@ class TariffCalculatorAgent(BaseAgent):
             processed = await self.process_result(result)
             self.shared_memory[self.output_key] = processed
             await write_shared_memory(self.output_key, processed)
+            await self._pad_to_min_duration(t0)
             self.status = AgentStatus.COMPLETE
             await self.emit("Analysis complete.")
         except (asyncio.TimeoutError, Exception) as e:
@@ -100,4 +103,5 @@ class TariffCalculatorAgent(BaseAgent):
             fallback = self._fallback_tariff_impact()
             self.shared_memory[self.output_key] = fallback
             await write_shared_memory(self.output_key, fallback)
+            await self._pad_to_min_duration(t0)
             # Do not re-raise so Strategy Architect can still run
