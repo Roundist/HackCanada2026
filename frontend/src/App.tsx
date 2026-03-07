@@ -105,8 +105,8 @@ export default function App() {
       <main className="flex-1 overflow-hidden flex">
         <motion.aside
           initial={false}
-          animate={{ width: showCollapsedLeft ? 86 : 320 }}
-          transition={{ type: "spring", stiffness: 260, damping: 30 }}
+          animate={{ width: showCollapsedLeft ? 90 : 240 }}
+          transition={{ type: "spring", stiffness: 240, damping: 32 }}
           className="h-full border-r border-white/10 bg-black/30 backdrop-blur flex flex-col"
         >
           <div className="px-4 py-3 border-b border-white/10 flex items-center justify-between">

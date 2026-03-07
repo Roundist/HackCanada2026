@@ -96,14 +96,14 @@ export default function SurvivalPlan({ result, onReset, agents }: SurvivalPlanPr
     const items = Array.isArray(tariffImpact?.line_items)
       ? (tariffImpact.line_items as TariffLine[])
       : [];
-    if (items.length > 0) return items;
+    if (items.length > 0) return [...items].sort((a, b) => (b.exposure || 0) - (a.exposure || 0));
     return [
       { input: "Hardwood lumber", exposure: 82000 },
       { input: "Steel hardware", exposure: 61000 },
       { input: "Finishing chemicals", exposure: 42000 },
       { input: "Upholstery fabric", exposure: 38000 },
       { input: "Logistics + freight", exposure: 28000 },
-    ];
+    ].sort((a, b) => b.exposure - a.exposure);
   }, [tariffImpact]);
 
   const headlineExposure = tariffImpact.total_tariff_exposure ?? 180000;
@@ -208,6 +208,7 @@ export default function SurvivalPlan({ result, onReset, agents }: SurvivalPlanPr
             <div className="border border-white/12 bg-black/40 p-4">
               <div className="text-[10px] font-mono uppercase tracking-[0.28em] text-white/40 mb-2">Tariff Cost per Input</div>
               <Bar data={chartData} options={{
+                indexAxis: "y",
                 responsive: true,
                 plugins: { legend: { display: false } },
                 scales: {
@@ -282,6 +283,12 @@ export default function SurvivalPlan({ result, onReset, agents }: SurvivalPlanPr
             </div>
           </div>
         )}
+      </div>
+
+      {/* Persistent mini graph indicator */}
+      <div className="fixed right-4 bottom-4 border border-white/12 bg-black/60 backdrop-blur-sm p-3 shadow-lg shadow-black/30">
+        <div className="text-[9px] font-mono uppercase tracking-[0.24em] text-white/40 mb-2">Agent Status</div>
+        <MiniGraph agents={agents} />
       </div>
     </div>
   );
@@ -361,14 +368,19 @@ function SupplierMap({ suppliers }: { suppliers: Supplier[] }) {
         return (
           <div
             key={s.name + i}
-            className="absolute flex flex-col items-center"
+            className="absolute group flex flex-col items-center"
             style={{ left: `${x}px`, top: `${y}px` }}
           >
-            <div className="px-2 py-1 border border-emerald-400/40 bg-emerald-400/10 text-[10px] font-mono text-emerald-100">
-              {s.name}
+            <div className="w-2 h-2 rounded-full bg-emerald-400 shadow-lg shadow-emerald-400/30 relative">
+              <div className="absolute -left-20 -top-16 opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none">
+                <div className="border border-emerald-400/40 bg-black/80 px-3 py-2 text-[10px] font-mono text-white/80 whitespace-nowrap">
+                  <div className="text-emerald-300">{s.name}</div>
+                  <div className="text-white/60">{s.province} · {s.type}</div>
+                  <div className="text-emerald-200">Savings {s.savings}</div>
+                </div>
+              </div>
             </div>
-            <div className="w-2 h-2 rounded-full bg-emerald-400 shadow-lg shadow-emerald-400/30" />
-            <div className="text-[9px] font-mono text-white/70 mt-1">{s.province} · {s.type} · {s.savings}</div>
+            <div className="text-[9px] font-mono text-white/70 mt-1">{s.province}</div>
           </div>
         );
       })}
