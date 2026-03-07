@@ -10,7 +10,6 @@ from agents.supplier_agent import SupplierScoutAgent
 from agents.geopolitical_agent import GeopoliticalAgent
 from agents.strategy_agent import StrategyArchitectAgent
 from services.hs_classifier import classify_inputs
-from services.tariff_lookup import get_rate
 from services.backboard_client import create_session_thread, write_shared_memory
 
 
@@ -25,10 +24,15 @@ class Orchestrator:
         self,
         business_description: str,
         ws_callback: Callable[[str, str, dict], Coroutine] | None = None,
+        session_id: str | None = None,
     ):
         self.business_description = business_description
         self.ws_callback = ws_callback
-        self.shared_memory: dict[str, Any] = {}
+        self.session_id = session_id
+        self.shared_memory: dict[str, Any] = {
+            "_session_id": session_id,
+            "_backboard_thread_id": None,
+        }
         self.backboard_thread_id: str | None = None
 
     async def _ws(self, agent_name: str, event_type: str, data: dict):
@@ -119,8 +123,18 @@ class Orchestrator:
         self.shared_memory["hs_classifications"] = classifications
 
         # Persist RAG results to Backboard.io
-        await write_shared_memory("tariff_rates", tariff_rates)
-        await write_shared_memory("hs_classifications", classifications)
+        await write_shared_memory(
+            "tariff_rates",
+            tariff_rates,
+            thread_id=self.backboard_thread_id,
+            session_id=self.session_id,
+        )
+        await write_shared_memory(
+            "hs_classifications",
+            classifications,
+            thread_id=self.backboard_thread_id,
+            session_id=self.session_id,
+        )
         await self._arch(
             "backboard",
             "memory_write",
@@ -180,6 +194,7 @@ class Orchestrator:
 
         # Initialize Backboard.io session thread
         self.backboard_thread_id = await create_session_thread()
+        self.shared_memory["_backboard_thread_id"] = self.backboard_thread_id
         if self.backboard_thread_id:
             await self._arch(
                 "backboard",

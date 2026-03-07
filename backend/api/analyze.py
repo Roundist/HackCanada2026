@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import json
 import logging
+import os
+import time
 import uuid
 from pathlib import Path
 
@@ -18,6 +20,12 @@ router = APIRouter()
 
 # session_id -> shared_memory (final results)
 sessions: dict[str, dict] = {}
+session_updated_at: dict[str, float] = {}
+
+try:
+    _SESSION_TTL_SECONDS = max(300, int(os.getenv("SESSION_TTL_SECONDS", "21600")))
+except ValueError:
+    _SESSION_TTL_SECONDS = 21600
 
 _DEMO_PROFILES_PATH = Path(__file__).parent.parent / "database" / "demo_profiles.json"
 
@@ -27,13 +35,26 @@ def _load_demo_profiles() -> list[dict]:
         return json.load(f)
 
 
+def _prune_expired_sessions() -> None:
+    cutoff = time.time() - _SESSION_TTL_SECONDS
+    expired = [sid for sid, ts in session_updated_at.items() if ts < cutoff]
+    for sid in expired:
+        sessions.pop(sid, None)
+        session_updated_at.pop(sid, None)
+
+
 async def _run_pipeline(session_id: str, business_description: str):
     """Run the multi-agent pipeline as a background task."""
     ws_callback = make_ws_callback(session_id)
-    orchestrator = Orchestrator(business_description, ws_callback)
+    orchestrator = Orchestrator(
+        business_description,
+        ws_callback,
+        session_id=session_id,
+    )
     try:
         result = await orchestrator.run()
         sessions[session_id] = result
+        session_updated_at[session_id] = time.time()
         await broadcast(session_id, {
             "agent": "System",
             "event_type": "pipeline_complete",
@@ -59,6 +80,7 @@ async def _run_pipeline(session_id: str, business_description: str):
 
 @router.post("/api/analyze", response_model=AnalyzeResponse, status_code=202)
 async def analyze(request: AnalyzeRequest, background_tasks: BackgroundTasks):
+    _prune_expired_sessions()
     session_id = str(uuid.uuid4())
 
     description = request.business_description
@@ -81,8 +103,10 @@ async def analyze(request: AnalyzeRequest, background_tasks: BackgroundTasks):
 
 @router.get("/api/session/{session_id}/plan")
 async def get_plan(session_id: str):
+    _prune_expired_sessions()
     if session_id not in sessions:
         raise HTTPException(status_code=202, detail="Analysis still in progress")
+    session_updated_at[session_id] = time.time()
     data = sessions[session_id]
     return {
         "session_id": session_id,
@@ -97,8 +121,10 @@ async def get_plan(session_id: str):
 
 @router.get("/api/session/{session_id}/pdf")
 async def get_pdf(session_id: str):
+    _prune_expired_sessions()
     if session_id not in sessions:
         raise HTTPException(status_code=409, detail="Analysis not yet complete")
+    session_updated_at[session_id] = time.time()
     from services.pdf_generator import generate_pdf
     from fastapi.responses import Response
     pdf_bytes = await generate_pdf(sessions[session_id])
@@ -111,8 +137,10 @@ async def get_pdf(session_id: str):
 
 @router.post("/api/session/{session_id}/reclassify")
 async def reclassify(session_id: str, body: dict, background_tasks: BackgroundTasks):
+    _prune_expired_sessions()
     if session_id not in sessions:
         raise HTTPException(status_code=409, detail="Analysis not yet complete")
+    session_updated_at[session_id] = time.time()
 
     data = sessions[session_id]
     supply_chain = data.get("supply_chain_map", {})
@@ -199,8 +227,10 @@ async def _rerun_tariff_agent(session_id: str, shared_memory: dict):
 
 @router.get("/api/session/{session_id}/embedding-explorer/{input_name}")
 async def get_embedding_explorer(session_id: str, input_name: str):
+    _prune_expired_sessions()
     if session_id not in sessions:
         raise HTTPException(status_code=409, detail="Analysis not yet complete")
+    session_updated_at[session_id] = time.time()
 
     data = sessions[session_id]
     supply_chain = data.get("supply_chain_map", {})

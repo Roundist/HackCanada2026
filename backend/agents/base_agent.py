@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import asyncio
-import json
 import os
 import time
 from abc import ABC, abstractmethod
@@ -43,6 +42,23 @@ class BaseAgent(ABC):
         self.status = AgentStatus.IDLE
         self.messages: list[dict] = []
 
+    def _backboard_context(self) -> tuple[str | None, str | None]:
+        thread_id = self.shared_memory.get("_backboard_thread_id")
+        session_id = self.shared_memory.get("_session_id")
+        return (
+            thread_id if isinstance(thread_id, str) and thread_id else None,
+            session_id if isinstance(session_id, str) and session_id else None,
+        )
+
+    async def _write_backboard_memory(self, key: str, value: Any) -> None:
+        thread_id, session_id = self._backboard_context()
+        await write_shared_memory(
+            key,
+            value,
+            thread_id=thread_id,
+            session_id=session_id,
+        )
+
     async def emit(self, message: str, event_type: str = "status"):
         """Send a status update to the frontend via WebSocket."""
         entry = {
@@ -57,7 +73,13 @@ class BaseAgent(ABC):
         if self.ws_callback:
             await self.ws_callback(self.name, event_type, entry)
         # Log to Backboard for audit trail
-        await log_agent_activity(self.name, message)
+        thread_id, session_id = self._backboard_context()
+        await log_agent_activity(
+            self.name,
+            message,
+            thread_id=thread_id,
+            session_id=session_id,
+        )
 
     async def emit_architecture(
         self,
@@ -162,7 +184,7 @@ class BaseAgent(ABC):
             self.shared_memory[self.output_key] = processed
 
             # Persist to Backboard.io shared memory
-            await write_shared_memory(self.output_key, processed)
+            await self._write_backboard_memory(self.output_key, processed)
             await self.emit_architecture(
                 "backboard",
                 "memory_write",
@@ -204,7 +226,7 @@ class BaseAgent(ABC):
             fallback = self.fallback_output()
             self.shared_memory[self.output_key] = fallback
             try:
-                await write_shared_memory(self.output_key, fallback)
+                await self._write_backboard_memory(self.output_key, fallback)
                 await self.emit_architecture(
                     "backboard",
                     "fallback_write",

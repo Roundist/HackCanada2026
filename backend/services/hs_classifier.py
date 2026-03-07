@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import os
 from typing import Any
 
 from services.gemini_client import generate_json
@@ -48,6 +49,11 @@ async def classify(product_description: str) -> dict:
 
 
 CLASSIFY_TIMEOUT_SEC = 30  # per input; avoids pipeline hanging on quota/API issues
+try:
+    _CLASSIFY_CONCURRENCY_RAW = int(os.getenv("HS_CLASSIFY_MAX_CONCURRENCY", "3"))
+except ValueError:
+    _CLASSIFY_CONCURRENCY_RAW = 3
+CLASSIFY_MAX_CONCURRENCY = max(1, _CLASSIFY_CONCURRENCY_RAW)
 
 
 async def classify_inputs(inputs: list[dict]) -> dict[str, dict]:
@@ -57,12 +63,14 @@ async def classify_inputs(inputs: list[dict]) -> dict[str, dict]:
     us_inputs = [inp for inp in inputs if inp.get("is_us_sourced")]
     if not us_inputs:
         return {}
+    semaphore = asyncio.Semaphore(CLASSIFY_MAX_CONCURRENCY)
 
     async def classify_one(inp: dict) -> tuple[str, dict]:
         name = inp.get("name", "unknown")
         desc = inp.get("description") or inp.get("name") or "general product"
         try:
-            cls = await asyncio.wait_for(classify(desc), timeout=CLASSIFY_TIMEOUT_SEC)
+            async with semaphore:
+                cls = await asyncio.wait_for(classify(desc), timeout=CLASSIFY_TIMEOUT_SEC)
             return (name, cls)
         except asyncio.TimeoutError:
             return (name, {

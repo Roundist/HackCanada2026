@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import sys
 import time
+import os
 from collections import defaultdict
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -98,9 +99,18 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+_default_cors_origins = "http://localhost:5173,http://127.0.0.1:5173,http://localhost:5174,http://127.0.0.1:5174"
+_cors_origins = [
+    origin.strip()
+    for origin in os.getenv("CORS_ALLOW_ORIGINS", _default_cors_origins).split(",")
+    if origin.strip()
+]
+if not _cors_origins:
+    _cors_origins = ["http://localhost:5173"]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=_cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

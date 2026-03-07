@@ -249,7 +249,7 @@ export function downloadSurvivalPlanPdf(
       doc.setFontSize(10);
       doc.setTextColor(...navy);
       const titleStartY = yStart + 3.5;
-      titleLines.forEach((line, idx) => {
+      titleLines.forEach((line: string, idx: number) => {
         doc.text(line, mL + 12, titleStartY + idx * titleLineH);
       });
 
@@ -266,7 +266,7 @@ export function downloadSurvivalPlanPdf(
         doc.setFont("helvetica", "normal");
         doc.setFontSize(8.5);
         doc.setTextColor(...midGray);
-        descLines.forEach((line, idx) => {
+        descLines.forEach((line: string, idx: number) => {
           doc.text(line, mL + 12, y + (idx + 1) * descLineH);
         });
         y += descH;
@@ -276,7 +276,7 @@ export function downloadSurvivalPlanPdf(
         doc.setFont("helvetica", "normal");
         doc.setFontSize(7);
         doc.setTextColor(...midGray);
-        tagLines.forEach((line, idx) => {
+        tagLines.forEach((line: string, idx: number) => {
           doc.text(line, mL + 12, y + (idx + 1) * tagLineH);
         });
         y += tagsH;

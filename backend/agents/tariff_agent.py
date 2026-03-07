@@ -6,7 +6,6 @@ import time as _time
 from typing import Any
 
 from agents.base_agent import BaseAgent, AgentStatus
-from services.backboard_client import write_shared_memory
 from services.tariff_lookup import get_rate
 
 
@@ -238,7 +237,7 @@ class TariffCalculatorAgent(BaseAgent):
             await self.emit("Merging computed data with qualitative analysis...")
             processed = await self.process_result(result)
             self.shared_memory[self.output_key] = processed
-            await write_shared_memory(self.output_key, processed)
+            await self._write_backboard_memory(self.output_key, processed)
             await self._pad_to_min_duration(t0)
             self.status = AgentStatus.COMPLETE
             await self.emit("Analysis complete.")
@@ -247,6 +246,6 @@ class TariffCalculatorAgent(BaseAgent):
             await self.emit(f"Error: {str(e)} — using computed fallback", event_type="error")
             fallback = self._fallback_tariff_impact()
             self.shared_memory[self.output_key] = fallback
-            await write_shared_memory(self.output_key, fallback)
+            await self._write_backboard_memory(self.output_key, fallback)
             await self._pad_to_min_duration(t0)
             # Do not re-raise so Strategy Architect can still run

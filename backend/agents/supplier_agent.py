@@ -4,7 +4,6 @@ import json
 from typing import Any
 
 from agents.base_agent import BaseAgent, AgentStatus
-from services.backboard_client import write_shared_memory
 
 
 class SupplierScoutAgent(BaseAgent):
@@ -179,7 +178,7 @@ class SupplierScoutAgent(BaseAgent):
             )
 
         self.shared_memory[self.output_key] = output
-        await write_shared_memory(self.output_key, output)
+        await self._write_backboard_memory(self.output_key, output)
         await self._pad_to_min_duration(t0)
         self.status = AgentStatus.COMPLETE
         await self.emit("Analysis complete.")

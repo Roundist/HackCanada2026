@@ -11,6 +11,69 @@ logger = logging.getLogger(__name__)
 
 _backboard_client = None
 _assistant_id: str | None = None
+_MAX_BACKBOARD_CONTENT = 3500
+
+
+def _serialize_json(value: Any) -> str:
+    return json.dumps(value, ensure_ascii=False, default=str)
+
+
+def _safe_backboard_payload(value: Any) -> tuple[str, bool, int]:
+    """Return (json_payload, truncated, original_len) bounded to Backboard size."""
+    serialized = _serialize_json(value)
+    original_len = len(serialized)
+    if original_len <= _MAX_BACKBOARD_CONTENT:
+        return serialized, False, original_len
+
+    if isinstance(value, dict):
+        keys = list(value.keys())
+        sample_keys = keys[:5]
+        reduced: Any = {
+            "_truncated": True,
+            "_summary_type": "dict",
+            "_total_keys": len(keys),
+            "_sample_keys": sample_keys,
+            "_sample": {k: value[k] for k in sample_keys},
+        }
+    elif isinstance(value, list):
+        reduced = {
+            "_truncated": True,
+            "_summary_type": "list",
+            "_total_items": len(value),
+            "_sample_items": value[:3],
+        }
+    else:
+        reduced = {
+            "_truncated": True,
+            "_summary_type": type(value).__name__,
+            "_preview": str(value)[:400],
+        }
+
+    reduced_serialized = _serialize_json(reduced)
+    if len(reduced_serialized) <= _MAX_BACKBOARD_CONTENT:
+        return reduced_serialized, True, original_len
+
+    preview_budget = max(64, _MAX_BACKBOARD_CONTENT - 140)
+    preview = serialized[:preview_budget]
+    compact = {
+        "_truncated": True,
+        "_summary_type": "raw_json_preview",
+        "_original_chars": original_len,
+        "_preview": preview,
+    }
+    compact_serialized = _serialize_json(compact)
+    if len(compact_serialized) > _MAX_BACKBOARD_CONTENT:
+        overflow = len(compact_serialized) - _MAX_BACKBOARD_CONTENT
+        preview = preview[: max(0, len(preview) - overflow - 8)]
+        compact["_preview"] = preview
+        compact_serialized = _serialize_json(compact)
+
+    if len(compact_serialized) > _MAX_BACKBOARD_CONTENT:
+        compact_serialized = _serialize_json(
+            {"_truncated": True, "_original_chars": original_len}
+        )
+
+    return compact_serialized, True, original_len
 
 
 async def init_backboard() -> bool:
@@ -73,7 +136,12 @@ async def create_session_thread() -> str | None:
         return None
 
 
-async def write_shared_memory(key: str, value: Any) -> None:
+async def write_shared_memory(
+    key: str,
+    value: Any,
+    thread_id: str | None = None,
+    session_id: str | None = None,
+) -> None:
     """Persist an agent's output to Backboard shared memory.
 
     Backboard has a 4 KiB limit per attribute value, so we truncate large
@@ -83,24 +151,30 @@ async def write_shared_memory(key: str, value: Any) -> None:
     if not is_connected():
         return
     try:
-        serialized = json.dumps(value)
-        # Backboard 4 KiB limit — keep content well under it (3.5 KiB budget
-        # after accounting for the "[key] " prefix and metadata overhead).
-        MAX_CONTENT = 3500
-        if len(serialized) > MAX_CONTENT:
-            serialized = serialized[:MAX_CONTENT] + "…[truncated]"
+        serialized, truncated, original_len = _safe_backboard_payload(value)
         content = f"[{key}] {serialized}"
+        metadata = {"key": key, "type": "agent_output"}
+        if thread_id:
+            metadata["thread_id"] = thread_id
+        if session_id:
+            metadata["session_id"] = session_id
+        if truncated:
+            metadata["truncated"] = True
+            metadata["original_chars"] = original_len
         await _backboard_client.add_memory(
             assistant_id=_assistant_id,
             content=content,
-            metadata={"key": key, "type": "agent_output"},
+            metadata=metadata,
         )
         logger.info("Backboard: wrote shared memory key '%s'", key)
     except Exception as e:
         logger.warning("Backboard: failed to write key '%s': %s", key, e)
 
 
-async def read_shared_memory() -> dict[str, Any]:
+async def read_shared_memory(
+    thread_id: str | None = None,
+    session_id: str | None = None,
+) -> dict[str, Any]:
     """Read all shared memory entries from Backboard.
 
     Returns a dict of key -> parsed value.
@@ -113,6 +187,10 @@ async def read_shared_memory() -> dict[str, Any]:
         for mem in memories.memories:
             meta = mem.metadata or {}
             if meta.get("type") == "agent_output" and "key" in meta:
+                if thread_id and meta.get("thread_id") != thread_id:
+                    continue
+                if session_id and meta.get("session_id") != session_id:
+                    continue
                 key = meta["key"]
                 # Content format: "[key] {json...}"
                 content = mem.content
@@ -128,15 +206,25 @@ async def read_shared_memory() -> dict[str, Any]:
         return {}
 
 
-async def log_agent_activity(agent_name: str, message: str) -> None:
+async def log_agent_activity(
+    agent_name: str,
+    message: str,
+    thread_id: str | None = None,
+    session_id: str | None = None,
+) -> None:
     """Log an agent status message to Backboard for audit trail."""
     if not is_connected():
         return
     try:
+        metadata = {"key": "agent_log", "type": "activity", "agent": agent_name}
+        if thread_id:
+            metadata["thread_id"] = thread_id
+        if session_id:
+            metadata["session_id"] = session_id
         await _backboard_client.add_memory(
             assistant_id=_assistant_id,
             content=f"[{agent_name}] {message}",
-            metadata={"key": "agent_log", "type": "activity", "agent": agent_name},
+            metadata=metadata,
         )
     except Exception:
         pass  # Non-critical, don't break the pipeline
