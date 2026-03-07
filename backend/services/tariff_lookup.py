@@ -56,3 +56,9 @@ def get_dataframe() -> pd.DataFrame:
     """Return the loaded DataFrame (for vector store indexing)."""
     _ensure_loaded()
     return _df
+
+
+def get_all_rates() -> list[dict]:
+    """Return all tariff rows as list of dicts (for bulk API)."""
+    _ensure_loaded()
+    return _df.to_dict(orient="records")

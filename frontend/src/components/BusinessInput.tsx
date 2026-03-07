@@ -1,41 +1,14 @@
 import { useState } from "react";
+import { businessProfiles } from "../data/businessProfiles";
+import type { BusinessProfile } from "../data/businessProfiles";
 
 interface BusinessInputProps {
-  onSubmit: (description: string) => void;
+  onSubmit: (description: string, profile?: BusinessProfile | null) => void;
+  onSelectProfile?: (profile: BusinessProfile | null) => void;
   isRunning: boolean;
 }
 
-const DEMO_PROFILES = [
-  {
-    name: "Maple Furniture Co.",
-    industry: "Manufacturing",
-    revenue: "$8M",
-    imports: "US -- 65%",
-    risk: "HIGH",
-    description:
-      "We are a mid-sized Canadian furniture manufacturer based in Ontario with $8M annual revenue. We import hardwood lumber (oak, maple, walnut) from mills in Michigan and Wisconsin, upholstery fabrics from North Carolina, steel hardware and hinges from Ohio, and finishing chemicals (stains, lacquers) from Pennsylvania. About 65% of our raw materials come from the US. We sell primarily in the Canadian market through retail partners, with 20% of sales exported back to the US. Our margins are typically 18-22% depending on the product line. We employ 45 people and operate one production facility.",
-  },
-  {
-    name: "Northern Tech Solutions",
-    industry: "Technology",
-    revenue: "$12M",
-    imports: "US -- 55%",
-    risk: "MEDIUM",
-    description:
-      "We are a Canadian electronics company in Vancouver with $12M annual revenue. We import printed circuit boards and semiconductor components from suppliers in California and Texas, plastic housings from injection molding companies in Michigan, lithium batteries from US distributors (originally manufactured in China), and specialized testing equipment from Oregon. About 55% of our component costs are US-sourced. We assemble IoT devices for agricultural monitoring and sell 40% to US customers and 35% to Canadian customers. Margins run 25-30% but are under pressure from rising component costs. We have 60 employees.",
-  },
-  {
-    name: "Prairie Harvest Foods",
-    industry: "Food & Beverage",
-    revenue: "$5M",
-    imports: "US -- 40%",
-    risk: "MEDIUM",
-    description:
-      "We are a Canadian food processing company in Manitoba with $5M annual revenue. We import packaging materials (specialized food-grade containers and labels) from Wisconsin, flavoring extracts and food additives from US chemical companies in New Jersey, processing equipment parts from Illinois, and some specialty grains and ingredients from North Dakota. About 40% of our input costs are US-sourced. We produce organic snack foods and sell 70% domestically through major grocery chains, with 25% exported to the US. Margins are thin at 12-15%. We employ 30 people in our processing facility.",
-  },
-];
-
-export default function BusinessInput({ onSubmit, isRunning }: BusinessInputProps) {
+export default function BusinessInput({ onSubmit, onSelectProfile, isRunning }: BusinessInputProps) {
   const [description, setDescription] = useState("");
   const [showDemos, setShowDemos] = useState(true);
 
@@ -45,10 +18,11 @@ export default function BusinessInput({ onSubmit, isRunning }: BusinessInputProp
     }
   };
 
-  const handleDemo = (desc: string) => {
-    setDescription(desc);
+  const handleDemo = (profile: BusinessProfile) => {
+    setDescription(profile.description);
     setShowDemos(false);
-    onSubmit(desc);
+    onSelectProfile?.(profile);
+    onSubmit(profile.description, profile);
   };
 
   return (
@@ -59,10 +33,10 @@ export default function BusinessInput({ onSubmit, isRunning }: BusinessInputProp
             Demo Profiles -- Select to Analyze
           </div>
           <div className="space-y-2">
-            {DEMO_PROFILES.map((profile) => (
+            {businessProfiles.map((profile) => (
               <button
-                key={profile.name}
-                onClick={() => handleDemo(profile.description)}
+                key={profile.id}
+                onClick={() => handleDemo(profile)}
                 className="w-full text-left border border-white/[0.05] hover:border-white/[0.12] transition-colors p-3"
                 style={{ background: "rgba(15,17,23,0.6)" }}
               >

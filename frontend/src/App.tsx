@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ReactFlowProvider } from "@xyflow/react";
 import { motion, AnimatePresence } from "framer-motion";
 import NeuralGraph from "./components/NeuralGraph";
@@ -6,42 +6,59 @@ import BusinessInput from "./components/BusinessInput";
 import FindingsPanel from "./components/FindingsPanel";
 import ExecutionSteps from "./components/ExecutionSteps";
 import SurvivalPlan from "./components/SurvivalPlan";
-import SupplyChainFlow from "./components/SupplyChainFlow";
+import SupplyChainMap from "./components/SupplyChainMap";
+import AgentTerminalLog from "./components/AgentTerminalLog";
+import IntelligencePreview from "./components/IntelligencePreview";
 import RagTracePanel from "./components/RagTracePanel";
 import { useAgentState } from "./hooks/useAgentState";
 import { useWebSocket } from "./hooks/useWebSocket";
+import { useTariffRates } from "./hooks/useTariffRates";
 import { startAnalysis } from "./api/client";
 import { runDemoSimulation } from "./api/demo";
+import type { BusinessProfile } from "./data/businessProfiles";
 
 type View = "input" | "analyzing" | "results";
 
 export default function App() {
   const [view, setView] = useState<View>("input");
   const [selectedAgent, setSelectedAgent] = useState<string | null>(null);
+  const [selectedProfile, setSelectedProfile] = useState<BusinessProfile | null>(null);
+  const [tariffRatePct, setTariffRatePct] = useState(25);
   const demoAbort = useRef<(() => void) | null>(null);
   const {
     agents,
     pipelineDone,
     finalResult,
     systemEvents,
+    chainOfThoughtLog,
     handleWSMessage,
     resetAgents,
-  } =
-    useAgentState();
+  } = useAgentState();
+  const { getRate: getTariffRate, loaded: tariffRatesLoaded } = useTariffRates();
 
   const onWSMessage = useCallback(
     (msg: Parameters<typeof handleWSMessage>[0]) => {
       handleWSMessage(msg);
-      if (msg.type === "pipeline_done") {
+      const isPipelineComplete =
+        msg.type === "pipeline_done" || (msg as { event_type?: string }).event_type === "pipeline_complete";
+      if (isPipelineComplete) {
         setTimeout(() => setView("results"), 1500);
       }
     },
     [handleWSMessage]
   );
 
+  // Fallback: whenever pipeline is done and we have result, ensure we transition to results
+  useEffect(() => {
+    if (view !== "analyzing" || !pipelineDone || !finalResult) return;
+    const t = setTimeout(() => setView("results"), 1200);
+    return () => clearTimeout(t);
+  }, [view, pipelineDone, finalResult]);
+
   const { connect } = useWebSocket(onWSMessage);
 
-  const handleSubmit = async (description: string) => {
+  const handleSubmit = async (description: string, profile?: BusinessProfile | null) => {
+    if (profile) setSelectedProfile(profile);
     resetAgents();
     setView("analyzing");
     setSelectedAgent(null);
@@ -51,8 +68,11 @@ export default function App() {
       connect(session_id);
     } catch {
       console.log("Backend unavailable, running demo simulation");
-      demoAbort.current = runDemoSimulation(handleWSMessage, () =>
-        setTimeout(() => setView("results"), 1500)
+      const activeProfile = profile ?? selectedProfile;
+      demoAbort.current = runDemoSimulation(
+        handleWSMessage,
+        () => setTimeout(() => setView("results"), 1500),
+        { revenue: activeProfile?.revenue, profile: activeProfile ?? undefined }
       );
     }
   };
@@ -68,13 +88,13 @@ export default function App() {
   const completedAgents = agents.filter((a) => a.status === "done");
 
   return (
-    <div className="h-screen w-screen flex flex-col overflow-hidden grid-bg" style={{ background: "#06070a" }}>
-      {/* Top Bar */}
-      <header className="shrink-0 h-11 px-4 flex items-center justify-between border-b border-white/[0.06]" style={{ background: "rgba(10,11,16,0.95)" }}>
+    <div className="h-screen w-screen flex flex-col overflow-hidden grid-bg" style={{ background: "#0a0a0a" }}>
+      {/* Top Bar — Cyberpunk theme */}
+      <header className="shrink-0 h-11 px-4 flex items-center justify-between border-b border-white/[0.06]" style={{ background: "rgba(10,10,10,0.95)" }}>
         <div className="flex items-center gap-6">
           <div className="flex items-center gap-2">
-            <div className="w-5 h-5 border border-accent-red flex items-center justify-center">
-              <div className="w-2 h-2 bg-accent-red" />
+            <div className="w-5 h-5 border flex items-center justify-center" style={{ borderColor: "#ff4d4d" }}>
+              <div className="w-2 h-2" style={{ background: "#ff4d4d" }} />
             </div>
             <span className="text-xs font-semibold tracking-wider uppercase text-white/80">TariffTriage</span>
             <span className="text-[9px] font-mono text-white/20 ml-1">v2.0</span>
@@ -112,25 +132,25 @@ export default function App() {
               exit={{ opacity: 0 }}
               className="h-full flex"
             >
-              {/* LEFT panel — Agent Engine + Supply Chain Flow */}
-              <div className="w-[340px] shrink-0 border-r border-white/[0.06] flex flex-col" style={{ background: "rgba(8,9,13,0.6)" }}>
+              {/* LEFT panel — Chain of Thought terminal + Supply Chain Map */}
+              <div className="w-[400px] shrink-0 border-r border-white/[0.06] flex flex-col" style={{ background: "rgba(10,10,10,0.8)" }}>
                 <div className="px-4 py-3 border-b border-white/[0.06]">
                   <div className="text-[10px] font-mono uppercase tracking-widest text-white/25">Agent Intelligence Engine</div>
                 </div>
-                <div className="flex-1 p-3 space-y-1 overflow-y-auto">
-                  {agents.map((agent) => (
-                    <div key={agent.id} className="flex items-center gap-3 px-3 py-2.5 border border-white/[0.04]" style={{ background: "rgba(15,17,23,0.5)" }}>
-                      <div className="w-2 h-2 rounded-full" style={{ background: agent.color, opacity: 0.4 }} />
-                      <div className="flex-1 min-w-0">
-                        <div className="text-[11px] font-medium text-white/50">{agent.name}</div>
-                        <div className="text-[9px] font-mono text-white/20 mt-0.5 truncate">{agent.description}</div>
-                      </div>
-                      <div className="text-[8px] font-mono text-white/15 uppercase shrink-0">Standby</div>
-                    </div>
-                  ))}
+                <div className="flex-1 min-h-0 flex flex-col" style={{ minHeight: 180 }}>
+                  <AgentTerminalLog
+                    log={chainOfThoughtLog}
+                    isRunning={false}
+                    isComplete={false}
+                  />
                 </div>
-                <div className="border-t border-white/[0.06] p-4">
-                  <SupplyChainFlow />
+                <div className="border-t border-white/[0.06] p-4 flex-shrink-0 flex flex-col">
+                  <SupplyChainMap
+                    profile={selectedProfile}
+                    highlightedCommodity={selectedProfile?.routes?.[0]?.commodity}
+                    tariffRatePct={tariffRatePct}
+                    getRate={tariffRatesLoaded ? getTariffRate : undefined}
+                  />
                 </div>
               </div>
 
@@ -146,30 +166,23 @@ export default function App() {
                       Our AI agents will analyze tariff exposure, geopolitical risk, and survival strategy.
                     </p>
                   </div>
-                  <BusinessInput onSubmit={handleSubmit} isRunning={false} />
+                  <BusinessInput
+                    onSubmit={handleSubmit}
+                    onSelectProfile={setSelectedProfile}
+                    isRunning={false}
+                  />
                 </div>
               </div>
 
-              {/* RIGHT — Intel Preview */}
-              <div className="w-[280px] shrink-0 border-l border-white/[0.06] flex flex-col" style={{ background: "rgba(8,9,13,0.6)" }}>
-                <div className="px-4 py-3 border-b border-white/[0.06]">
-                  <div className="text-[10px] font-mono uppercase tracking-widest text-white/25">Intelligence Preview</div>
-                </div>
-                <div className="flex-1 p-4 space-y-3">
-                  {[
-                    { label: "Current Tariff Rate", value: "25%", sub: "US imports to Canada", color: "#dc2626" },
-                    { label: "Affected Sectors", value: "12", sub: "Manufacturing, Food, Tech", color: "#d97706" },
-                    { label: "Avg Margin Erosion", value: "8.4%", sub: "Cross-sector average", color: "#dc2626" },
-                    { label: "Alt Suppliers Available", value: "--", sub: "Awaiting analysis", color: "#16a34a" },
-                    { label: "Confidence Score", value: "--", sub: "Awaiting analysis", color: "#2563eb" },
-                  ].map((item) => (
-                    <div key={item.label} className="border border-white/[0.04] p-3" style={{ background: "rgba(15,17,23,0.5)" }}>
-                      <div className="text-[9px] font-mono uppercase tracking-wider text-white/20">{item.label}</div>
-                      <div className="text-lg font-semibold mt-1" style={{ color: item.value === "--" ? "rgba(255,255,255,0.12)" : item.color }}>{item.value}</div>
-                      <div className="text-[9px] font-mono text-white/15 mt-0.5">{item.sub}</div>
-                    </div>
-                  ))}
-                </div>
+              {/* RIGHT — Intelligence Preview (slider + alt suppliers + reactive metrics) */}
+              <div className="w-[300px] shrink-0 border-l border-white/[0.06] flex flex-col" style={{ background: "rgba(10,10,10,0.8)" }}>
+                <IntelligencePreview
+                  profile={selectedProfile}
+                  tariffRatePct={tariffRatePct}
+                  onTariffRateChange={setTariffRatePct}
+                  analysisComplete={false}
+                  tariffRatesFromCbsa={tariffRatesLoaded}
+                />
               </div>
             </motion.div>
           )}
@@ -199,9 +212,16 @@ export default function App() {
                 </div>
               </div>
 
-              {/* RIGHT — Live Findings */}
-              <div className="w-[360px] shrink-0 border-l border-white/[0.06] flex flex-col" style={{ background: "rgba(8,9,13,0.6)" }}>
-                <div className="flex-1 min-h-0">
+              {/* RIGHT — Chain of Thought log + Live Findings */}
+              <div className="w-[380px] shrink-0 border-l border-white/[0.06] flex flex-col" style={{ background: "rgba(10,10,10,0.8)" }}>
+                <div className="shrink-0" style={{ minHeight: 200, maxHeight: 220 }}>
+                  <AgentTerminalLog
+                    log={chainOfThoughtLog}
+                    isRunning={agents.some((a) => a.status === "running")}
+                    isComplete={pipelineDone}
+                  />
+                </div>
+                <div className="flex-1 min-h-0 overflow-hidden flex flex-col border-t border-white/[0.06]">
                   <FindingsPanel agents={agents} pipelineDone={pipelineDone} />
                 </div>
                 <RagTracePanel agents={agents} systemEvents={systemEvents} />

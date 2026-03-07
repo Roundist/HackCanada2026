@@ -1,4 +1,5 @@
 import type { AgentInfo } from "../types";
+import { getAgentActivity } from "../hooks/useAgentState";
 
 interface ExecutionStepsProps {
   agents: AgentInfo[];
@@ -25,23 +26,24 @@ export default function ExecutionSteps({ agents }: ExecutionStepsProps) {
         const isRunning = agent?.status === "running";
         const isDone = agent?.status === "done";
         const isActive = isRunning || isDone;
+        const stepLabel = agent && (agent.messages.length > 0 || agent.status !== "idle") ? getAgentActivity(agent) : step.label;
 
         return (
           <div key={step.key} className="flex items-center gap-1">
-            <div className="flex items-center gap-1.5 px-2 py-1 border" style={{
+            <div className="flex items-center gap-1.5 px-2 py-1 border max-w-[140px]" style={{
               borderColor: isActive ? `${agent.color}33` : "rgba(255,255,255,0.04)",
               background: isRunning ? `${agent.color}08` : "transparent",
             }}>
               <div
-                className={`w-1.5 h-1.5 rounded-full ${isRunning ? "status-blink" : ""}`}
+                className={`w-1.5 h-1.5 rounded-full shrink-0 ${isRunning ? "status-blink" : ""}`}
                 style={{
                   background: isDone ? "#16a34a" : isRunning ? agent.color : "rgba(255,255,255,0.1)",
                 }}
               />
-              <span className="text-[9px] font-mono whitespace-nowrap" style={{
+              <span className="text-[9px] font-mono whitespace-nowrap truncate" title={stepLabel} style={{
                 color: isRunning ? agent.color : isDone ? "rgba(255,255,255,0.4)" : "rgba(255,255,255,0.15)",
               }}>
-                {step.label}
+                {stepLabel}
               </span>
             </div>
             {i < STEPS.length - 1 && (

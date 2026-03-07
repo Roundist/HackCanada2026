@@ -10,7 +10,7 @@
 
 body {
   font-family: "Inter", system-ui, sans-serif;
-  background: #06070a;
+  background: #0a0a0a;
   color: #c8ccd4;
   overflow: hidden;
 }
@@ -98,4 +98,421 @@ body {
 }
 .status-blink {
   animation: statusBlink 2s ease-in-out infinite;
+}
+
+/* ========== Harbor & Horizon (Isometric Bay) ========== */
+.harbor-bay {
+  position: relative;
+  flex: 1;
+  min-height: 280px;
+  display: flex;
+  flex-direction: column;
+}
+
+.harbor-bay-title {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  color: rgba(255, 255, 255, 0.35);
+  font-family: "JetBrains Mono", monospace;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  flex-shrink: 0;
+}
+
+.harbor-bay-scene {
+  position: relative;
+  flex: 1;
+  min-height: 300px;
+  background: linear-gradient(180deg, rgba(6, 8, 14, 0.98) 0%, rgba(10, 14, 24, 0.99) 50%, rgba(8, 12, 22, 1) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+}
+
+/* Water — isometric-style band at bottom */
+.harbor-water {
+  position: absolute;
+  left: -5%;
+  right: -5%;
+  bottom: 0;
+  height: 52%;
+  background: linear-gradient(
+    160deg,
+    rgba(15, 35, 55, 0.85) 0%,
+    rgba(20, 45, 70, 0.9) 30%,
+    rgba(25, 55, 85, 0.88) 70%,
+    rgba(15, 40, 60, 0.92) 100%
+  );
+  clip-path: polygon(0 35%, 100% 25%, 100% 100%, 0 100%);
+  animation: harborWave 4s ease-in-out infinite;
+}
+
+@keyframes harborWave {
+  0%, 100% { opacity: 0.95; transform: translateY(0); }
+  50% { opacity: 1; transform: translateY(-2px); }
+}
+
+/* Data particles flowing like currents */
+.harbor-particles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.harbor-particle {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: rgba(120, 200, 255, 0.6);
+  box-shadow: 0 0 10px rgba(100, 180, 255, 0.5);
+  animation: harborParticleFlow 7s linear infinite;
+}
+
+@keyframes harborParticleFlow {
+  0% { transform: translate(0, 0) scale(1); opacity: 0.1; }
+  15% { opacity: 0.25; }
+  50% { transform: translate(20px, -30px) scale(1.1); opacity: 0.2; }
+  85% { opacity: 0.15; }
+  100% { transform: translate(-10px, -60px) scale(0.9); opacity: 0.05; }
+}
+
+/* Rocky headland */
+.harbor-headland {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 42%;
+  height: 55%;
+  pointer-events: none;
+}
+
+.harbor-headland-rock {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(145deg, rgba(35, 40, 52, 0.95) 0%, rgba(25, 30, 42, 0.98) 100%);
+  clip-path: polygon(55% 80%, 75% 45%, 100% 30%, 100% 100%, 0 100%, 20% 85%);
+  border-left: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.harbor-headland-rock.accent {
+  clip-path: polygon(60% 75%, 78% 50%, 100% 35%, 100% 100%, 30% 100%);
+  background: linear-gradient(145deg, rgba(42, 48, 62, 0.9) 0%, rgba(30, 36, 50, 0.95) 100%);
+  opacity: 0.7;
+}
+
+/* Lighthouse — prominent on headland */
+.harbor-lighthouse {
+  position: absolute;
+  right: 14%;
+  bottom: 28%;
+  width: 52px;
+  height: 100px;
+  pointer-events: none;
+}
+
+.harbor-lighthouse-base {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40px;
+  height: 14px;
+  background: linear-gradient(180deg, rgba(60, 68, 88, 0.98), rgba(42, 50, 68, 0.99));
+  clip-path: polygon(12% 0, 88% 0, 100% 100%, 0 100%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+.harbor-lighthouse-tower {
+  position: absolute;
+  bottom: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 20px;
+  height: 72px;
+  background: linear-gradient(90deg, rgba(48, 56, 76, 0.98), rgba(68, 80, 105, 0.95), rgba(48, 56, 76, 0.98));
+  clip-path: polygon(18% 0, 82% 0, 100% 100%, 0 100%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: inset 0 0 16px rgba(0, 0, 0, 0.35);
+}
+
+.harbor-lighthouse-beacon {
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 28px;
+  height: 16px;
+}
+
+.harbor-lighthouse-glow {
+  position: absolute;
+  inset: -12px;
+  background: radial-gradient(circle, rgba(100, 180, 255, 0.5) 0%, transparent 65%);
+  animation: lighthouseGlow 2.2s ease-in-out infinite;
+}
+
+@keyframes lighthouseGlow {
+  0%, 100% { opacity: 0.7; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.2); }
+}
+
+.harbor-lighthouse-beam {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 200px;
+  height: 3px;
+  background: linear-gradient(
+    90deg,
+    rgba(100, 180, 255, 0.95) 0%,
+    rgba(100, 180, 255, 0.5) 35%,
+    rgba(100, 180, 255, 0.15) 70%,
+    transparent 100%
+  );
+  transform-origin: left center;
+  transform: translateY(-50%) rotate(-22deg) translateX(14px);
+  filter: blur(1px);
+  animation: beamPulse 2.5s ease-in-out infinite;
+  box-shadow: 0 0 20px rgba(100, 180, 255, 0.6), 0 0 40px rgba(100, 180, 255, 0.25);
+}
+
+@keyframes beamPulse {
+  0%, 100% { opacity: 0.75; }
+  50% { opacity: 1; }
+}
+
+.harbor-lighthouse-label {
+  position: absolute;
+  bottom: -18px;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: rgba(160, 210, 255, 0.65);
+  text-shadow: 0 0 12px rgba(100, 180, 255, 0.4);
+}
+
+/* Ships — larger, clearer silhouettes */
+.harbor-ship {
+  position: absolute;
+  pointer-events: none;
+}
+
+.harbor-ship-small {
+  left: 8%;
+  bottom: 26%;
+  width: 58px;
+  height: 24px;
+}
+
+.harbor-ship-bulk {
+  left: 32%;
+  bottom: 20%;
+  width: 68px;
+  height: 22px;
+}
+
+.harbor-ship-weighted {
+  left: 52%;
+  bottom: 14%;
+  width: 78px;
+  height: 32px;
+}
+
+.ship-hull {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 60%;
+  background: linear-gradient(180deg, rgba(70, 78, 95, 0.9), rgba(50, 58, 72, 0.95));
+  clip-path: polygon(8% 100%, 92% 100%, 100% 0, 0 0);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.ship-hull.bulk {
+  height: 55%;
+  clip-path: polygon(5% 100%, 95% 100%, 100% 15%, 0 15%);
+}
+
+.ship-hull.weighted {
+  height: 72%;
+  background: linear-gradient(180deg, rgba(62, 70, 88, 0.95), rgba(42, 48, 64, 0.98));
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+}
+
+.ship-deck {
+  position: absolute;
+  top: 0;
+  left: 10%;
+  right: 10%;
+  height: 45%;
+  background: linear-gradient(180deg, rgba(55, 62, 78, 0.9), rgba(45, 52, 68, 0.95));
+  clip-path: polygon(0 100%, 100% 100%, 95% 0, 5% 0);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.ship-deck.bulk {
+  height: 40%;
+}
+
+.ship-deck.weighted {
+  height: 50%;
+}
+
+.ship-containers {
+  position: absolute;
+  top: 2px;
+  left: 5%;
+  right: 5%;
+  height: 85%;
+  background: repeating-linear-gradient(
+    90deg,
+    transparent,
+    transparent 6px,
+    rgba(80, 90, 110, 0.6) 6px,
+    rgba(80, 90, 110, 0.6) 7px
+  );
+  border-radius: 1px;
+}
+
+.ship-drift-1 {
+  animation: shipDrift1 6s ease-in-out infinite;
+}
+
+.ship-drift-2 {
+  animation: shipDrift2 7s ease-in-out infinite;
+}
+
+.ship-drift-slow {
+  animation: shipDriftSlow 8s ease-in-out infinite;
+}
+
+@keyframes shipDrift1 {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(4px, -2px); }
+}
+
+@keyframes shipDrift2 {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(-3px, 2px); }
+}
+
+@keyframes shipDriftSlow {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(2px, 1px); }
+}
+
+/* Tariff badge — prominent on weighted ship */
+.harbor-tariff-badge {
+  position: absolute;
+  top: -28px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: #fecaca;
+  text-shadow: 0 0 16px rgba(220, 38, 38, 0.9), 0 0 32px rgba(220, 38, 38, 0.5);
+  padding: 4px 10px;
+  background: rgba(220, 38, 38, 0.25);
+  border: 1px solid rgba(220, 38, 38, 0.6);
+  border-radius: 6px;
+  box-shadow: 0 0 24px rgba(220, 38, 38, 0.4), inset 0 0 12px rgba(220, 38, 38, 0.15);
+}
+
+/* Glass-morphic Intelligence Preview — translucent, projected feel */
+.harbor-intel-window {
+  position: absolute;
+  left: 50%;
+  bottom: 36%;
+  transform: translateX(-50%);
+  width: calc(100% - 20px);
+  max-width: 340px;
+  z-index: 10;
+  pointer-events: auto;
+}
+
+.harbor-intel-window-inner {
+  background: rgba(14, 18, 28, 0.6);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(100, 180, 255, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+
+.harbor-intel-window-header {
+  padding: 8px 12px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: rgba(170, 220, 255, 0.85);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.harbor-intel-window-body {
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 180px;
+  overflow-y: auto;
+}
+
+.harbor-intel-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 4px 12px;
+  align-items: baseline;
+  font-size: 10px;
+}
+
+.harbor-intel-label {
+  font-family: "JetBrains Mono", monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 9px;
+}
+
+.harbor-intel-value {
+  font-weight: 700;
+  font-size: 13px;
+  text-align: right;
+}
+
+.harbor-intel-bar-wrap {
+  grid-column: 1 / -1;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.harbor-intel-bar {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.5s ease-out;
+}
+
+.harbor-intel-sub {
+  grid-column: 1 / -1;
+  font-size: 8px;
+  font-family: "JetBrains Mono", monospace;
+  color: rgba(255, 255, 255, 0.28);
 }

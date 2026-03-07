@@ -12,6 +12,7 @@ import "@xyflow/react/dist/style.css";
 import { motion, AnimatePresence } from "framer-motion";
 import AgentNodeComponent from "./AgentNode";
 import CenterNodeComponent from "./CenterNode";
+import { getAgentActivity } from "../hooks/useAgentState";
 import type { AgentInfo } from "../types";
 
 interface NeuralGraphProps {
@@ -57,6 +58,7 @@ export default function NeuralGraph({ agents, onSelectAgent, selectedAgent }: Ne
         data: {
           ...agentMap["supply_chain"],
           label: agentMap["supply_chain"].name,
+          activity: getAgentActivity(agentMap["supply_chain"]),
           isSelected: selectedAgent === "supply_chain",
           onSelect,
         },
@@ -69,6 +71,7 @@ export default function NeuralGraph({ agents, onSelectAgent, selectedAgent }: Ne
         data: {
           ...agentMap["tariff_calculator"],
           label: agentMap["tariff_calculator"].name,
+          activity: getAgentActivity(agentMap["tariff_calculator"]),
           isSelected: selectedAgent === "tariff_calculator",
           onSelect,
         },
@@ -81,6 +84,7 @@ export default function NeuralGraph({ agents, onSelectAgent, selectedAgent }: Ne
         data: {
           ...agentMap["geopolitical"],
           label: agentMap["geopolitical"].name,
+          activity: getAgentActivity(agentMap["geopolitical"]),
           isSelected: selectedAgent === "geopolitical",
           onSelect,
         },
@@ -93,6 +97,7 @@ export default function NeuralGraph({ agents, onSelectAgent, selectedAgent }: Ne
         data: {
           ...agentMap["supplier_scout"],
           label: agentMap["supplier_scout"].name,
+          activity: getAgentActivity(agentMap["supplier_scout"]),
           isSelected: selectedAgent === "supplier_scout",
           onSelect,
         },
@@ -105,6 +110,7 @@ export default function NeuralGraph({ agents, onSelectAgent, selectedAgent }: Ne
         data: {
           ...agentMap["strategy"],
           label: agentMap["strategy"].name,
+          activity: getAgentActivity(agentMap["strategy"]),
           isSelected: selectedAgent === "strategy",
           onSelect,
         },

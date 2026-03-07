@@ -10,6 +10,8 @@ interface AgentNodeData {
   status: AgentStatus;
   description: string;
   messages: string[];
+  /** Current activity line (e.g. "Parsing business description...") */
+  activity?: string;
   isSelected: boolean;
   onSelect: (id: string) => void;
   [key: string]: unknown;
@@ -24,7 +26,7 @@ const STATUS_LABEL: Record<AgentStatus, string> = {
 };
 
 function AgentNodeComponent({ id, data }: NodeProps & { data: AgentNodeData }) {
-  const { label, color, status, messages, isSelected, onSelect } = data;
+  const { label, color, status, messages, activity, isSelected, onSelect } = data;
 
   const isActive = status === "running";
   const isDone = status === "done";
@@ -78,15 +80,22 @@ function AgentNodeComponent({ id, data }: NodeProps & { data: AgentNodeData }) {
             <div className="text-[11px] font-semibold text-white/70">{label}</div>
           </div>
 
-          <div className="flex items-center gap-2 ml-[18px]">
-            <span className="text-[8px] font-mono uppercase tracking-widest" style={{
-              color: isActive ? color : isDone ? "#16a34a" : "rgba(255,255,255,0.2)",
-            }}>
-              {STATUS_LABEL[status]}
-            </span>
-            {isDone && messages.length > 0 && (
-              <span className="text-[8px] font-mono text-white/15">
-                {messages.length} outputs
+          <div className="flex flex-col gap-0.5 ml-[18px]">
+            <div className="flex items-center gap-2">
+              <span className="text-[8px] font-mono uppercase tracking-widest" style={{
+                color: isActive ? color : isDone ? "#16a34a" : "rgba(255,255,255,0.2)",
+              }}>
+                {STATUS_LABEL[status]}
+              </span>
+              {isDone && messages.length > 0 && (
+                <span className="text-[8px] font-mono text-white/15">
+                  {messages.length} outputs
+                </span>
+              )}
+            </div>
+            {activity && (isActive || isDone) && (
+              <span className="text-[8px] font-mono text-white/25 truncate max-w-[160px]" title={activity}>
+                {activity}
               </span>
             )}
           </div>

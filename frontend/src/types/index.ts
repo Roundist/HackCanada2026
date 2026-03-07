@@ -17,6 +17,12 @@ export interface SystemEvent {
   timestamp: number;
 }
 
+export interface ChainOfThoughtEntry {
+  agent: string;
+  message: string;
+  timestamp: number;
+}
+
 export interface WSMessage {
   // Demo simulation format
   type?: "agent_start" | "agent_log" | "agent_done" | "agent_error" | "pipeline_done";
