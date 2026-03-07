@@ -105,33 +105,29 @@ class Orchestrator:
             Phase 3: Agents 2 + 3 + 4 all in parallel
             Phase 4: Agent 5 (Strategy Architect)
 
-        Pacing: deliberate delays between phases so the full pipeline takes
-        ~40 seconds, giving time to explain each phase in a live demo.
+        Pacing: each agent is guaranteed >=8s via _pad_to_min_duration,
+        plus fixed 3s transitions between phases.  Total: ~40s consistent.
         """
 
         # Initialize Backboard.io session thread
         self.backboard_thread_id = await create_session_thread()
 
         # Phase 1: Supply Chain Analyst + pre-fetch news headlines in parallel
-        await self._phase_delay("Initializing Supply Chain Analyst...", 2)
+        await self._phase_delay("Initializing Supply Chain Analyst...", 3)
         agent1 = SupplyChainAgent(
             self.shared_memory, self._ws, self.business_description
         )
-        # Start a news pre-fetch that won't block Agent 1.
-        # We cache the result so GeopoliticalAgent picks it up instantly.
         news_task = asyncio.create_task(self._prefetch_news())
         await agent1.run()
 
-        # Pause between Phase 1 → Phase 2
-        await self._phase_delay("Supply chain mapped. Preparing RAG classification...", 4)
+        # Transition: Phase 1 → Phase 2
+        await self._phase_delay("Supply chain mapped. Preparing RAG classification...", 3)
 
         # Phase 2: RAG HS code classification (inputs classified in parallel)
         await self._run_rag_classification()
 
-        # Pause between Phase 2 → Phase 3
-        await self._phase_delay("HS codes classified. Dispatching parallel agents...", 4)
-
-        # Make sure news pre-fetch is done before Agent 4 starts
+        # Transition: Phase 2 → Phase 3
+        await self._phase_delay("HS codes classified. Dispatching parallel agents...", 3)
         await news_task
 
         # Phase 3: Tariff Calculator + Supplier Scout + Geopolitical Analyst in parallel
@@ -140,8 +136,8 @@ class Orchestrator:
         agent4 = GeopoliticalAgent(self.shared_memory, self._ws)
         await asyncio.gather(agent2.run(), agent3.run(), agent4.run())
 
-        # Pause between Phase 3 → Phase 4
-        await self._phase_delay("All intelligence gathered. Synthesizing survival strategy...", 5)
+        # Transition: Phase 3 → Phase 4
+        await self._phase_delay("All intelligence gathered. Synthesizing survival strategy...", 3)
 
         # Phase 4: Strategy Architect (needs all 4 outputs)
         agent5 = StrategyArchitectAgent(self.shared_memory, self._ws)

@@ -9,6 +9,13 @@ from typing import Any
 from services.gemini_client import generate_json
 from services.backboard_client import write_shared_memory, log_agent_activity
 
+# ---------------------------------------------------------------------------
+# Demo pacing: each agent's run() is guaranteed to take at least this many
+# seconds (wall-clock).  If the real work finishes faster, we pad with sleep.
+# This keeps the neural-graph animation consistent across demo runs.
+# ---------------------------------------------------------------------------
+AGENT_MIN_DURATION_SECS: float = 8.0
+
 
 class AgentStatus:
     IDLE = "idle"
@@ -78,6 +85,13 @@ class BaseAgent(ABC):
             timeout=timeout_seconds,
         )
 
+    async def _pad_to_min_duration(self, start_time: float):
+        """Sleep the remaining time so the agent takes at least AGENT_MIN_DURATION_SECS."""
+        elapsed = time.time() - start_time
+        remaining = AGENT_MIN_DURATION_SECS - elapsed
+        if remaining > 0:
+            await asyncio.sleep(remaining)
+
     @abstractmethod
     def system_prompt(self) -> str:
         """Return the system prompt for this agent."""
@@ -100,22 +114,21 @@ class BaseAgent(ABC):
     async def run(self):
         """Execute the full agent lifecycle.
 
-        Includes deliberate pacing delays so each agent phase is visible
-        in the frontend neural graph during a live demo (~40s total pipeline).
+        Guaranteed to take at least AGENT_MIN_DURATION_SECS wall-clock seconds
+        so the frontend neural-graph animation is consistent across demo runs.
         """
+        t0 = time.time()
         try:
             await self.wait_for_dependencies()
 
             self.status = AgentStatus.WORKING
             await self.emit("Starting analysis...")
-            await asyncio.sleep(2)
 
             user_message = await self.build_user_message()
             await self.emit("Calling Gemini for analysis...")
 
             result = await self.call_gemini(user_message)
             await self.emit("Processing results...")
-            await asyncio.sleep(2)
 
             processed = await self.process_result(result)
             self.shared_memory[self.output_key] = processed
@@ -123,7 +136,8 @@ class BaseAgent(ABC):
             # Persist to Backboard.io shared memory
             await write_shared_memory(self.output_key, processed)
 
-            await asyncio.sleep(1)
+            # Pad so this agent always takes a consistent amount of time
+            await self._pad_to_min_duration(t0)
             self.status = AgentStatus.COMPLETE
             await self.emit("Analysis complete.")
 
