@@ -8,6 +8,11 @@ const DEMO_MESSAGES: { delay: number; msg: WSMessage }[] = [
   { delay: 3000, msg: { type: "agent_log", agent: "Supply Chain Analyst", message: "Identified 5 US-sourced inputs exposed to tariffs" } },
   { delay: 3500, msg: { type: "agent_done", agent: "Supply Chain Analyst", data: {} } },
 
+  // System RAG stage
+  { delay: 3800, msg: { type: "agent_log", agent: "System", status: "working", message: "Running RAG pipeline: classifying HS codes via semantic search..." } },
+  { delay: 3950, msg: { type: "agent_log", agent: "System", status: "working", message: "Retrieved top-5 HS candidates per US-sourced input from vector index" } },
+  { delay: 4150, msg: { type: "agent_log", agent: "System", status: "complete", message: "Classified 5 inputs to HS codes with tariff rates" } },
+
   // Tariff Calculator + Geopolitical (parallel)
   { delay: 4000, msg: { type: "agent_start", agent: "Tariff Calculator" } },
   { delay: 4200, msg: { type: "agent_start", agent: "Geopolitical Analyst" } },

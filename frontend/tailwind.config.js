@@ -4,7 +4,25 @@ export default {
   theme: {
     extend: {
       colors: {
-        dark: { 900: "#0a0a0f", 800: "#12121a", 700: "#1a1a25", 600: "#222230" },
+        dark: {
+          950: "#06070a",
+          900: "#0a0b10",
+          800: "#0f1117",
+          700: "#14161e",
+          600: "#1a1d27",
+          500: "#22252f",
+        },
+        accent: {
+          red: "#dc2626",
+          amber: "#d97706",
+          green: "#16a34a",
+          blue: "#2563eb",
+          cyan: "#0891b2",
+        },
+      },
+      fontFamily: {
+        sans: ['"Inter"', "system-ui", "sans-serif"],
+        mono: ['"JetBrains Mono"', "monospace"],
       },
     },
   },

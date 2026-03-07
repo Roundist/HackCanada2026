@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo } from "react";
 import {
   ReactFlow,
   Background,
@@ -11,6 +11,7 @@ import {
 import "@xyflow/react/dist/style.css";
 import { motion, AnimatePresence } from "framer-motion";
 import AgentNodeComponent from "./AgentNode";
+import CenterNodeComponent from "./CenterNode";
 import type { AgentInfo } from "../types";
 
 interface NeuralGraphProps {
@@ -21,6 +22,7 @@ interface NeuralGraphProps {
 
 const nodeTypes: NodeTypes = {
   agent: AgentNodeComponent as unknown as NodeTypes["agent"],
+  center: CenterNodeComponent as unknown as NodeTypes["center"],
 };
 
 export default function NeuralGraph({ agents, onSelectAgent, selectedAgent }: NeuralGraphProps) {
@@ -33,11 +35,25 @@ export default function NeuralGraph({ agents, onSelectAgent, selectedAgent }: Ne
 
   const nodes: Node[] = useMemo(() => {
     const agentMap = Object.fromEntries(agents.map((a) => [a.id, a]));
+    const anyRunning = agents.some((a) => a.status === "running");
+    const allDone = agents.every((a) => a.status === "done");
+
     return [
+      {
+        id: "business_center",
+        type: "center",
+        position: { x: 280, y: 220 },
+        data: {
+          label: "Business Profile",
+          isActive: anyRunning,
+          isDone: allDone,
+        },
+        draggable: false,
+      },
       {
         id: "supply_chain",
         type: "agent",
-        position: { x: 300, y: 0 },
+        position: { x: 280, y: 0 },
         data: {
           ...agentMap["supply_chain"],
           label: agentMap["supply_chain"].name,
@@ -49,7 +65,7 @@ export default function NeuralGraph({ agents, onSelectAgent, selectedAgent }: Ne
       {
         id: "tariff_calculator",
         type: "agent",
-        position: { x: 80, y: 180 },
+        position: { x: 20, y: 140 },
         data: {
           ...agentMap["tariff_calculator"],
           label: agentMap["tariff_calculator"].name,
@@ -61,7 +77,7 @@ export default function NeuralGraph({ agents, onSelectAgent, selectedAgent }: Ne
       {
         id: "geopolitical",
         type: "agent",
-        position: { x: 520, y: 180 },
+        position: { x: 540, y: 140 },
         data: {
           ...agentMap["geopolitical"],
           label: agentMap["geopolitical"].name,
@@ -73,7 +89,7 @@ export default function NeuralGraph({ agents, onSelectAgent, selectedAgent }: Ne
       {
         id: "supplier_scout",
         type: "agent",
-        position: { x: 80, y: 370 },
+        position: { x: 80, y: 400 },
         data: {
           ...agentMap["supplier_scout"],
           label: agentMap["supplier_scout"].name,
@@ -85,7 +101,7 @@ export default function NeuralGraph({ agents, onSelectAgent, selectedAgent }: Ne
       {
         id: "strategy",
         type: "agent",
-        position: { x: 300, y: 530 },
+        position: { x: 480, y: 400 },
         data: {
           ...agentMap["strategy"],
           label: agentMap["strategy"].name,
@@ -100,44 +116,58 @@ export default function NeuralGraph({ agents, onSelectAgent, selectedAgent }: Ne
   const edges: Edge[] = useMemo(() => {
     const agentMap = Object.fromEntries(agents.map((a) => [a.id, a]));
 
-    const makeEdge = (source: string, target: string): Edge => {
-      const sourceAgent = agentMap[source];
-      const targetAgent = agentMap[target];
-      const isFlowing =
-        sourceAgent?.status === "done" &&
-        (targetAgent?.status === "running" || targetAgent?.status === "done");
-      const isDone = sourceAgent?.status === "done" && targetAgent?.status === "done";
+    const makeEdge = (source: string, target: string, isFromCenter = false): Edge => {
+      let isFlowing = false;
+      let isDone = false;
+      let edgeColor = "rgba(255,255,255,0.05)";
+
+      if (isFromCenter) {
+        const targetAgent = agentMap[target];
+        isFlowing = targetAgent?.status === "running";
+        isDone = targetAgent?.status === "done";
+        edgeColor = isFlowing ? targetAgent.color : isDone ? `${targetAgent.color}55` : "rgba(255,255,255,0.05)";
+      } else {
+        const sourceAgent = agentMap[source];
+        const targetAgent = agentMap[target];
+        isFlowing = sourceAgent?.status === "done" && targetAgent?.status === "running";
+        isDone = sourceAgent?.status === "done" && targetAgent?.status === "done";
+        edgeColor = isFlowing ? sourceAgent.color : isDone ? `${sourceAgent.color}44` : "rgba(255,255,255,0.05)";
+      }
 
       return {
         id: `${source}-${target}`,
         source,
         target,
-        animated: isFlowing && !isDone,
+        animated: isFlowing,
         style: {
-          stroke: isFlowing ? sourceAgent.color : "rgba(255,255,255,0.08)",
-          strokeWidth: isFlowing ? 2.5 : 1.5,
-          transition: "stroke 0.5s, stroke-width 0.5s",
+          stroke: edgeColor,
+          strokeWidth: isFlowing ? 2 : 1,
+          transition: "stroke 0.6s, stroke-width 0.6s",
         },
         markerEnd: {
           type: MarkerType.ArrowClosed,
-          color: isFlowing ? sourceAgent.color : "rgba(255,255,255,0.15)",
-          width: 16,
-          height: 16,
+          color: edgeColor,
+          width: 12,
+          height: 12,
         },
       };
     };
 
     return [
+      makeEdge("business_center", "supply_chain", true),
+      makeEdge("business_center", "tariff_calculator", true),
+      makeEdge("business_center", "geopolitical", true),
+      makeEdge("business_center", "supplier_scout", true),
+      makeEdge("business_center", "strategy", true),
       makeEdge("supply_chain", "tariff_calculator"),
       makeEdge("supply_chain", "geopolitical"),
       makeEdge("tariff_calculator", "supplier_scout"),
-      makeEdge("supplier_scout", "strategy"),
-      makeEdge("geopolitical", "strategy"),
       makeEdge("tariff_calculator", "strategy"),
+      makeEdge("geopolitical", "strategy"),
+      makeEdge("supplier_scout", "strategy"),
     ];
   }, [agents]);
 
-  // Agent detail panel
   const selectedAgentInfo = agents.find((a) => a.id === selectedAgent);
 
   return (
@@ -147,7 +177,7 @@ export default function NeuralGraph({ agents, onSelectAgent, selectedAgent }: Ne
         edges={edges}
         nodeTypes={nodeTypes}
         fitView
-        fitViewOptions={{ padding: 0.3 }}
+        fitViewOptions={{ padding: 0.25 }}
         proOptions={{ hideAttribution: true }}
         panOnDrag={false}
         zoomOnScroll={false}
@@ -158,10 +188,9 @@ export default function NeuralGraph({ agents, onSelectAgent, selectedAgent }: Ne
         nodesConnectable={false}
         elementsSelectable={false}
       >
-        <Background variant={BackgroundVariant.Dots} gap={24} size={1} color="rgba(255,255,255,0.03)" />
+        <Background variant={BackgroundVariant.Dots} gap={30} size={0.5} color="rgba(255,255,255,0.03)" />
       </ReactFlow>
 
-      {/* Agent Detail Sidebar */}
       <AnimatePresence>
         {selectedAgentInfo && (
           <motion.div
@@ -169,72 +198,53 @@ export default function NeuralGraph({ agents, onSelectAgent, selectedAgent }: Ne
             animate={{ x: 0, opacity: 1 }}
             exit={{ x: 300, opacity: 0 }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="absolute top-4 right-4 w-80 max-h-[calc(100%-2rem)] rounded-xl overflow-hidden"
-            style={{
-              background: "linear-gradient(135deg, rgba(20,20,35,0.95), rgba(15,15,25,0.98))",
-              border: `1px solid ${selectedAgentInfo.color}33`,
-              backdropFilter: "blur(20px)",
-            }}
+            className="absolute top-3 right-3 w-72 max-h-[calc(100%-1.5rem)] overflow-hidden border border-white/[0.08]"
+            style={{ background: "rgba(10,11,16,0.95)" }}
           >
-            {/* Header */}
-            <div
-              className="p-4 flex items-center justify-between"
-              style={{ borderBottom: `1px solid ${selectedAgentInfo.color}22` }}
-            >
-              <div className="flex items-center gap-3">
-                <span className="text-xl">{selectedAgentInfo.icon}</span>
+            <div className="p-3 flex items-center justify-between border-b border-white/[0.06]">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full" style={{ background: selectedAgentInfo.color }} />
                 <div>
-                  <h3 className="text-sm font-semibold">{selectedAgentInfo.name}</h3>
-                  <p className="text-[10px] font-mono uppercase tracking-wider" style={{ color: selectedAgentInfo.color }}>
+                  <h3 className="text-[11px] font-semibold text-white/70">{selectedAgentInfo.name}</h3>
+                  <p className="text-[9px] font-mono uppercase tracking-wider" style={{ color: selectedAgentInfo.color }}>
                     {selectedAgentInfo.status}
                   </p>
                 </div>
               </div>
               <button
                 onClick={() => onSelectAgent(null)}
-                className="text-white/30 hover:text-white/60 transition-colors text-lg"
+                className="text-white/20 hover:text-white/50 transition-colors text-xs font-mono"
               >
-                x
+                [x]
               </button>
             </div>
 
-            {/* Messages log */}
-            <div className="p-4 overflow-y-auto max-h-96">
-              <div className="text-[10px] font-mono uppercase tracking-wider text-white/30 mb-3">
-                Agent Output
-              </div>
+            <div className="p-3 overflow-y-auto max-h-80">
+              <div className="text-[9px] font-mono uppercase tracking-wider text-white/20 mb-2">Output Log</div>
               {selectedAgentInfo.messages.length === 0 ? (
-                <div className="text-sm text-white/20 italic">
-                  {selectedAgentInfo.status === "idle"
-                    ? "Waiting to start..."
-                    : selectedAgentInfo.status === "running"
-                    ? "Processing..."
-                    : "No output yet"}
+                <div className="text-[10px] text-white/15 font-mono">
+                  {selectedAgentInfo.status === "idle" ? "Awaiting activation..." : "Processing..."}
                 </div>
               ) : (
-                <div className="space-y-2">
+                <div className="space-y-1">
                   {selectedAgentInfo.messages.map((msg, i) => (
                     <motion.div
                       key={i}
-                      initial={{ opacity: 0, y: 5 }}
+                      initial={{ opacity: 0, y: 3 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className="text-xs text-white/60 font-mono leading-relaxed flex items-start gap-2"
+                      className="text-[10px] text-white/40 font-mono leading-relaxed flex items-start gap-1.5"
                     >
-                      <span style={{ color: selectedAgentInfo.color }} className="mt-0.5 shrink-0">
-                        {">"}
-                      </span>
+                      <span style={{ color: selectedAgentInfo.color }} className="shrink-0">{">"}</span>
                       <span>{msg}</span>
                     </motion.div>
                   ))}
                 </div>
               )}
-
-              {/* Typing indicator when running */}
               {selectedAgentInfo.status === "running" && (
-                <div className="flex gap-1 mt-3 ml-4">
-                  <div className="typing-dot w-1.5 h-1.5 rounded-full" style={{ background: selectedAgentInfo.color }} />
-                  <div className="typing-dot w-1.5 h-1.5 rounded-full" style={{ background: selectedAgentInfo.color }} />
-                  <div className="typing-dot w-1.5 h-1.5 rounded-full" style={{ background: selectedAgentInfo.color }} />
+                <div className="flex gap-0.5 mt-2 ml-3">
+                  <div className="typing-dot w-1 h-1 rounded-full" style={{ background: selectedAgentInfo.color }} />
+                  <div className="typing-dot w-1 h-1 rounded-full" style={{ background: selectedAgentInfo.color }} />
+                  <div className="typing-dot w-1 h-1 rounded-full" style={{ background: selectedAgentInfo.color }} />
                 </div>
               )}
             </div>

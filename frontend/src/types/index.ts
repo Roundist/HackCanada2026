@@ -11,8 +11,19 @@ export interface AgentInfo {
   result: Record<string, unknown> | null;
 }
 
+export interface SystemEvent {
+  message: string;
+  status: "working" | "complete" | "info";
+  timestamp: number;
+}
+
 export interface WSMessage {
-  type: "agent_start" | "agent_log" | "agent_done" | "agent_error" | "pipeline_done";
+  // Demo simulation format
+  type?: "agent_start" | "agent_log" | "agent_done" | "agent_error" | "pipeline_done";
+  // Backend format
+  event_type?: string;
+  status?: string;
+  // Common
   agent?: string;
   message?: string;
   data?: Record<string, unknown>;

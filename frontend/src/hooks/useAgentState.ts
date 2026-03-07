@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import { AgentInfo, AgentStatus, WSMessage } from "../types";
+import { AgentInfo, AgentStatus, SystemEvent, WSMessage } from "../types";
 
 const INITIAL_AGENTS: AgentInfo[] = [
   {
@@ -67,11 +67,13 @@ export function useAgentState() {
   const [agents, setAgents] = useState<AgentInfo[]>(INITIAL_AGENTS);
   const [pipelineDone, setPipelineDone] = useState(false);
   const [finalResult, setFinalResult] = useState<Record<string, unknown> | null>(null);
+  const [systemEvents, setSystemEvents] = useState<SystemEvent[]>([]);
 
   const resetAgents = useCallback(() => {
     setAgents(INITIAL_AGENTS);
     setPipelineDone(false);
     setFinalResult(null);
+    setSystemEvents([]);
   }, []);
 
   const updateAgent = useCallback(
@@ -85,9 +87,47 @@ export function useAgentState() {
 
   const handleWSMessage = useCallback(
     (msg: WSMessage) => {
+      // Normalize: backend uses event_type/status, demo uses type
+      const msgType = msg.type || (() => {
+        if (msg.event_type === "pipeline_complete") return "pipeline_done" as const;
+        if (msg.event_type === "pipeline_error") return "agent_error" as const;
+        if (msg.event_type === "error") return "agent_error" as const;
+        if (msg.status === "working") return "agent_log" as const;
+        if (msg.status === "complete") return "agent_done" as const;
+        return "agent_log" as const;
+      })();
+
       const agentId = msg.agent ? AGENT_NAME_MAP[msg.agent] || msg.agent : undefined;
 
-      switch (msg.type) {
+      // Backend sends "working" as first message for an agent — treat as start if idle
+      if (msg.status === "working" && agentId) {
+        setAgents((prev) => {
+          const agent = prev.find((a) => a.id === agentId);
+          if (agent && agent.status === "idle") {
+            return prev.map((a) =>
+              a.id === agentId ? { ...a, status: "running" as AgentStatus, messages: [] } : a
+            );
+          }
+          return prev;
+        });
+      }
+
+      const systemMessage = msg.message;
+      if (msg.agent === "System" && systemMessage) {
+        setSystemEvents((prev) => [
+          ...prev,
+          {
+            message: systemMessage,
+            status:
+              msg.status === "working" || msg.status === "complete"
+                ? msg.status
+                : "info",
+            timestamp: Date.now(),
+          },
+        ]);
+      }
+
+      switch (msgType) {
         case "agent_start":
           if (agentId) {
             updateAgent(agentId, { status: "running", messages: [] });
@@ -126,5 +166,12 @@ export function useAgentState() {
     [updateAgent]
   );
 
-  return { agents, pipelineDone, finalResult, handleWSMessage, resetAgents };
+  return {
+    agents,
+    pipelineDone,
+    finalResult,
+    systemEvents,
+    handleWSMessage,
+    resetAgents,
+  };
 }

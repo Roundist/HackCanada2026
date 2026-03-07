@@ -12,7 +12,7 @@ export function useWebSocket(onMessage: (msg: WSMessage) => void) {
 
       const protocol = window.location.protocol === "https:" ? "wss" : "ws";
       const ws = new WebSocket(
-        `${protocol}://${window.location.host}/ws/${sessionId}`
+        `${protocol}://${window.location.host}/ws/warroom/${sessionId}`
       );
 
       ws.onmessage = (event) => {

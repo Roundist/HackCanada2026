@@ -3,8 +3,11 @@ import { ReactFlowProvider } from "@xyflow/react";
 import { motion, AnimatePresence } from "framer-motion";
 import NeuralGraph from "./components/NeuralGraph";
 import BusinessInput from "./components/BusinessInput";
-import AgentFeed from "./components/AgentFeed";
+import FindingsPanel from "./components/FindingsPanel";
+import ExecutionSteps from "./components/ExecutionSteps";
 import SurvivalPlan from "./components/SurvivalPlan";
+import SupplyChainFlow from "./components/SupplyChainFlow";
+import RagTracePanel from "./components/RagTracePanel";
 import { useAgentState } from "./hooks/useAgentState";
 import { useWebSocket } from "./hooks/useWebSocket";
 import { startAnalysis } from "./api/client";
@@ -16,7 +19,14 @@ export default function App() {
   const [view, setView] = useState<View>("input");
   const [selectedAgent, setSelectedAgent] = useState<string | null>(null);
   const demoAbort = useRef<(() => void) | null>(null);
-  const { agents, pipelineDone, finalResult, handleWSMessage, resetAgents } =
+  const {
+    agents,
+    pipelineDone,
+    finalResult,
+    systemEvents,
+    handleWSMessage,
+    resetAgents,
+  } =
     useAgentState();
 
   const onWSMessage = useCallback(
@@ -40,7 +50,6 @@ export default function App() {
       const { session_id } = await startAnalysis(description);
       connect(session_id);
     } catch {
-      // Backend not available — run demo simulation
       console.log("Backend unavailable, running demo simulation");
       demoAbort.current = runDemoSimulation(handleWSMessage, () =>
         setTimeout(() => setView("results"), 1500)
@@ -56,32 +65,39 @@ export default function App() {
     setSelectedAgent(null);
   };
 
+  const completedAgents = agents.filter((a) => a.status === "done");
+
   return (
-    <div className="h-screen w-screen flex flex-col overflow-hidden" style={{ background: "#0a0a0f" }}>
-      {/* Header */}
-      <header className="shrink-0 px-6 py-4 flex items-center justify-between border-b border-white/[0.04]">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-sm font-bold shadow-lg shadow-indigo-500/20">
-            T
+    <div className="h-screen w-screen flex flex-col overflow-hidden grid-bg" style={{ background: "#06070a" }}>
+      {/* Top Bar */}
+      <header className="shrink-0 h-11 px-4 flex items-center justify-between border-b border-white/[0.06]" style={{ background: "rgba(10,11,16,0.95)" }}>
+        <div className="flex items-center gap-6">
+          <div className="flex items-center gap-2">
+            <div className="w-5 h-5 border border-accent-red flex items-center justify-center">
+              <div className="w-2 h-2 bg-accent-red" />
+            </div>
+            <span className="text-xs font-semibold tracking-wider uppercase text-white/80">TariffTriage</span>
+            <span className="text-[9px] font-mono text-white/20 ml-1">v2.0</span>
           </div>
-          <div>
-            <h1 className="text-sm font-bold tracking-tight text-white/90">
-              Tariff Triage
-            </h1>
-            <p className="text-[10px] font-mono uppercase tracking-wider text-white/25">
-              Trade War Survival Platform
-            </p>
-          </div>
+          <div className="h-4 w-px bg-white/[0.06]" />
+          <span className="text-[10px] font-mono uppercase tracking-widest text-white/25">
+            AI Trade Intelligence Platform
+          </span>
         </div>
 
-        {view === "analyzing" && (
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
-            <span className="text-xs font-mono text-white/30">
-              {pipelineDone ? "Analysis Complete" : "Agents Working"}
-            </span>
-          </div>
-        )}
+        <div className="flex items-center gap-4">
+          {view === "analyzing" && (
+            <div className="flex items-center gap-2">
+              <div className={`w-1.5 h-1.5 rounded-full ${pipelineDone ? "bg-accent-green" : "bg-accent-red status-blink"}`} />
+              <span className="text-[10px] font-mono text-white/30">
+                {pipelineDone ? "ANALYSIS COMPLETE" : `${completedAgents.length}/${agents.length} AGENTS`}
+              </span>
+            </div>
+          )}
+          <span className="text-[10px] font-mono text-white/15">
+            {new Date().toISOString().slice(0, 10)}
+          </span>
+        </div>
       </header>
 
       {/* Main Content */}
@@ -94,65 +110,66 @@ export default function App() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="h-full flex items-center justify-center p-8"
+              className="h-full flex"
             >
-              <div className="w-full max-w-4xl space-y-8">
-                {/* Hero */}
-                <div className="text-center space-y-4">
-                  <motion.h2
-                    initial={{ y: 20, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    className="text-4xl font-extrabold bg-gradient-to-r from-white via-white/80 to-indigo-300 bg-clip-text text-transparent"
-                  >
-                    Survive the Tariff Storm
-                  </motion.h2>
-                  <motion.p
-                    initial={{ y: 20, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    transition={{ delay: 0.1 }}
-                    className="text-sm text-white/30 max-w-lg mx-auto"
-                  >
-                    Our AI agents analyze your supply chain, calculate tariff exposure,
-                    scout alternative suppliers, and build your personalized survival plan.
-                  </motion.p>
-
-                  {/* Agent preview */}
-                  <motion.div
-                    initial={{ y: 20, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    transition={{ delay: 0.2 }}
-                    className="flex items-center justify-center gap-3 mt-6"
-                  >
-                    {agents.map((agent, i) => (
-                      <div key={agent.id} className="flex items-center gap-3">
-                        <div
-                          className="flex items-center gap-2 px-3 py-1.5 rounded-full"
-                          style={{
-                            background: `${agent.color}10`,
-                            border: `1px solid ${agent.color}25`,
-                          }}
-                        >
-                          <span className="text-sm">{agent.icon}</span>
-                          <span className="text-[10px] font-mono text-white/40">
-                            {agent.name}
-                          </span>
-                        </div>
-                        {i < agents.length - 1 && (
-                          <span className="text-white/10 text-xs">{">"}</span>
-                        )}
-                      </div>
-                    ))}
-                  </motion.div>
+              {/* LEFT panel — Agent Engine + Supply Chain Flow */}
+              <div className="w-[340px] shrink-0 border-r border-white/[0.06] flex flex-col" style={{ background: "rgba(8,9,13,0.6)" }}>
+                <div className="px-4 py-3 border-b border-white/[0.06]">
+                  <div className="text-[10px] font-mono uppercase tracking-widest text-white/25">Agent Intelligence Engine</div>
                 </div>
+                <div className="flex-1 p-3 space-y-1 overflow-y-auto">
+                  {agents.map((agent) => (
+                    <div key={agent.id} className="flex items-center gap-3 px-3 py-2.5 border border-white/[0.04]" style={{ background: "rgba(15,17,23,0.5)" }}>
+                      <div className="w-2 h-2 rounded-full" style={{ background: agent.color, opacity: 0.4 }} />
+                      <div className="flex-1 min-w-0">
+                        <div className="text-[11px] font-medium text-white/50">{agent.name}</div>
+                        <div className="text-[9px] font-mono text-white/20 mt-0.5 truncate">{agent.description}</div>
+                      </div>
+                      <div className="text-[8px] font-mono text-white/15 uppercase shrink-0">Standby</div>
+                    </div>
+                  ))}
+                </div>
+                <div className="border-t border-white/[0.06] p-4">
+                  <SupplyChainFlow />
+                </div>
+              </div>
 
-                {/* Input Form */}
-                <motion.div
-                  initial={{ y: 20, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ delay: 0.3 }}
-                >
+              {/* CENTER — Business Input */}
+              <div className="flex-1 flex items-center justify-center p-8">
+                <div className="w-full max-w-2xl space-y-6">
+                  <div className="space-y-2">
+                    <h2 className="text-xl font-semibold text-white/80 tracking-tight">
+                      Trade Impact Assessment
+                    </h2>
+                    <p className="text-xs text-white/30 leading-relaxed max-w-md">
+                      Describe your Canadian business, supply chain dependencies, and import sources.
+                      Our AI agents will analyze tariff exposure, geopolitical risk, and survival strategy.
+                    </p>
+                  </div>
                   <BusinessInput onSubmit={handleSubmit} isRunning={false} />
-                </motion.div>
+                </div>
+              </div>
+
+              {/* RIGHT — Intel Preview */}
+              <div className="w-[280px] shrink-0 border-l border-white/[0.06] flex flex-col" style={{ background: "rgba(8,9,13,0.6)" }}>
+                <div className="px-4 py-3 border-b border-white/[0.06]">
+                  <div className="text-[10px] font-mono uppercase tracking-widest text-white/25">Intelligence Preview</div>
+                </div>
+                <div className="flex-1 p-4 space-y-3">
+                  {[
+                    { label: "Current Tariff Rate", value: "25%", sub: "US imports to Canada", color: "#dc2626" },
+                    { label: "Affected Sectors", value: "12", sub: "Manufacturing, Food, Tech", color: "#d97706" },
+                    { label: "Avg Margin Erosion", value: "8.4%", sub: "Cross-sector average", color: "#dc2626" },
+                    { label: "Alt Suppliers Available", value: "--", sub: "Awaiting analysis", color: "#16a34a" },
+                    { label: "Confidence Score", value: "--", sub: "Awaiting analysis", color: "#2563eb" },
+                  ].map((item) => (
+                    <div key={item.label} className="border border-white/[0.04] p-3" style={{ background: "rgba(15,17,23,0.5)" }}>
+                      <div className="text-[9px] font-mono uppercase tracking-wider text-white/20">{item.label}</div>
+                      <div className="text-lg font-semibold mt-1" style={{ color: item.value === "--" ? "rgba(255,255,255,0.12)" : item.color }}>{item.value}</div>
+                      <div className="text-[9px] font-mono text-white/15 mt-0.5">{item.sub}</div>
+                    </div>
+                  ))}
+                </div>
               </div>
             </motion.div>
           )}
@@ -166,23 +183,28 @@ export default function App() {
               exit={{ opacity: 0 }}
               className="h-full flex"
             >
-              {/* Neural Graph - main area */}
-              <div className="flex-1 relative">
-                <ReactFlowProvider>
-                  <NeuralGraph
-                    agents={agents}
-                    onSelectAgent={setSelectedAgent}
-                    selectedAgent={selectedAgent}
-                  />
-                </ReactFlowProvider>
+              {/* LEFT — Neural Graph + Execution Steps */}
+              <div className="flex-1 relative flex flex-col">
+                <div className="flex-1 relative">
+                  <ReactFlowProvider>
+                    <NeuralGraph
+                      agents={agents}
+                      onSelectAgent={setSelectedAgent}
+                      selectedAgent={selectedAgent}
+                    />
+                  </ReactFlowProvider>
+                </div>
+                <div className="shrink-0 border-t border-white/[0.06]" style={{ background: "rgba(8,9,13,0.8)" }}>
+                  <ExecutionSteps agents={agents} />
+                </div>
               </div>
 
-              {/* Live Feed - right sidebar */}
-              <div
-                className="w-72 shrink-0 border-l border-white/[0.04]"
-                style={{ background: "rgba(12,12,18,0.8)" }}
-              >
-                <AgentFeed agents={agents} />
+              {/* RIGHT — Live Findings */}
+              <div className="w-[360px] shrink-0 border-l border-white/[0.06] flex flex-col" style={{ background: "rgba(8,9,13,0.6)" }}>
+                <div className="flex-1 min-h-0">
+                  <FindingsPanel agents={agents} pipelineDone={pipelineDone} />
+                </div>
+                <RagTracePanel agents={agents} systemEvents={systemEvents} />
               </div>
             </motion.div>
           )}
@@ -196,9 +218,7 @@ export default function App() {
               exit={{ opacity: 0 }}
               className="h-full overflow-y-auto"
             >
-              <div className="max-w-4xl mx-auto py-8">
-                <SurvivalPlan result={finalResult} onReset={handleReset} />
-              </div>
+              <SurvivalPlan result={finalResult} onReset={handleReset} />
             </motion.div>
           )}
         </AnimatePresence>

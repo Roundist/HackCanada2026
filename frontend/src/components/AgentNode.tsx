@@ -15,16 +15,16 @@ interface AgentNodeData {
   [key: string]: unknown;
 }
 
-const statusLabel: Record<AgentStatus, string> = {
+const STATUS_LABEL: Record<AgentStatus, string> = {
   idle: "Standby",
   waiting: "Queued",
-  running: "Processing",
+  running: "Active",
   done: "Complete",
   error: "Error",
 };
 
 function AgentNodeComponent({ id, data }: NodeProps & { data: AgentNodeData }) {
-  const { label, icon, color, status, description, messages, isSelected, onSelect } = data;
+  const { label, color, status, messages, isSelected, onSelect } = data;
 
   const isActive = status === "running";
   const isDone = status === "done";
@@ -32,132 +32,101 @@ function AgentNodeComponent({ id, data }: NodeProps & { data: AgentNodeData }) {
 
   return (
     <>
-      <Handle type="target" position={Position.Top} className="!bg-transparent !border-0 !w-3 !h-3" />
-      <motion.div
+      <Handle type="target" position={Position.Top} className="!bg-transparent !border-0 !w-2 !h-2" />
+      <Handle type="target" position={Position.Left} className="!bg-transparent !border-0 !w-2 !h-2" />
+      <Handle type="target" position={Position.Right} className="!bg-transparent !border-0 !w-2 !h-2" />
+      <div
         onClick={() => onSelect(id)}
         className="relative cursor-pointer select-none"
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.98 }}
       >
-        {/* Outer glow ring */}
-        <AnimatePresence>
-          {isActive && (
-            <motion.div
-              className="absolute -inset-3 rounded-2xl"
-              style={{
-                background: `radial-gradient(circle, ${color}33 0%, transparent 70%)`,
-              }}
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.8 }}
-              transition={{ duration: 0.5 }}
-            />
-          )}
-        </AnimatePresence>
-
-        {/* Pulsing ring for active */}
         {isActive && (
-          <motion.div
-            className="absolute -inset-1 rounded-2xl"
-            style={{ border: `2px solid ${color}` }}
-            animate={{ opacity: [0.3, 0.8, 0.3], scale: [1, 1.03, 1] }}
-            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+          <div
+            className="absolute -inset-1.5 pulse-ring"
+            style={{ border: `1px solid ${color}55` }}
           />
         )}
 
-        {/* Main card */}
         <div
-          className="relative rounded-xl px-5 py-4 backdrop-blur-sm transition-all duration-300"
+          className="relative px-4 py-3 transition-all duration-300"
           style={{
             background: isActive
-              ? `linear-gradient(135deg, ${color}18, ${color}08)`
+              ? `${color}08`
               : isDone
-              ? `linear-gradient(135deg, ${color}12, transparent)`
-              : "linear-gradient(135deg, rgba(30,30,45,0.9), rgba(20,20,35,0.9))",
+              ? `${color}05`
+              : "rgba(15,17,23,0.9)",
             border: `1px solid ${
-              isActive ? color : isDone ? `${color}66` : isError ? "#ef444466" : "rgba(255,255,255,0.06)"
+              isSelected
+                ? `${color}88`
+                : isActive
+                ? `${color}44`
+                : isDone
+                ? `${color}22`
+                : isError
+                ? "#ef444433"
+                : "rgba(255,255,255,0.05)"
             }`,
-            minWidth: 200,
-            boxShadow: isActive
-              ? `0 0 30px ${color}22, 0 4px 20px rgba(0,0,0,0.4)`
-              : isDone
-              ? `0 0 15px ${color}11`
-              : "0 4px 20px rgba(0,0,0,0.3)",
+            minWidth: 180,
           }}
         >
-          {/* Header */}
-          <div className="flex items-center gap-3 mb-2">
+          <div className="flex items-center gap-2.5 mb-1.5">
             <div
-              className="text-xl w-9 h-9 rounded-lg flex items-center justify-center"
+              className={`w-2 h-2 rounded-full shrink-0 ${isActive ? "status-blink" : ""}`}
               style={{
-                background: `${color}22`,
-                boxShadow: isActive ? `0 0 12px ${color}44` : "none",
+                background: isActive ? color : isDone ? "#16a34a" : isError ? "#ef4444" : "rgba(255,255,255,0.12)",
               }}
-            >
-              {icon}
-            </div>
-            <div>
-              <div className="text-sm font-semibold text-white/90">{label}</div>
-              <div className="flex items-center gap-1.5 mt-0.5">
-                <div
-                  className="w-1.5 h-1.5 rounded-full"
-                  style={{
-                    background: isActive ? color : isDone ? "#22c55e" : isError ? "#ef4444" : "#666",
-                    boxShadow: isActive ? `0 0 6px ${color}` : "none",
-                  }}
-                />
-                <span className="text-[10px] font-mono uppercase tracking-wider text-white/40">
-                  {statusLabel[status]}
-                </span>
-              </div>
-            </div>
+            />
+            <div className="text-[11px] font-semibold text-white/70">{label}</div>
           </div>
 
-          {/* Description */}
-          <p className="text-[11px] text-white/30 leading-relaxed">{description}</p>
+          <div className="flex items-center gap-2 ml-[18px]">
+            <span className="text-[8px] font-mono uppercase tracking-widest" style={{
+              color: isActive ? color : isDone ? "#16a34a" : "rgba(255,255,255,0.2)",
+            }}>
+              {STATUS_LABEL[status]}
+            </span>
+            {isDone && messages.length > 0 && (
+              <span className="text-[8px] font-mono text-white/15">
+                {messages.length} outputs
+              </span>
+            )}
+          </div>
 
-          {/* Live messages */}
           <AnimatePresence>
             {isActive && messages.length > 0 && (
               <motion.div
                 initial={{ height: 0, opacity: 0 }}
                 animate={{ height: "auto", opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
-                className="mt-3 pt-3 border-t border-white/5 overflow-hidden"
+                className="mt-2 pt-2 border-t overflow-hidden ml-[18px]"
+                style={{ borderColor: `${color}15` }}
               >
-                <div className="text-[10px] font-mono text-white/50 max-h-16 overflow-y-auto">
-                  {messages.slice(-2).map((m, i) => (
-                    <motion.div
-                      key={i}
-                      initial={{ x: -10, opacity: 0 }}
-                      animate={{ x: 0, opacity: 1 }}
-                      className="flex items-start gap-1.5 mb-1"
-                    >
-                      <span style={{ color }}>{">"}</span>
-                      <span>{m}</span>
-                    </motion.div>
-                  ))}
-                </div>
+                {messages.slice(-2).map((m, i) => (
+                  <motion.div
+                    key={i}
+                    initial={{ x: -6, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    className="text-[9px] font-mono text-white/30 leading-relaxed flex items-start gap-1 mb-0.5"
+                  >
+                    <span style={{ color }} className="shrink-0">{">"}</span>
+                    <span className="truncate">{m}</span>
+                  </motion.div>
+                ))}
               </motion.div>
             )}
           </AnimatePresence>
 
-          {/* Completion checkmark */}
-          <AnimatePresence>
-            {isDone && (
-              <motion.div
-                initial={{ scale: 0, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-green-500 flex items-center justify-center text-xs shadow-lg"
-                style={{ boxShadow: "0 0 10px rgba(34,197,94,0.5)" }}
-              >
-                ✓
-              </motion.div>
-            )}
-          </AnimatePresence>
+          {isDone && (
+            <div className="absolute top-2 right-2">
+              <div className="w-3.5 h-3.5 border flex items-center justify-center" style={{ borderColor: "#16a34a44", background: "#16a34a11" }}>
+                <span className="text-[8px] text-green-500">&#10003;</span>
+              </div>
+            </div>
+          )}
         </div>
-      </motion.div>
-      <Handle type="source" position={Position.Bottom} className="!bg-transparent !border-0 !w-3 !h-3" />
+      </div>
+      <Handle type="source" position={Position.Bottom} className="!bg-transparent !border-0 !w-2 !h-2" />
+      <Handle type="source" position={Position.Left} className="!bg-transparent !border-0 !w-2 !h-2" />
+      <Handle type="source" position={Position.Right} className="!bg-transparent !border-0 !w-2 !h-2" />
     </>
   );
 }
