@@ -13,8 +13,8 @@ interface RoutesMapProps {
 
 const sizeClasses = {
   compact: "max-w-[260px]",
-  default: "max-w-[480px]",
-  large: "max-w-[640px]",
+  default: "w-full flex-1",
+  large: "w-full flex-1",
 };
 
 export default function RoutesMap({ size = "default", variant = "light", className = "" }: RoutesMapProps) {
@@ -36,7 +36,7 @@ export default function RoutesMap({ size = "default", variant = "light", classNa
         <img
           src={regmapImg}
           alt="Trade routes: internal (blue), US tariffed (red), foreign (green)"
-          className="w-full h-auto object-contain object-center"
+          className="w-full h-[250px] object-cover object-center"
         />
       </div>
       <div
