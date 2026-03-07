@@ -43,22 +43,32 @@ class Orchestrator:
             "status": "working",
         })
 
-        supply_chain = self.shared_memory["supply_chain_map"]
+        supply_chain = self.shared_memory.get("supply_chain_map") or {}
         us_inputs = [i for i in supply_chain.get("inputs", []) if i.get("is_us_sourced")]
 
-        classifications = await classify_inputs(us_inputs)
+        try:
+            classifications = await classify_inputs(us_inputs)
+        except Exception:
+            classifications = {}
+            await self._ws("System", "status", {
+                "agent": "System",
+                "message": "RAG classification failed; Tariff Calculator will use fallback.",
+                "event_type": "status",
+                "status": "complete",
+            })
 
         # Update supply_chain_map with classified HS codes
         tariff_rates = {}
         for inp in supply_chain.get("inputs", []):
-            if inp["name"] in classifications:
-                cls = classifications[inp["name"]]
-                inp["hs_code"] = cls["hs_code"]
-                tariff_rates[inp["name"]] = {
-                    "hs_code": cls["hs_code"],
-                    "tariff_rate": cls["tariff_rate"],
-                    "confidence": cls["confidence"],
-                    "reasoning": cls["reasoning"],
+            name = inp.get("name")
+            if name and name in classifications:
+                cls = classifications[name]
+                inp["hs_code"] = cls.get("hs_code")
+                tariff_rates[name] = {
+                    "hs_code": cls.get("hs_code"),
+                    "tariff_rate": cls.get("tariff_rate", 0),
+                    "confidence": cls.get("confidence", 0),
+                    "reasoning": cls.get("reasoning", ""),
                 }
 
         self.shared_memory["supply_chain_map"] = supply_chain

@@ -48,13 +48,27 @@ async def classify(product_description: str) -> dict:
 
 
 async def classify_inputs(inputs: list[dict]) -> dict[str, dict]:
-    """Classify multiple inputs in parallel, returning a map of input_name -> classification result."""
+    """Classify multiple inputs in parallel, returning a map of input_name -> classification result.
+    Uses description or name for each input. If one input fails, others still get classified.
+    """
     us_inputs = [inp for inp in inputs if inp.get("is_us_sourced")]
     if not us_inputs:
         return {}
 
-    classifications = await asyncio.gather(
-        *(classify(inp["description"]) for inp in us_inputs)
-    )
+    async def classify_one(inp: dict) -> tuple[str, dict]:
+        name = inp.get("name", "unknown")
+        desc = inp.get("description") or inp.get("name") or "general product"
+        try:
+            cls = await classify(desc)
+            return (name, cls)
+        except Exception:
+            return (name, {
+                "hs_code": "999999",
+                "confidence": 0.0,
+                "reasoning": "Classification failed; using placeholder.",
+                "tariff_rate": get_rate("999999"),
+                "candidates": [],
+            })
 
-    return {inp["name"]: cls for inp, cls in zip(us_inputs, classifications)}
+    results = await asyncio.gather(*(classify_one(inp) for inp in us_inputs))
+    return dict(results)

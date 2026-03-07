@@ -52,7 +52,7 @@ class BaseAgent(ABC):
         # Log to Backboard for audit trail
         await log_agent_activity(self.name, message)
 
-    async def wait_for_dependencies(self, timeout: float = 120.0):
+    async def wait_for_dependencies(self, timeout: float = 60.0):
         """Block until all dependency keys are present in shared memory."""
         if not self.dependencies:
             return
@@ -68,11 +68,14 @@ class BaseAgent(ABC):
                 )
             await asyncio.sleep(0.3)
 
-    async def call_gemini(self, user_message: str) -> dict[str, Any]:
-        """Call Gemini with this agent's system prompt."""
-        return await generate_json(
-            system_prompt=self.system_prompt(),
-            user_message=user_message,
+    async def call_gemini(self, user_message: str, timeout_seconds: float = 75.0) -> dict[str, Any]:
+        """Call Gemini with this agent's system prompt. Fails with TimeoutError if Gemini takes too long."""
+        return await asyncio.wait_for(
+            generate_json(
+                system_prompt=self.system_prompt(),
+                user_message=user_message,
+            ),
+            timeout=timeout_seconds,
         )
 
     @abstractmethod
