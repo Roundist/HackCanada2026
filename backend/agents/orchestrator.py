@@ -86,6 +86,16 @@ class Orchestrator:
             "status": "complete",
         })
 
+    async def _phase_delay(self, label: str, seconds: float):
+        """Broadcast a status message and pause between phases for demo pacing."""
+        await self._ws("System", "status", {
+            "agent": "System",
+            "message": label,
+            "event_type": "status",
+            "status": "working",
+        })
+        await asyncio.sleep(seconds)
+
     async def run(self) -> dict[str, Any]:
         """Execute the full multi-agent pipeline.
 
@@ -94,12 +104,16 @@ class Orchestrator:
             Phase 2: RAG HS code classification (parallel per input)
             Phase 3: Agents 2 + 3 + 4 all in parallel
             Phase 4: Agent 5 (Strategy Architect)
+
+        Pacing: deliberate delays between phases so the full pipeline takes
+        ~40 seconds, giving time to explain each phase in a live demo.
         """
 
         # Initialize Backboard.io session thread
         self.backboard_thread_id = await create_session_thread()
 
         # Phase 1: Supply Chain Analyst + pre-fetch news headlines in parallel
+        await self._phase_delay("Initializing Supply Chain Analyst...", 2)
         agent1 = SupplyChainAgent(
             self.shared_memory, self._ws, self.business_description
         )
@@ -108,8 +122,14 @@ class Orchestrator:
         news_task = asyncio.create_task(self._prefetch_news())
         await agent1.run()
 
+        # Pause between Phase 1 → Phase 2
+        await self._phase_delay("Supply chain mapped. Preparing RAG classification...", 4)
+
         # Phase 2: RAG HS code classification (inputs classified in parallel)
         await self._run_rag_classification()
+
+        # Pause between Phase 2 → Phase 3
+        await self._phase_delay("HS codes classified. Dispatching parallel agents...", 4)
 
         # Make sure news pre-fetch is done before Agent 4 starts
         await news_task
@@ -119,6 +139,9 @@ class Orchestrator:
         agent3 = SupplierScoutAgent(self.shared_memory, self._ws)
         agent4 = GeopoliticalAgent(self.shared_memory, self._ws)
         await asyncio.gather(agent2.run(), agent3.run(), agent4.run())
+
+        # Pause between Phase 3 → Phase 4
+        await self._phase_delay("All intelligence gathered. Synthesizing survival strategy...", 5)
 
         # Phase 4: Strategy Architect (needs all 4 outputs)
         agent5 = StrategyArchitectAgent(self.shared_memory, self._ws)

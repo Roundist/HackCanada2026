@@ -74,11 +74,22 @@ async def create_session_thread() -> str | None:
 
 
 async def write_shared_memory(key: str, value: Any) -> None:
-    """Persist an agent's output to Backboard shared memory."""
+    """Persist an agent's output to Backboard shared memory.
+
+    Backboard has a 4 KiB limit per attribute value, so we truncate large
+    payloads to a summary to stay within bounds.  The full data lives in the
+    in-memory shared_memory dict and is not affected.
+    """
     if not is_connected():
         return
     try:
-        content = f"[{key}] {json.dumps(value)}"
+        serialized = json.dumps(value)
+        # Backboard 4 KiB limit — keep content well under it (3.5 KiB budget
+        # after accounting for the "[key] " prefix and metadata overhead).
+        MAX_CONTENT = 3500
+        if len(serialized) > MAX_CONTENT:
+            serialized = serialized[:MAX_CONTENT] + "…[truncated]"
+        content = f"[{key}] {serialized}"
         await _backboard_client.add_memory(
             assistant_id=_assistant_id,
             content=content,
