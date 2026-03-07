@@ -143,9 +143,20 @@ class BaseAgent(ABC):
         except Exception as e:
             self.status = AgentStatus.ERROR
             err_msg = str(e).strip()
-            if "GEMINI_API_KEY" in err_msg or "API key" in err_msg.lower() or "api_key" in err_msg.lower():
+            err_lower = err_msg.lower()
+            if "timeout" in err_lower or isinstance(e, TimeoutError):
                 await self.emit(
-                    "Gemini API key missing or invalid. Set GEMINI_API_KEY in backend/.env (see .env.example).",
+                    "Gemini request timed out. This is usually transient load/latency; retry the analysis.",
+                    event_type="error",
+                )
+            elif "resourceexhausted" in err_lower or "quota" in err_lower or "too many requests" in err_lower:
+                await self.emit(
+                    "Gemini quota/rate limit reached. Wait briefly or use a higher-quota API key/project.",
+                    event_type="error",
+                )
+            elif "gemini_api_key" in err_lower or "api key" in err_lower or "api_key" in err_lower:
+                await self.emit(
+                    "Gemini API key missing or invalid. Set GEMINI_API_KEY in .env (repo root) or backend/.env.",
                     event_type="error",
                 )
             else:
