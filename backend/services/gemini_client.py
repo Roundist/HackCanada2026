@@ -19,8 +19,8 @@ from tenacity import (
 
 logger = logging.getLogger(__name__)
 
-_GENERATION_MODEL = "gemini-2.0-flash"
-_EMBEDDING_MODEL = "models/text-embedding-004"
+_GENERATION_MODEL = "gemini-2.5-flash"
+_EMBEDDING_MODEL = "models/gemini-embedding-001"
 
 _retry_decorator = retry(
     retry=retry_if_exception_type((ResourceExhausted, ServiceUnavailable)),

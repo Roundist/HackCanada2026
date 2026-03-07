@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { Bar } from "react-chartjs-2";
@@ -11,13 +12,21 @@ import {
 import type { AgentInfo } from "../types";
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip);
+=======
+import { useState } from "react";
+import { motion } from "framer-motion";
+import { downloadSurvivalPlanPdf } from "../utils/exportPdf";
+>>>>>>> ec147a2ee4dbe0c062915b60d5ae25d3c521076f
 
 interface SurvivalPlanProps {
   result: Record<string, unknown>;
   agents: AgentInfo[];
   onReset: () => void;
+  /** When set, export uses backend PDF; otherwise client-generated PDF. */
+  sessionId?: string | null;
 }
 
+<<<<<<< HEAD
 type ExecSummary = {
   business_name?: string;
   headline?: string;
@@ -64,6 +73,10 @@ const fallbackActions: Action[] = [
 export default function SurvivalPlan({ result, onReset, agents }: SurvivalPlanProps) {
   const [activeTab, setActiveTab] = useState<(typeof tabs)[number]>("Overview");
 
+=======
+export default function SurvivalPlan({ result, onReset, sessionId }: SurvivalPlanProps) {
+  const [exporting, setExporting] = useState(false);
+>>>>>>> ec147a2ee4dbe0c062915b60d5ae25d3c521076f
   const plan = (result.survival_plan || result) as Record<string, unknown>;
   const summaryRaw = plan.executive_summary as ExecSummary | undefined;
   const summary: ExecSummary = summaryRaw || {};
@@ -124,6 +137,31 @@ export default function SurvivalPlan({ result, onReset, agents }: SurvivalPlanPr
     ],
   };
 
+  const handleExportPdf = async () => {
+    setExporting(true);
+    try {
+      if (sessionId) {
+        const res = await fetch(`/api/session/${sessionId}/pdf`);
+        if (!res.ok) throw new Error("PDF not ready");
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `survival-plan-${sessionId.slice(0, 8)}.pdf`;
+        a.click();
+        URL.revokeObjectURL(url);
+      } else {
+        const name = (summary?.business_name as string)?.replace(/\s+/g, "-") ?? "survival-plan";
+        downloadSurvivalPlanPdf(result, `tariff-triage-${name}.pdf`);
+      }
+    } catch (e) {
+      console.error(e);
+      downloadSurvivalPlanPdf(result, "tariff-triage-survival-plan.pdf");
+    } finally {
+      setExporting(false);
+    }
+  };
+
   return (
     <div className="relative max-w-6xl mx-auto py-6 px-2 sm:px-4">
       <div className="flex items-center justify-between px-4 py-3 border border-white/10 bg-black/40 backdrop-blur sticky top-0 z-10">
@@ -140,11 +178,26 @@ export default function SurvivalPlan({ result, onReset, agents }: SurvivalPlanPr
             </div>
           )}
         </div>
+<<<<<<< HEAD
         <div className="flex items-center gap-3">
           <MiniGraph agents={agents} />
           <button
             onClick={onReset}
             className="px-3 py-2 text-[10px] font-mono uppercase tracking-[0.2em] border border-white/15 text-white/70 hover:border-white/40"
+=======
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleExportPdf}
+            disabled={exporting}
+            className="px-3 py-1.5 text-[10px] font-mono uppercase tracking-wider border transition-all disabled:opacity-50"
+            style={{ borderColor: "rgba(34,197,94,0.5)", color: "#22c55e", background: "rgba(34,197,94,0.08)" }}
+          >
+            {exporting ? "Exporting…" : "Export PDF"}
+          </button>
+          <button
+            onClick={onReset}
+            className="px-3 py-1.5 text-[10px] font-mono uppercase tracking-wider border border-white/[0.06] text-white/30 hover:text-white/60 hover:border-white/[0.15] transition-all"
+>>>>>>> ec147a2ee4dbe0c062915b60d5ae25d3c521076f
           >
             New Analysis
           </button>

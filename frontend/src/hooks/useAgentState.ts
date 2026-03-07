@@ -1,5 +1,14 @@
 import { useCallback, useState } from "react";
-import { AgentInfo, AgentStatus, SystemEvent, WSMessage } from "../types";
+import { AgentInfo, AgentStatus, ChainOfThoughtEntry, SystemEvent, WSMessage } from "../types";
+
+/** Short “what this agent is doing” when idle (before run) */
+export const AGENT_IDLE_ACTIVITY: Record<string, string> = {
+  supply_chain: "Will parse your description & map US-sourced inputs",
+  tariff_calculator: "Will fetch tariff rates & run margin scenarios",
+  geopolitical: "Will fetch live trade news & assess escalation risk",
+  supplier_scout: "Will search for Canadian & int’l alternatives",
+  strategy: "Will synthesize findings into your survival plan",
+};
 
 const INITIAL_AGENTS: AgentInfo[] = [
   {
@@ -63,17 +72,28 @@ const AGENT_NAME_MAP: Record<string, string> = {
   "Strategy Architect": "strategy",
 };
 
+/** Activity line to show for an agent (what it's doing or last message). */
+export function getAgentActivity(agent: AgentInfo): string {
+  if (agent.status === "running" || agent.status === "done") {
+    const last = agent.messages[agent.messages.length - 1];
+    if (last) return last;
+  }
+  return AGENT_IDLE_ACTIVITY[agent.id] ?? agent.description;
+}
+
 export function useAgentState() {
   const [agents, setAgents] = useState<AgentInfo[]>(INITIAL_AGENTS);
   const [pipelineDone, setPipelineDone] = useState(false);
   const [finalResult, setFinalResult] = useState<Record<string, unknown> | null>(null);
   const [systemEvents, setSystemEvents] = useState<SystemEvent[]>([]);
+  const [chainOfThoughtLog, setChainOfThoughtLog] = useState<ChainOfThoughtEntry[]>([]);
 
   const resetAgents = useCallback(() => {
     setAgents(INITIAL_AGENTS);
     setPipelineDone(false);
     setFinalResult(null);
     setSystemEvents([]);
+    setChainOfThoughtLog([]);
   }, []);
 
   const updateAgent = useCallback(
@@ -135,6 +155,11 @@ export function useAgentState() {
           break;
         case "agent_log":
           if (agentId && msg.message) {
+            const agentName = msg.agent ?? agentId;
+            setChainOfThoughtLog((prev) => [
+              ...prev,
+              { agent: agentName, message: msg.message!, timestamp: Date.now() },
+            ]);
             setAgents((prev) =>
               prev.map((a) =>
                 a.id === agentId
@@ -142,6 +167,12 @@ export function useAgentState() {
                   : a
               )
             );
+          }
+          if (msg.agent === "System" && msg.message) {
+            setChainOfThoughtLog((prev) => [
+              ...prev,
+              { agent: "System", message: msg.message!, timestamp: Date.now() },
+            ]);
           }
           break;
         case "agent_done":
@@ -171,6 +202,7 @@ export function useAgentState() {
     pipelineDone,
     finalResult,
     systemEvents,
+    chainOfThoughtLog,
     handleWSMessage,
     resetAgents,
   };

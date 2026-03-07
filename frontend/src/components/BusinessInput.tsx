@@ -1,69 +1,79 @@
 import { useState } from "react";
+import { businessProfiles } from "../data/businessProfiles";
+import type { BusinessProfile } from "../data/businessProfiles";
 
 interface BusinessInputProps {
-  onSubmit: (description: string) => void;
+  onSubmit: (description: string, profile?: BusinessProfile | null) => void;
+  onSelectProfile?: (profile: BusinessProfile | null) => void;
+  selectedProfile: BusinessProfile | null;
   isRunning: boolean;
 }
 
-const DEMO_PROFILES = [
-  {
-    name: "Maple Furniture Co.",
-    industry: "Manufacturing",
-    revenue: "$8M",
-    imports: "US -- 65%",
-    risk: "HIGH",
-    description:
-      "We are a mid-sized Canadian furniture manufacturer based in Ontario with $8M annual revenue. We import hardwood lumber (oak, maple, walnut) from mills in Michigan and Wisconsin, upholstery fabrics from North Carolina, steel hardware and hinges from Ohio, and finishing chemicals (stains, lacquers) from Pennsylvania. About 65% of our raw materials come from the US. We sell primarily in the Canadian market through retail partners, with 20% of sales exported back to the US. Our margins are typically 18-22% depending on the product line. We employ 45 people and operate one production facility.",
-  },
-  {
-    name: "Northern Tech Solutions",
-    industry: "Technology",
-    revenue: "$12M",
-    imports: "US -- 55%",
-    risk: "MEDIUM",
-    description:
-      "We are a Canadian electronics company in Vancouver with $12M annual revenue. We import printed circuit boards and semiconductor components from suppliers in California and Texas, plastic housings from injection molding companies in Michigan, lithium batteries from US distributors (originally manufactured in China), and specialized testing equipment from Oregon. About 55% of our component costs are US-sourced. We assemble IoT devices for agricultural monitoring and sell 40% to US customers and 35% to Canadian customers. Margins run 25-30% but are under pressure from rising component costs. We have 60 employees.",
-  },
-  {
-    name: "Prairie Harvest Foods",
-    industry: "Food & Beverage",
-    revenue: "$5M",
-    imports: "US -- 40%",
-    risk: "MEDIUM",
-    description:
-      "We are a Canadian food processing company in Manitoba with $5M annual revenue. We import packaging materials (specialized food-grade containers and labels) from Wisconsin, flavoring extracts and food additives from US chemical companies in New Jersey, processing equipment parts from Illinois, and some specialty grains and ingredients from North Dakota. About 40% of our input costs are US-sourced. We produce organic snack foods and sell 70% domestically through major grocery chains, with 25% exported to the US. Margins are thin at 12-15%. We employ 30 people in our processing facility.",
-  },
-];
-
-export default function BusinessInput({ onSubmit, isRunning }: BusinessInputProps) {
-  const [description, setDescription] = useState("");
+export default function BusinessInput({ onSubmit, onSelectProfile, selectedProfile, isRunning }: BusinessInputProps) {
+  const [description, setDescription] = useState(() => selectedProfile?.description ?? "");
   const [showDemos, setShowDemos] = useState(true);
 
   const handleSubmit = () => {
     if (description.trim().length >= 50) {
-      onSubmit(description.trim());
+      onSubmit(description.trim(), selectedProfile ?? undefined);
     }
   };
 
-  const handleDemo = (desc: string) => {
-    setDescription(desc);
+  /** Clicking a profile only selects it — preview and slider update. Run Analysis starts the pipeline. */
+  const handleSelectProfile = (profile: BusinessProfile) => {
+    setDescription(profile.description);
     setShowDemos(false);
-    onSubmit(desc);
+    onSelectProfile?.(profile);
   };
 
+  const canRun = description.trim().length >= 50;
+
   return (
+<<<<<<< HEAD
     <div className="space-y-5 text-white">
       {showDemos && !isRunning && (
         <div className="space-y-2">
           <div className="text-[9px] font-mono uppercase tracking-[0.28em] text-white/35">
             Demo Profiles
+=======
+    <div className="space-y-5">
+      {/* Floating CTA when ready — visible without scrolling to bottom */}
+      {!isRunning && canRun && (
+        <div className="flex items-center justify-between py-2.5 px-4 rounded-lg border border-red-500/25" style={{ background: "rgba(30,12,12,0.6)" }}>
+          <span className="text-[10px] font-mono text-white/50">Profile ready</span>
+          <button
+            type="button"
+            onClick={handleSubmit}
+            className="px-4 py-1.5 text-[10px] font-semibold uppercase tracking-wider border border-red-500/40 rounded"
+            style={{ background: "rgba(220,38,38,0.12)", color: "#dc2626" }}
+          >
+            Run Analysis
+          </button>
+        </div>
+      )}
+      {showDemos && !isRunning && (
+        <div className="space-y-2">
+          <div className="text-[9px] font-mono uppercase tracking-widest text-white/20">
+            Demo Profiles — select to preview, then Run Analysis
+>>>>>>> ec147a2ee4dbe0c062915b60d5ae25d3c521076f
           </div>
           <div className="space-y-2">
-            {DEMO_PROFILES.map((profile) => (
+            {businessProfiles.map((profile) => (
               <button
+<<<<<<< HEAD
                 key={profile.name}
                 onClick={() => handleDemo(profile.description)}
                 className="w-full text-left border border-white/10 bg-white/5 hover:border-white/25 transition-colors px-3 py-3"
+=======
+                type="button"
+                key={profile.id}
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleSelectProfile(profile);
+                }}
+                className={`w-full text-left border transition-colors p-3 ${selectedProfile?.id === profile.id ? "border-red-500/40 bg-red-500/5" : "border-white/[0.05] hover:border-white/[0.12]"}`}
+                style={{ background: "rgba(15,17,23,0.6)" }}
+>>>>>>> ec147a2ee4dbe0c062915b60d5ae25d3c521076f
               >
                 <div className="flex items-center justify-between mb-1.5">
                   <div className="flex flex-col">
@@ -94,6 +104,7 @@ export default function BusinessInput({ onSubmit, isRunning }: BusinessInputProp
       )}
 
       {!isRunning && (
+<<<<<<< HEAD
         <div className="space-y-2">
           {showDemos && (
             <div className="text-[9px] font-mono uppercase tracking-[0.28em] text-white/35">
@@ -109,10 +120,51 @@ export default function BusinessInput({ onSubmit, isRunning }: BusinessInputProp
             />
             <div className="flex items-center justify-between px-4 py-3 border-t border-white/10">
               <span className="text-[9px] font-mono text-white/40">{description.length} chars / 50 min</span>
+=======
+        <div className="space-y-4">
+          {!showDemos && selectedProfile && (
+            <button
+              type="button"
+              onClick={() => setShowDemos(true)}
+              className="text-[10px] font-mono text-white/40 hover:text-white/70 transition-colors flex items-center gap-1.5"
+            >
+              ← Change profile
+            </button>
+          )}
+          {/* Clearer hierarchy: custom profile section stands out */}
+          <div className="border border-white/[0.1] rounded-lg p-4" style={{ background: "rgba(15,17,23,0.7)" }}>
+            <div className="text-[10px] font-mono uppercase tracking-widest text-white/35 mb-2">
+              Or enter your own business profile
+            </div>
+            <p className="text-[11px] text-white/25 mb-3">
+              Paste or type your description below (min 50 characters). Include supply chain, imports, and revenue.
+            </p>
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Describe your Canadian business... Include supply chain details, import sources, industry, revenue, margins. (Min 50 characters)"
+              className="w-full h-28 p-3 border border-white/[0.08] rounded text-[12px] text-white/70 placeholder-white/20 resize-none focus:outline-none focus:border-white/[0.2] transition-colors font-mono"
+              style={{ background: "rgba(8,10,14,0.8)" }}
+            />
+            <div className="flex items-center justify-between mt-3">
+              <span className="text-[9px] font-mono text-white/20">
+                {description.length} chars / 50 min
+              </span>
+>>>>>>> ec147a2ee4dbe0c062915b60d5ae25d3c521076f
               <button
+                type="button"
                 onClick={handleSubmit}
                 disabled={description.trim().length < 50}
+<<<<<<< HEAD
                 className="px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.22em] border border-cyan-400/60 text-cyan-300 hover:bg-cyan-400/10 disabled:opacity-20 disabled:cursor-not-allowed"
+=======
+                className="px-5 py-2 text-[11px] font-semibold uppercase tracking-wider border transition-all disabled:opacity-20 disabled:cursor-not-allowed rounded"
+                style={{
+                  borderColor: description.trim().length >= 50 ? "rgba(220,38,38,0.5)" : "rgba(255,255,255,0.05)",
+                  background: description.trim().length >= 50 ? "rgba(220,38,38,0.08)" : "transparent",
+                  color: description.trim().length >= 50 ? "#dc2626" : "rgba(255,255,255,0.2)",
+                }}
+>>>>>>> ec147a2ee4dbe0c062915b60d5ae25d3c521076f
               >
                 Run Analysis
               </button>

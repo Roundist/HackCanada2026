@@ -13,8 +13,8 @@ export default {
           500: "#22252f",
         },
         accent: {
-          red: "#dc2626",
-          amber: "#d97706",
+          red: "#ff4d4d",
+          amber: "#ffb800",
           green: "#16a34a",
           blue: "#2563eb",
           cyan: "#0891b2",

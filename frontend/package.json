@@ -9,9 +9,15 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@types/d3": "^7.4.3",
     "@xyflow/react": "^12.6.0",
+<<<<<<< HEAD
     "chart.js": "^4.4.4",
+=======
+    "d3": "^7.9.0",
+>>>>>>> ec147a2ee4dbe0c062915b60d5ae25d3c521076f
     "framer-motion": "^12.4.0",
+    "jspdf": "^4.2.0",
     "react": "^19.0.0",
     "react-chartjs-2": "^5.3.0",
     "react-dom": "^19.0.0",
