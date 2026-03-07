@@ -13,11 +13,11 @@ export default function AgentIntelligencePanel() {
   const saultSteMarie = { x: 195, y: 75 };
 
   return (
-    <div className="flex flex-col h-full">
-      <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wide mb-3">
+    <div className="flex flex-col shrink-0">
+      <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wide mb-2">
         Agent Intelligence Engine
       </h3>
-      <div className="flex gap-2 mb-4">
+      <div className="flex gap-2 mb-2">
         <button
           type="button"
           onClick={() => setImportActive(true)}
@@ -44,7 +44,7 @@ export default function AgentIntelligencePanel() {
         </button>
       </div>
 
-      <div className="flex-1 min-h-[180px] border border-gray-200 rounded-lg bg-gray-50/80 overflow-hidden">
+      <div className="w-full h-[120px] border border-gray-200 rounded-lg bg-gray-50/80 overflow-hidden shrink-0">
         <svg viewBox={vb} className="w-full h-full" preserveAspectRatio="xMidYMid meet">
           {/* Light landmass outline (simplified Great Lakes / Canada–US border region) */}
           <path
@@ -97,12 +97,12 @@ export default function AgentIntelligencePanel() {
         </svg>
       </div>
 
-      <div className="flex gap-4 mt-2 text-[10px] text-gray-500">
+      <div className="flex gap-4 mt-1.5 text-[10px] text-gray-500">
         <span className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-red-500" /> Risk</span>
         <span className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-gray-800" /> Active</span>
         <span className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-gray-400" /> Inactive</span>
       </div>
-      <p className="text-xs text-gray-400 mt-2">Select a profile and run analysis to visualize routes.</p>
+      <p className="text-xs text-gray-400 mt-1">Select a profile and run analysis to visualize routes.</p>
     </div>
   );
 }

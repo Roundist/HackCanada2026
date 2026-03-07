@@ -11,11 +11,40 @@ interface SurvivalPlanProps {
   sessionId?: string | null;
   hsClassifications?: HsClassification[];
   reasoningSteps?: ReasoningStep[];
+  variant?: "dark" | "light";
 }
 
 const BASE_TARIFF_RATE = 25;
 
-export default function SurvivalPlan({ result, onReset, sessionId, hsClassifications = [], reasoningSteps = [] }: SurvivalPlanProps) {
+const light = {
+  container: "bg-gray-50",
+  bar: "bg-white border-gray-200 text-gray-700",
+  barMuted: "text-gray-500",
+  card: "border border-gray-200 bg-white",
+  label: "text-gray-500",
+  heading: "text-gray-900",
+  body: "text-gray-600",
+  muted: "text-gray-400",
+  divider: "border-gray-200",
+  button: "border-gray-300 text-gray-600 hover:bg-gray-50",
+};
+
+const dark = {
+  container: "",
+  bar: "border-white/10 bg-black/40 text-white/80",
+  barMuted: "text-white/60",
+  card: "border-white/[0.06]",
+  cardBg: "rgba(15,17,23,0.6)",
+  label: "text-white/20",
+  heading: "text-white/70",
+  body: "text-white/35",
+  muted: "text-white/30",
+  divider: "border-white/[0.04]",
+  button: "border-white/[0.06] text-white/30 hover:text-white/60",
+};
+
+export default function SurvivalPlan({ result, onReset, sessionId, hsClassifications = [], reasoningSteps = [], variant = "dark" }: SurvivalPlanProps) {
+  const t = variant === "light" ? light : dark;
   const [exporting, setExporting] = useState(false);
   const [simulatedRate, setSimulatedRate] = useState(BASE_TARIFF_RATE);
   const plan = (result.survival_plan || result) as Record<string, unknown>;
@@ -56,17 +85,17 @@ export default function SurvivalPlan({ result, onReset, sessionId, hsClassificat
   };
 
   return (
-    <div className="relative max-w-6xl mx-auto py-6 px-2 sm:px-4">
-      <div className="flex items-center justify-between px-4 py-3 border border-white/10 bg-black/40 backdrop-blur sticky top-0 z-10">
+    <div className={`relative max-w-6xl mx-auto py-6 px-2 sm:px-4 ${t.container}`}>
+      <div className={`flex items-center justify-between px-4 py-3 border backdrop-blur sticky top-0 z-10 ${t.bar}`}>
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 text-[10px] font-mono uppercase tracking-[0.24em] text-white/60">
-            <span className="w-2 h-2 rounded-full bg-green-400" />
+          <div className={`flex items-center gap-2 text-[10px] font-mono uppercase tracking-[0.24em] ${t.barMuted}`}>
+            <span className="w-2 h-2 rounded-full bg-green-500" />
             Analysis Complete
           </div>
-          <div className="h-4 w-px bg-white/12" />
-          <div className="text-sm text-white/80 font-semibold">Operational Dossier</div>
+          <div className={`h-4 w-px ${variant === "light" ? "bg-gray-200" : "bg-white/12"}`} />
+          <div className={`text-sm font-semibold ${variant === "light" ? "text-gray-900" : "text-white/80"}`}>Operational Dossier</div>
           {summary && typeof summary.business_name === "string" && summary.business_name.length > 0 && (
-            <div className="text-[10px] font-mono text-white/40 uppercase tracking-[0.2em]">
+            <div className={`text-[10px] font-mono uppercase tracking-[0.2em] ${t.muted}`}>
               {summary.business_name}
             </div>
           )}
@@ -75,14 +104,13 @@ export default function SurvivalPlan({ result, onReset, sessionId, hsClassificat
           <button
             onClick={handleExportPdf}
             disabled={exporting}
-            className="px-3 py-1.5 text-[10px] font-mono uppercase tracking-wider border transition-all disabled:opacity-50"
-            style={{ borderColor: "rgba(34,197,94,0.5)", color: "#22c55e", background: "rgba(34,197,94,0.08)" }}
+            className="px-3 py-1.5 text-[10px] font-mono uppercase tracking-wider border border-green-600/50 text-green-700 bg-green-50 transition-all disabled:opacity-50"
           >
             {exporting ? "Exporting…" : "Export PDF"}
           </button>
           <button
             onClick={onReset}
-            className="px-3 py-1.5 text-[10px] font-mono uppercase tracking-wider border border-white/[0.06] text-white/30 hover:text-white/60 hover:border-white/[0.15] transition-all"
+            className={`px-3 py-1.5 text-[10px] font-mono uppercase tracking-wider border transition-all ${t.button}`}
           >
             New Analysis
           </button>
@@ -96,25 +124,27 @@ export default function SurvivalPlan({ result, onReset, sessionId, hsClassificat
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="col-span-2 border border-white/[0.06] p-4"
-              style={{ background: "rgba(15,17,23,0.6)" }}
+              className={`col-span-2 border p-4 ${t.card}`}
+              style={variant === "dark" ? { background: "rgba(15,17,23,0.6)" } : undefined}
             >
-              <div className="text-[9px] font-mono uppercase tracking-widest text-white/20 mb-2">Executive Summary</div>
-              <h3 className="text-sm font-semibold text-white/70 mb-2">
+              <div className={`text-[9px] font-mono uppercase tracking-widest mb-2 ${t.label}`}>Executive Summary</div>
+              <h3 className={`text-sm font-semibold mb-2 ${t.heading}`}>
                 {summary.headline as string}
               </h3>
-              <p className="text-[11px] text-white/35 leading-relaxed">{summary.key_finding as string}</p>
+              <p className={`text-[11px] leading-relaxed ${t.body}`}>{summary.key_finding as string}</p>
             </motion.div>
           )}
           {tariffImpact && (
             <>
               <StatCard
+                variant={variant}
                 label="Total Exposure"
                 value={`$${((tariffImpact.total_tariff_exposure as number) || 0).toLocaleString()}`}
                 color="#dc2626"
                 delay={0.1}
               />
               <StatCard
+                variant={variant}
                 label="Margin Erosion"
                 value={`${((tariffImpact.total_margin_erosion_pct as number) || 0).toFixed(1)}%`}
                 color="#d97706"
@@ -134,14 +164,16 @@ export default function SurvivalPlan({ result, onReset, sessionId, hsClassificat
             const confidence = 60 + dataScore;
             return (
               <>
-                <StatCard
-                  label="Risk Level"
+<StatCard
+                variant={variant}
+                label="Risk Level"
                   value={riskLevel || "N/A"}
                   color="#dc2626"
                   delay={0.2}
                 />
-                <StatCard
-                  label="Confidence"
+<StatCard
+                variant={variant}
+                label="Confidence"
                   value={`${confidence}%`}
                   color="#2563eb"
                   delay={0.25}
@@ -432,16 +464,16 @@ export default function SurvivalPlan({ result, onReset, sessionId, hsClassificat
   );
 }
 
-function StatCard({ label, value, color, delay }: { label: string; value: string; color: string; delay: number }) {
+function StatCard({ label, value, color, delay, variant = "dark" }: { label: string; value: string; color: string; delay: number; variant?: "dark" | "light" }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay }}
-      className="border border-white/[0.04] p-4"
-      style={{ background: `${color}04` }}
+      className={`border p-4 ${variant === "light" ? "border-gray-200 bg-gray-50" : "border-white/[0.04]"}`}
+      style={variant === "dark" ? { background: `${color}04` } : undefined}
     >
-      <div className="text-[9px] font-mono uppercase tracking-wider text-white/20">{label}</div>
+      <div className={`text-[9px] font-mono uppercase tracking-wider ${variant === "light" ? "text-gray-500" : "text-white/20"}`}>{label}</div>
       <div className="text-xl font-semibold mt-1.5" style={{ color }}>{value}</div>
     </motion.div>
   );

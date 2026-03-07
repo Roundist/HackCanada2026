@@ -112,24 +112,17 @@ export default function App() {
     return "STAGING";
   }, [view, pipelineDone, completedAgents.length, agents.length]);
 
-  const isInputView = view === "input";
-  const headerBg = isInputView ? "bg-white border-b border-gray-200" : "border-b border-white/[0.06]";
-  const headerStyle = isInputView ? undefined : { background: "rgba(10,10,10,0.95)" };
-
   return (
-    <div
-      className={`h-screen w-screen flex flex-col overflow-hidden ${isInputView ? "bg-gray-50" : "grid-bg"}`}
-      style={isInputView ? undefined : { background: "#0a0a0a" }}
-    >
-      <header className={`shrink-0 h-12 px-4 flex items-center justify-between ${headerBg}`} style={headerStyle}>
+    <div className="h-screen w-screen flex flex-col overflow-hidden bg-gray-50">
+      <header className="shrink-0 h-12 px-4 flex items-center justify-between bg-white border-b border-gray-200">
         <div className="flex items-center gap-6">
           <div className="flex items-center gap-2">
             <div className="w-6 h-6 flex items-center justify-center rounded bg-red-600">
               <span className="text-white font-bold text-sm">T</span>
             </div>
-            <span className={`text-sm font-bold tracking-wide ${isInputView ? "text-gray-900" : "text-white/80"}`}>TariffTriage</span>
-            <span className={`text-[10px] font-mono ml-1 ${isInputView ? "text-gray-500" : "text-white/20"}`}>v2.0</span>
-            <span className={`text-[10px] font-mono uppercase tracking-wider ml-1 ${isInputView ? "text-gray-400" : "text-white/40"}`}>Bloomberg-Grade Neural Ops</span>
+            <span className="text-sm font-bold tracking-wide text-gray-900">TariffTriage</span>
+            <span className="text-[10px] font-mono ml-1 text-gray-500">v2.0</span>
+            <span className="text-[10px] font-mono uppercase tracking-wider ml-1 text-gray-400">Bloomberg-Grade Neural Ops</span>
             {isDemoMode && (
               <span className="ml-2 px-1.5 py-0.5 rounded text-[9px] font-mono uppercase bg-amber-500/20 text-amber-400 border border-amber-500/40" title="Pre-recorded demo — start the backend for real agent analysis">
                 Demo
@@ -137,9 +130,9 @@ export default function App() {
             )}
           </div>
         </div>
-        <div className={`flex items-center gap-3 text-[10px] font-mono ${isInputView ? "text-gray-600" : "text-white/60"}`}>
-          <span className={`px-2 py-1 border rounded-sm tracking-widest ${isInputView ? "border-gray-200 text-gray-600" : "border-white/10"}`}>{headerStatus}</span>
-          <span className={isInputView ? "text-gray-400" : "text-white/25"}>{new Date().toLocaleDateString("en-US", { month: "2-digit", day: "2-digit", year: "numeric" }).replace(/\//g, "/")}</span>
+        <div className="flex items-center gap-3 text-[10px] font-mono text-gray-600">
+          <span className="px-2 py-1 border border-gray-200 rounded-sm tracking-widest text-gray-600">{headerStatus}</span>
+          <span className="text-gray-400">{new Date().toLocaleDateString("en-US", { month: "2-digit", day: "2-digit", year: "numeric" }).replace(/\//g, "/")}</span>
         </div>
       </header>
 
@@ -196,17 +189,17 @@ export default function App() {
             </motion.div>
           )}
 
-          {/* ANALYZING VIEW */}
+          {/* ANALYZING VIEW — light theme */}
           {view === "analyzing" && (
             <motion.div
               key="analyzing"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="min-h-full flex"
+              className="min-h-full flex bg-gray-50"
             >
               {/* LEFT — Neural Graph + Execution Steps */}
-              <div className="flex-1 relative flex flex-col">
+              <div className="flex-1 relative flex flex-col bg-white border-r border-gray-200">
                 <div className="flex-1 relative">
                   <ReactFlowProvider>
                     <NeuralGraph
@@ -216,13 +209,13 @@ export default function App() {
                     />
                   </ReactFlowProvider>
                 </div>
-                <div className="shrink-0 border-t border-white/[0.06]" style={{ background: "rgba(8,9,13,0.8)" }}>
+                <div className="shrink-0 border-t border-gray-200 bg-gray-50 px-4 py-2">
                   <ExecutionSteps agents={agents} />
                 </div>
               </div>
 
               {/* RIGHT — Chain of Thought log + Live Findings */}
-              <div className="w-[380px] shrink-0 border-l border-white/[0.06] flex flex-col min-h-0 overflow-y-auto" style={{ background: "rgba(10,10,10,0.8)" }}>
+              <div className="w-[380px] shrink-0 border-l border-gray-200 flex flex-col min-h-0 overflow-y-auto bg-white">
                 <div className="shrink-0 min-h-[200px]" style={{ maxHeight: 280 }}>
                   <AgentTerminalLog
                     log={chainOfThoughtLog}
@@ -230,7 +223,7 @@ export default function App() {
                     isComplete={pipelineDone}
                   />
                 </div>
-                <div className="flex-1 min-h-0 overflow-y-auto flex flex-col border-t border-white/[0.06]">
+                <div className="flex-1 min-h-0 overflow-y-auto flex flex-col border-t border-gray-200">
                   <FindingsPanel agents={agents} pipelineDone={pipelineDone} geopoliticalAlerts={geopoliticalAlerts} systemEvents={systemEvents} />
                 </div>
                 <RagTracePanel agents={agents} systemEvents={systemEvents} hsClassifications={hsClassifications} reasoningSteps={reasoningSteps} />
@@ -238,16 +231,16 @@ export default function App() {
             </motion.div>
           )}
 
-          {/* RESULTS VIEW */}
+          {/* RESULTS VIEW — light theme */}
           {view === "results" && finalResult && (
             <motion.div
               key="results"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="min-h-full overflow-y-auto overflow-x-hidden"
+              className="min-h-full overflow-y-auto overflow-x-hidden bg-gray-50"
             >
-              <SurvivalPlan result={finalResult} onReset={handleReset} sessionId={sessionId} hsClassifications={hsClassifications} reasoningSteps={reasoningSteps} />
+              <SurvivalPlan result={finalResult} onReset={handleReset} sessionId={sessionId} hsClassifications={hsClassifications} reasoningSteps={reasoningSteps} variant="light" />
             </motion.div>
           )}
         </AnimatePresence>
