@@ -55,9 +55,27 @@ export interface ReasoningStep {
   timestamp: number;
 }
 
+export interface ArchitectureEvent {
+  component: "rag" | "backboard" | "orchestration";
+  step: string;
+  detail: string;
+  status: "working" | "complete" | "info";
+  sponsor?: string;
+  timestamp: number;
+}
+
 export interface WSMessage {
   // Demo simulation format
-  type?: "agent_start" | "agent_log" | "agent_done" | "agent_error" | "pipeline_done" | "geopolitical_alert" | "hs_classification" | "reasoning_step";
+  type?:
+    | "agent_start"
+    | "agent_log"
+    | "agent_done"
+    | "agent_error"
+    | "pipeline_done"
+    | "geopolitical_alert"
+    | "hs_classification"
+    | "reasoning_step"
+    | "architecture_event";
   // Backend format
   event_type?: string;
   status?: string;
@@ -78,6 +96,11 @@ export interface WSMessage {
   classification?: HsClassification;
   // Reasoning step payload
   reasoning?: ReasoningStep;
+  // Architecture telemetry payload
+  arch_component?: "rag" | "backboard" | "orchestration";
+  arch_step?: string;
+  arch_detail?: string;
+  sponsor?: string;
 }
 
 export interface DemoProfile {

@@ -6,6 +6,7 @@ import SurvivalPlan from "./components/SurvivalPlan";
 import AgentTerminalLog from "./components/AgentTerminalLog";
 import IntelligencePreview from "./components/IntelligencePreview";
 import RagClassificationLive from "./components/RagClassificationLive";
+import SponsorArchitecturePanel from "./components/SponsorArchitecturePanel";
 import ProductSearch from "./components/ProductSearch";
 import AgentIntelligencePanel from "./components/AgentIntelligencePanel";
 import SupplyChainFlowTable from "./components/SupplyChainFlowTable";
@@ -35,6 +36,7 @@ export default function App() {
     pipelineDone,
     finalResult,
     systemEvents,
+    architectureEvents,
     chainOfThoughtLog,
     geopoliticalAlerts,
     hsClassifications,
@@ -227,11 +229,17 @@ export default function App() {
               {/* RIGHT — Chain of Thought (top) + RAG Pipeline (bottom) */}
               <div className="w-[420px] shrink-0 border-l border-gray-200 flex flex-col overflow-hidden bg-white">
                 {/* Chain of thought: fixed height */}
-                <div className="shrink-0" style={{ height: 220 }}>
+                <div className="shrink-0" style={{ height: 170 }}>
                   <AgentTerminalLog
                     log={chainOfThoughtLog}
                     isRunning={agents.some((a) => a.status === "running")}
                     isComplete={pipelineDone}
+                  />
+                </div>
+                <div className="shrink-0 border-t border-gray-200" style={{ height: 180 }}>
+                  <SponsorArchitecturePanel
+                    events={architectureEvents}
+                    pipelineDone={pipelineDone}
                   />
                 </div>
                 {/* RAG Pipeline — fills the rest, scrolls internally */}

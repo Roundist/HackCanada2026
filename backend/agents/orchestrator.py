@@ -35,11 +35,43 @@ class Orchestrator:
         if self.ws_callback:
             await self.ws_callback(agent_name, event_type, data)
 
+    async def _arch(
+        self,
+        component: str,
+        step: str,
+        detail: str,
+        status: str = "info",
+        sponsor: str | None = None,
+    ):
+        """Emit architecture telemetry for live demo visibility."""
+        await self._ws(
+            "System",
+            "architecture",
+            {
+                "type": "architecture_event",
+                "agent": "System",
+                "status": status,
+                "arch_component": component,
+                "arch_step": step,
+                "arch_detail": detail,
+                "sponsor": sponsor,
+                "timestamp": time.time(),
+                "message": detail,
+            },
+        )
+
     RAG_MIN_DURATION_SECS: float = 0.0
 
     async def _run_rag_classification(self):
         """After Agent 1 completes, run RAG to classify HS codes and look up tariff rates. Padded to RAG_MIN_DURATION_SECS for consistent timing."""
         t0 = time.time()
+        await self._arch(
+            "rag",
+            "semantic_retrieval",
+            "RAG stage started: embedding input descriptions and retrieving top HS candidates.",
+            status="working",
+            sponsor="Gemini + ChromaDB",
+        )
         await self._ws("System", "status", {
             "agent": "System",
             "message": "Running RAG pipeline: classifying HS codes via semantic search...",
@@ -60,6 +92,13 @@ class Orchestrator:
                 "event_type": "status",
                 "status": "complete",
             })
+            await self._arch(
+                "rag",
+                "classification_fallback",
+                "RAG classification fallback triggered; downstream tariff calculations will continue.",
+                status="info",
+                sponsor="Gemini",
+            )
 
         # Update supply_chain_map with classified HS codes
         tariff_rates = {}
@@ -82,6 +121,13 @@ class Orchestrator:
         # Persist RAG results to Backboard.io
         await write_shared_memory("tariff_rates", tariff_rates)
         await write_shared_memory("hs_classifications", classifications)
+        await self._arch(
+            "backboard",
+            "memory_write",
+            "Persisted RAG outputs to Backboard shared memory: tariff_rates, hs_classifications.",
+            status="complete",
+            sponsor="Backboard.io",
+        )
 
         await self._ws("System", "status", {
             "agent": "System",
@@ -89,6 +135,13 @@ class Orchestrator:
             "event_type": "status",
             "status": "complete",
         })
+        await self._arch(
+            "rag",
+            "classification_complete",
+            f"RAG complete: {len(classifications)} US-sourced inputs mapped to HS codes and tariff rates.",
+            status="complete",
+            sponsor="Gemini + ChromaDB",
+        )
 
         # Pad so RAG phase has consistent minimum duration (same as agent padding)
         elapsed = time.time() - t0
@@ -98,6 +151,13 @@ class Orchestrator:
 
     async def _phase_delay(self, label: str, seconds: float):
         """Broadcast a status message and pause between phases for demo pacing."""
+        await self._arch(
+            "orchestration",
+            "phase_transition",
+            label,
+            status="working",
+            sponsor="Backboard.io",
+        )
         await self._ws("System", "status", {
             "agent": "System",
             "message": label,
@@ -120,6 +180,22 @@ class Orchestrator:
 
         # Initialize Backboard.io session thread
         self.backboard_thread_id = await create_session_thread()
+        if self.backboard_thread_id:
+            await self._arch(
+                "backboard",
+                "thread_created",
+                f"Backboard session thread created ({self.backboard_thread_id[:8]}...).",
+                status="complete",
+                sponsor="Backboard.io",
+            )
+        else:
+            await self._arch(
+                "backboard",
+                "fallback_mode",
+                "Backboard thread unavailable; pipeline will continue with in-memory shared state.",
+                status="info",
+                sponsor="Backboard.io",
+            )
 
         # Phase 1: Supply Chain Analyst + pre-fetch news in parallel
         await self._phase_delay("Initializing Supply Chain Analyst...", 0.2)

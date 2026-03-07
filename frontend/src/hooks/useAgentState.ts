@@ -1,5 +1,15 @@
 import { useCallback, useState } from "react";
-import { AgentInfo, AgentStatus, ChainOfThoughtEntry, GeopoliticalAlert, HsClassification, ReasoningStep, SystemEvent, WSMessage } from "../types";
+import {
+  AgentInfo,
+  AgentStatus,
+  ArchitectureEvent,
+  ChainOfThoughtEntry,
+  GeopoliticalAlert,
+  HsClassification,
+  ReasoningStep,
+  SystemEvent,
+  WSMessage,
+} from "../types";
 
 /** Short “what this agent is doing” when idle (before run) */
 export const AGENT_IDLE_ACTIVITY: Record<string, string> = {
@@ -86,6 +96,7 @@ export function useAgentState() {
   const [pipelineDone, setPipelineDone] = useState(false);
   const [finalResult, setFinalResult] = useState<Record<string, unknown> | null>(null);
   const [systemEvents, setSystemEvents] = useState<SystemEvent[]>([]);
+  const [architectureEvents, setArchitectureEvents] = useState<ArchitectureEvent[]>([]);
   const [chainOfThoughtLog, setChainOfThoughtLog] = useState<ChainOfThoughtEntry[]>([]);
   const [geopoliticalAlerts, setGeopoliticalAlerts] = useState<GeopoliticalAlert[]>([]);
   const [hsClassifications, setHsClassifications] = useState<HsClassification[]>([]);
@@ -96,6 +107,7 @@ export function useAgentState() {
     setPipelineDone(false);
     setFinalResult(null);
     setSystemEvents([]);
+    setArchitectureEvents([]);
     setChainOfThoughtLog([]);
     setGeopoliticalAlerts([]);
     setHsClassifications([]);
@@ -173,6 +185,29 @@ export function useAgentState() {
         setGeopoliticalAlerts((prev) => [...prev, alert]);
       }
 
+      if (msg.type === "architecture_event" && msg.arch_component && msg.arch_step && msg.arch_detail) {
+        const event: ArchitectureEvent = {
+          component: msg.arch_component,
+          step: msg.arch_step,
+          detail: msg.arch_detail,
+          status:
+            msg.status === "working" || msg.status === "complete"
+              ? msg.status
+              : "info",
+          sponsor: msg.sponsor,
+          timestamp: Date.now(),
+        };
+        setArchitectureEvents((prev) => [...prev, event]);
+        setChainOfThoughtLog((prev) => [
+          ...prev,
+          {
+            agent: "System",
+            message: `[${event.component.toUpperCase()}] ${event.detail}`,
+            timestamp: event.timestamp,
+          },
+        ]);
+      }
+
       // HS classification evidence
       if (msg.type === "hs_classification" && msg.classification) {
         setHsClassifications((prev) => [...prev, msg.classification!]);
@@ -238,6 +273,7 @@ export function useAgentState() {
     pipelineDone,
     finalResult,
     systemEvents,
+    architectureEvents,
     chainOfThoughtLog,
     geopoliticalAlerts,
     hsClassifications,

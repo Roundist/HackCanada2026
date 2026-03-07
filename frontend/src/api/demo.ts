@@ -288,6 +288,8 @@ function buildDemoMessages(opts: DemoRunOptions = {}): { delay: number; msg: WSM
   const t = (ms: number) => Math.round(ms * DEMO_SPEED);
 
   return [
+  { delay: t(150), msg: { type: "architecture_event", arch_component: "backboard", arch_step: "thread_created", arch_detail: "Backboard session thread created for this analysis run.", sponsor: "Backboard.io", status: "complete" } },
+
   // Supply Chain Analyst — chain-of-thought style
   { delay: t(300), msg: { type: "agent_start", agent: "Supply Chain Analyst" } },
   { delay: t(600), msg: { type: "agent_log", agent: "Supply Chain Analyst", message: "GET /v1/cbsa/tariff-schedule/HS-4407 — Querying Canadian Customs Tariff" } },
@@ -295,8 +297,10 @@ function buildDemoMessages(opts: DemoRunOptions = {}): { delay: number; msg: WSM
   { delay: t(1800), msg: { type: "agent_log", agent: "Supply Chain Analyst", message: "Parsing business description... Mapped 7 supply chain inputs" } },
   { delay: t(2500), msg: { type: "agent_log", agent: "Supply Chain Analyst", message: "Identified 5 US-sourced inputs exposed to tariffs" } },
   { delay: t(3500), msg: { type: "agent_done", agent: "Supply Chain Analyst", data: {} } },
+  { delay: t(3600), msg: { type: "architecture_event", arch_component: "backboard", arch_step: "memory_write", arch_detail: "Supply Chain Analyst wrote 'supply_chain_map' to Backboard shared memory.", sponsor: "Backboard.io", status: "complete" } },
 
   // System RAG
+  { delay: t(3760), msg: { type: "architecture_event", arch_component: "rag", arch_step: "semantic_retrieval", arch_detail: "RAG started: embed inputs, retrieve top-5 HS candidates from vector index.", sponsor: "Gemini + ChromaDB", status: "working" } },
   { delay: t(3800), msg: { type: "agent_log", agent: "System", status: "working", message: "Running RAG pipeline: classifying HS codes via semantic search..." } },
   { delay: t(3950), msg: { type: "agent_log", agent: "System", status: "working", message: "Retrieved top-5 HS candidates per US-sourced input from vector index" } },
 
@@ -304,6 +308,8 @@ function buildDemoMessages(opts: DemoRunOptions = {}): { delay: number; msg: WSM
   ...buildHsClassifications(opts.profile ?? null, t),
 
   { delay: t(4150), msg: { type: "agent_log", agent: "System", status: "complete", message: `Classified ${(opts.profile?.routes.length ?? 4)} inputs to HS codes with tariff rates` } },
+  { delay: t(4200), msg: { type: "architecture_event", arch_component: "backboard", arch_step: "memory_write", arch_detail: "Persisted 'tariff_rates' and 'hs_classifications' to Backboard shared memory.", sponsor: "Backboard.io", status: "complete" } },
+  { delay: t(4250), msg: { type: "architecture_event", arch_component: "rag", arch_step: "classification_complete", arch_detail: `RAG complete: ${(opts.profile?.routes.length ?? 4)} inputs mapped to HS codes with CBSA tariff rates.`, sponsor: "Gemini + ChromaDB", status: "complete" } },
 
   // Tariff Calculator + Geopolitical — CoT style (numbers match selected profile)
   { delay: t(4000), msg: { type: "agent_start", agent: "Tariff Calculator" } },
@@ -319,15 +325,18 @@ function buildDemoMessages(opts: DemoRunOptions = {}): { delay: number; msg: WSM
 
   { delay: t(8000), msg: { type: "agent_log", agent: "Tariff Calculator", message: `Total tariff exposure: $${totalExposure.toLocaleString()} — Risk level: ${riskLevel}` } },
   { delay: t(8500), msg: { type: "agent_done", agent: "Tariff Calculator", data: {} } },
+  { delay: t(8600), msg: { type: "architecture_event", arch_component: "backboard", arch_step: "memory_write", arch_detail: "Tariff Calculator wrote 'tariff_impact' to Backboard shared memory.", sponsor: "Backboard.io", status: "complete" } },
   { delay: t(9000), msg: { type: "geopolitical_alert", urgency: "high", headline: "Canada Expands 25% Surtax to All US-Origin Goods Under Customs Tariff Act", source: "Government of Canada — CBSA", relevance: "Effective March 4, 2025: 25% retaliatory surtax on all US-origin imports. Applies to HS chapters 1–97.", affected_inputs: ["All US-sourced inputs"], risk_adjustment: { from: "high", to: "critical" }, actionable_alert: "Accelerate CPTPP/CETA supplier sourcing — 25% surtax now applies across all commodity chapters." } },
   { delay: t(9500), msg: { type: "agent_log", agent: "Geopolitical Analyst", message: "Escalation risk: elevated — CA–US trade corridor under active retaliatory measures since Mar 2025" } },
   { delay: t(10000), msg: { type: "agent_done", agent: "Geopolitical Analyst", data: {} } },
+  { delay: t(10100), msg: { type: "architecture_event", arch_component: "backboard", arch_step: "memory_write", arch_detail: "Geopolitical Analyst wrote 'geopolitical_context' to Backboard shared memory.", sponsor: "Backboard.io", status: "complete" } },
 
   // Supplier Scout
   { delay: t(10500), msg: { type: "agent_start", agent: "Supplier Scout" } },
   { delay: t(11500), msg: { type: "agent_log", agent: "Supplier Scout", message: "Searching for Canadian alternatives for 5 US-sourced inputs..." } },
   { delay: t(13000), msg: { type: "agent_log", agent: "Supplier Scout", message: `Found alternatives for ${actions.length || 5} inputs — potential savings: $${totalSavings > 0 ? totalSavings.toLocaleString() : "127,000"}` } },
   { delay: t(13500), msg: { type: "agent_done", agent: "Supplier Scout", data: {} } },
+  { delay: t(13600), msg: { type: "architecture_event", arch_component: "backboard", arch_step: "memory_write", arch_detail: "Supplier Scout wrote 'alternative_suppliers' to Backboard shared memory.", sponsor: "Backboard.io", status: "complete" } },
 
   // Strategy Architect
   { delay: t(14000), msg: { type: "agent_start", agent: "Strategy Architect" } },
@@ -335,6 +344,7 @@ function buildDemoMessages(opts: DemoRunOptions = {}): { delay: number; msg: WSM
   { delay: t(17000), msg: { type: "agent_log", agent: "Strategy Architect", message: "Generating priority actions ranked by impact..." } },
   { delay: t(19000), msg: { type: "agent_log", agent: "Strategy Architect", message: `Survival plan ready — ${actions.length || 5} priority actions identified.` } },
   { delay: t(19500), msg: { type: "agent_done", agent: "Strategy Architect", data: {} } },
+  { delay: t(19600), msg: { type: "architecture_event", arch_component: "backboard", arch_step: "memory_write", arch_detail: "Strategy Architect wrote 'survival_plan' to Backboard shared memory.", sponsor: "Backboard.io", status: "complete" } },
 
   // Pipeline done — data is built from selected profile so results match the business
   {

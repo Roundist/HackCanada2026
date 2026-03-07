@@ -8,7 +8,7 @@ from abc import ABC, abstractmethod
 from typing import Any
 
 from services.gemini_client import generate_json
-from services.backboard_client import write_shared_memory, log_agent_activity
+from services.backboard_client import is_connected, write_shared_memory, log_agent_activity
 
 # ---------------------------------------------------------------------------
 # No padding: agents run as fast as the API allows. Demos need to finish in
@@ -58,6 +58,29 @@ class BaseAgent(ABC):
             await self.ws_callback(self.name, event_type, entry)
         # Log to Backboard for audit trail
         await log_agent_activity(self.name, message)
+
+    async def emit_architecture(
+        self,
+        component: str,
+        step: str,
+        detail: str,
+        status: str = "info",
+        sponsor: str | None = None,
+    ):
+        """Emit architecture telemetry for sponsor visibility in the UI."""
+        payload = {
+            "type": "architecture_event",
+            "agent": "System",
+            "status": status,
+            "arch_component": component,
+            "arch_step": step,
+            "arch_detail": detail,
+            "sponsor": sponsor,
+            "timestamp": time.time(),
+            "message": detail,
+        }
+        if self.ws_callback:
+            await self.ws_callback("System", "architecture", payload)
 
     async def wait_for_dependencies(self, timeout: float = 15.0):
         """Block until all dependency keys are present in shared memory."""
@@ -140,6 +163,16 @@ class BaseAgent(ABC):
 
             # Persist to Backboard.io shared memory
             await write_shared_memory(self.output_key, processed)
+            await self.emit_architecture(
+                "backboard",
+                "memory_write",
+                (
+                    f"{self.name} wrote '{self.output_key}' to "
+                    f"{'Backboard shared memory' if is_connected() else 'local fallback memory'}."
+                ),
+                status="complete",
+                sponsor="Backboard.io",
+            )
 
             # Pad so this agent always takes a consistent amount of time
             await self._pad_to_min_duration(t0)
@@ -172,5 +205,15 @@ class BaseAgent(ABC):
             self.shared_memory[self.output_key] = fallback
             try:
                 await write_shared_memory(self.output_key, fallback)
+                await self.emit_architecture(
+                    "backboard",
+                    "fallback_write",
+                    (
+                        f"{self.name} stored fallback output '{self.output_key}' in "
+                        f"{'Backboard shared memory' if is_connected() else 'local fallback memory'}."
+                    ),
+                    status="info",
+                    sponsor="Backboard.io",
+                )
             except Exception:
                 pass
