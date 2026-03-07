@@ -219,13 +219,14 @@ export default function SurvivalPlan({ result, onReset, sessionId, hsClassificat
                 {simulatedRate}%
               </span>
             </div>
-            <div className={`text-[10px] font-mono mb-3 ${t.body}`}>
+            <div className={`text-sm font-semibold tabular-nums mb-3 ${variant === "light" ? "text-gray-900" : "text-white"}`}>
               Simulated exposure at {simulatedRate}%: ${simulatedExposure.toLocaleString()}
             </div>
             <TariffChart
               inputs={inputs}
               simulatedRate={simulatedRate}
               baseRate={BASE_TARIFF_RATE}
+              variant={variant}
             />
             <button
               type="button"

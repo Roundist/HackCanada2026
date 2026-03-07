@@ -25,12 +25,14 @@ interface TariffChartProps {
   simulatedRate: number;
   /** Base rate used to compute the input costs (e.g. 25). */
   baseRate?: number;
+  variant?: "dark" | "light";
 }
 
 export default function TariffChart({
   inputs,
   simulatedRate,
   baseRate = 25,
+  variant = "dark",
 }: TariffChartProps) {
   const scale = baseRate > 0 ? simulatedRate / baseRate : 1;
   const data = [...inputs]
@@ -44,6 +46,12 @@ export default function TariffChart({
 
   if (data.length === 0) return null;
 
+  // Fixed scale: axis max = cost at 50% rate (slider max) so bars grow realistically from 0% to 50%
+  const maxBaseCost = Math.max(1, ...data.map((d) => d.baseCost));
+  const sliderMaxRate = 50;
+  const domainMax = Math.ceil(maxBaseCost * (sliderMaxRate / baseRate) * 1.05);
+  const isLight = variant === "light";
+
   return (
     <div className="w-full" style={{ height: 220 }}>
       <ResponsiveContainer width="100%" height="100%">
@@ -54,9 +62,10 @@ export default function TariffChart({
         >
           <XAxis
             type="number"
+            domain={[0, domainMax]}
             tickFormatter={(v) => `$${(v / 1000).toFixed(0)}K`}
-            stroke="rgba(255,255,255,0.2)"
-            tick={{ fill: "rgba(255,255,255,0.4)", fontSize: 9 }}
+            stroke={isLight ? "#d1d5db" : "rgba(255,255,255,0.2)"}
+            tick={{ fill: isLight ? "#374151" : "rgba(255,255,255,0.4)", fontSize: 9 }}
             axisLine={false}
             tickLine={false}
           />
@@ -64,22 +73,23 @@ export default function TariffChart({
             type="category"
             dataKey="name"
             width={100}
-            stroke="rgba(255,255,255,0.2)"
-            tick={{ fill: "rgba(255,255,255,0.5)", fontSize: 10 }}
+            stroke={isLight ? "#d1d5db" : "rgba(255,255,255,0.2)"}
+            tick={{ fill: isLight ? "#374151" : "rgba(255,255,255,0.5)", fontSize: 10 }}
             axisLine={false}
             tickLine={false}
           />
           <Tooltip
             contentStyle={{
-              background: "rgba(15,17,23,0.95)",
-              border: "1px solid rgba(255,255,255,0.1)",
+              background: isLight ? "#f9fafb" : "rgba(248,250,252,0.98)",
+              border: isLight ? "1px solid #e5e7eb" : "1px solid #e2e8f0",
               borderRadius: 6,
+              color: "#111827",
             }}
-            labelStyle={{ color: "rgba(255,255,255,0.8)" }}
+            labelStyle={{ color: "#111827", fontWeight: 600 }}
             formatter={(value: number) => [`$${value.toLocaleString()}`, "Tariff cost"]}
             labelFormatter={(_, payload) => payload[0]?.payload?.fullName ?? ""}
           />
-          <Bar dataKey="cost" radius={[0, 3, 3, 0]} maxBarSize={28}>
+          <Bar dataKey="cost" radius={[0, 3, 3, 0]} maxBarSize={28} isAnimationActive={true}>
             {data.map((_, i) => (
               <Cell key={i} fill={BAR_COLORS[i % BAR_COLORS.length]} fillOpacity={0.85} />
             ))}

@@ -120,7 +120,6 @@ export default function App() {
             </div>
             <span className="text-sm font-bold tracking-wide text-gray-900">TariffTriage</span>
             <span className="text-[10px] font-mono ml-1 text-gray-500">v2.0</span>
-            <span className="text-[10px] font-mono uppercase tracking-wider ml-1 text-gray-400">Bloomberg-Grade Neural Ops</span>
             {isDemoMode && (
               <span className="ml-2 px-1.5 py-0.5 rounded text-[9px] font-mono uppercase bg-amber-500/20 text-amber-400 border border-amber-500/40" title="Pre-recorded demo — start the backend for real agent analysis">
                 Demo
