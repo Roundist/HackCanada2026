@@ -3,14 +3,11 @@ import { ReactFlowProvider } from "@xyflow/react";
 import { motion, AnimatePresence } from "framer-motion";
 import NeuralGraph from "./components/NeuralGraph";
 import BusinessInput from "./components/BusinessInput";
-import SupplyChainMap from "./components/SupplyChainMap";
-import FindingsPanel from "./components/FindingsPanel";
 import ExecutionSteps from "./components/ExecutionSteps";
 import SurvivalPlan from "./components/SurvivalPlan";
-import AgentPipelineStatus from "./components/AgentPipelineStatus";
 import AgentTerminalLog from "./components/AgentTerminalLog";
 import IntelligencePreview from "./components/IntelligencePreview";
-import RagTracePanel from "./components/RagTracePanel";
+import RagClassificationLive from "./components/RagClassificationLive";
 import ProductSearch from "./components/ProductSearch";
 import AgentIntelligencePanel from "./components/AgentIntelligencePanel";
 import SupplyChainFlowTable from "./components/SupplyChainFlowTable";
@@ -43,6 +40,7 @@ export default function App() {
     reasoningSteps,
     handleWSMessage,
     resetAgents,
+    updateTariffImpact,
   } = useAgentState();
   const { getRate: getTariffRate, loaded: tariffRatesLoaded } = useTariffRates();
 
@@ -214,19 +212,24 @@ export default function App() {
                 </div>
               </div>
 
-              {/* RIGHT — Chain of Thought log + Live Findings */}
-              <div className="w-[380px] shrink-0 border-l border-gray-200 flex flex-col min-h-0 overflow-y-auto bg-white">
-                <div className="shrink-0 min-h-[200px]" style={{ maxHeight: 280 }}>
+              {/* RIGHT — Split: top half Chain of Thought + bottom half RAG Pipeline */}
+              <div className="w-[420px] shrink-0 border-l border-gray-200 flex flex-col min-h-0 bg-white">
+                {/* Chain of thought: fixed height */}
+                <div className="shrink-0" style={{ height: 220 }}>
                   <AgentTerminalLog
                     log={chainOfThoughtLog}
                     isRunning={agents.some((a) => a.status === "running")}
                     isComplete={pipelineDone}
                   />
                 </div>
-                <div className="flex-1 min-h-0 overflow-y-auto flex flex-col border-t border-gray-200">
-                  <FindingsPanel agents={agents} pipelineDone={pipelineDone} geopoliticalAlerts={geopoliticalAlerts} systemEvents={systemEvents} />
+                {/* RAG Pipeline — first-class, fills the rest */}
+                <div className="flex-1 min-h-0 overflow-hidden border-t border-gray-200">
+                  <RagClassificationLive
+                    agents={agents}
+                    systemEvents={systemEvents}
+                    hsClassifications={hsClassifications}
+                  />
                 </div>
-                <RagTracePanel agents={agents} systemEvents={systemEvents} hsClassifications={hsClassifications} reasoningSteps={reasoningSteps} />
               </div>
             </motion.div>
           )}
@@ -240,7 +243,7 @@ export default function App() {
               exit={{ opacity: 0 }}
               className="min-h-full overflow-y-auto overflow-x-hidden bg-gray-50"
             >
-              <SurvivalPlan result={finalResult} onReset={handleReset} sessionId={sessionId} hsClassifications={hsClassifications} reasoningSteps={reasoningSteps} variant="light" />
+              <SurvivalPlan result={finalResult} onReset={handleReset} sessionId={sessionId} hsClassifications={hsClassifications} reasoningSteps={reasoningSteps} variant="light" onTariffImpactUpdate={updateTariffImpact} />
             </motion.div>
           )}
         </AnimatePresence>

@@ -102,6 +102,11 @@ export function useAgentState() {
     setReasoningSteps([]);
   }, []);
 
+  /** Update tariff_impact in finalResult after a live reclassification. */
+  const updateTariffImpact = useCallback((updatedTariffImpact: Record<string, unknown>) => {
+    setFinalResult(prev => prev ? { ...prev, tariff_impact: updatedTariffImpact } : prev);
+  }, []);
+
   const updateAgent = useCallback(
     (agentId: string, updates: Partial<AgentInfo>) => {
       setAgents((prev) =>
@@ -239,5 +244,6 @@ export function useAgentState() {
     reasoningSteps,
     handleWSMessage,
     resetAgents,
+    updateTariffImpact,
   };
 }

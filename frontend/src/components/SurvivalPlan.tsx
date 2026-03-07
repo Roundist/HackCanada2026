@@ -2,6 +2,7 @@ import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import { downloadSurvivalPlanPdf } from "../utils/exportPdf";
 import TariffChart from "./TariffChart";
+import HsCorrection from "./HsCorrection";
 import type { HsClassification, ReasoningStep } from "../types";
 
 interface SurvivalPlanProps {
@@ -12,6 +13,7 @@ interface SurvivalPlanProps {
   hsClassifications?: HsClassification[];
   reasoningSteps?: ReasoningStep[];
   variant?: "dark" | "light";
+  onTariffImpactUpdate?: (updated: Record<string, unknown>) => void;
 }
 
 const BASE_TARIFF_RATE = 25;
@@ -43,7 +45,7 @@ const dark = {
   button: "border-white/[0.06] text-white/30 hover:text-white/60",
 };
 
-export default function SurvivalPlan({ result, onReset, sessionId, hsClassifications = [], reasoningSteps = [], variant = "dark" }: SurvivalPlanProps) {
+export default function SurvivalPlan({ result, onReset, sessionId, hsClassifications = [], reasoningSteps = [], variant = "dark", onTariffImpactUpdate }: SurvivalPlanProps) {
   const t = variant === "light" ? light : dark;
   const [exporting, setExporting] = useState(false);
   const [simulatedRate, setSimulatedRate] = useState(BASE_TARIFF_RATE);
@@ -232,6 +234,27 @@ export default function SurvivalPlan({ result, onReset, sessionId, hsClassificat
             >
               Reset to current rate ({BASE_TARIFF_RATE}%)
             </button>
+          </motion.div>
+        )}
+
+        {/* HS Code Correction — human-in-the-loop reclassification */}
+        {sessionId && hsClassifications.length > 0 && onTariffImpactUpdate && (
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15 }}
+          >
+            <h3 className={`text-[10px] font-mono uppercase tracking-widest mb-3 ${t.label}`}>
+              HS Classification Review
+              <span className={`ml-2 normal-case text-[9px] font-normal ${t.muted}`}>
+                — correct misclassified inputs to update tariff exposure in real time
+              </span>
+            </h3>
+            <HsCorrection
+              sessionId={sessionId}
+              hsClassifications={hsClassifications}
+              onRecalculated={onTariffImpactUpdate}
+            />
           </motion.div>
         )}
 
