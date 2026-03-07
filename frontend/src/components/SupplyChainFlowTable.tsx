@@ -12,9 +12,9 @@ export default function SupplyChainFlowTable({ profile }: SupplyChainFlowTablePr
   const crossingCount = crossingSet.size;
 
   return (
-    <div className="flex flex-col">
-      <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wide mb-3 pt-4 border-t border-gray-200">
-        Supply Chain Flow
+    <div className="flex flex-col pt-4 border-t border-gray-200 mt-3">
+      <h3 className="text-[10px] font-medium uppercase tracking-wider text-gray-500 mb-2">
+        Supply chain flow
       </h3>
       <div className="border border-gray-200 rounded-lg overflow-hidden bg-white">
         <table className="w-full text-left text-xs">

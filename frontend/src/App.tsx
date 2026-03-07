@@ -112,24 +112,22 @@ export default function App() {
 
   return (
     <div className="h-screen w-screen flex flex-col overflow-hidden bg-gray-50">
-      <header className="shrink-0 h-12 px-4 flex items-center justify-between bg-white border-b border-gray-200">
-        <div className="flex items-center gap-6">
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 flex items-center justify-center rounded bg-red-600">
-              <span className="text-white font-bold text-sm">T</span>
-            </div>
-            <span className="text-sm font-bold tracking-wide text-gray-900">TariffTriage</span>
-            <span className="text-[10px] font-mono ml-1 text-gray-500">v2.0</span>
-            {isDemoMode && (
-              <span className="ml-2 px-1.5 py-0.5 rounded text-[9px] font-mono uppercase bg-amber-500/20 text-amber-400 border border-amber-500/40" title="Pre-recorded demo — start the backend for real agent analysis">
-                Demo
-              </span>
-            )}
+      <header className="shrink-0 h-11 px-4 flex items-center justify-between bg-white border-b border-gray-200">
+        <div className="flex items-center gap-3">
+          <div className="w-6 h-6 flex items-center justify-center rounded bg-red-600">
+            <span className="text-white font-bold text-sm">T</span>
           </div>
+          <span className="text-sm font-semibold text-gray-900">TariffTriage</span>
+          <span className="text-[9px] text-gray-400 font-normal">v2.0</span>
+          {isDemoMode && (
+            <span className="px-1.5 py-0.5 rounded text-[9px] uppercase bg-amber-50 text-amber-700 border border-amber-200" title="Pre-recorded demo — start the backend for real agent analysis">
+              Demo
+            </span>
+          )}
         </div>
-        <div className="flex items-center gap-3 text-[10px] font-mono text-gray-600">
-          <span className="px-2 py-1 border border-gray-200 rounded-sm tracking-widest text-gray-600">{headerStatus}</span>
-          <span className="text-gray-400">{new Date().toLocaleDateString("en-US", { month: "2-digit", day: "2-digit", year: "numeric" }).replace(/\//g, "/")}</span>
+        <div className="flex items-center gap-2 text-[10px] text-gray-500">
+          <span className="px-2 py-0.5 rounded bg-gray-100 text-gray-600">{headerStatus}</span>
+          <span>{new Date().toLocaleDateString("en-US", { month: "2-digit", day: "2-digit", year: "numeric" }).replace(/\//g, "/")}</span>
         </div>
       </header>
 
@@ -142,23 +140,23 @@ export default function App() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="min-h-full flex bg-gray-50"
+              className="min-h-full flex bg-gray-100"
             >
-              {/* LEFT — Agent Intelligence Engine + Supply Chain Flow (light theme) */}
-              <div className="w-[380px] shrink-0 border-r border-gray-200 flex flex-col min-h-full bg-white px-4 py-4 overflow-y-auto">
-                <AgentIntelligencePanel />
+              {/* LEFT — Context only (secondary): selected profile + supply chain */}
+              <div className="w-[280px] shrink-0 border-r border-gray-200 flex flex-col min-h-full bg-white/80 px-3 py-4 overflow-y-auto">
+                <AgentIntelligencePanel selectedProfile={selectedProfile} />
                 <SupplyChainFlowTable profile={selectedProfile} />
               </div>
 
-              {/* CENTER — Trade Impact Assessment (light theme) */}
-              <div className="flex-1 flex items-start justify-center p-8 min-w-0 bg-gray-50">
-                <div className="w-full max-w-2xl space-y-6 py-4">
-                  <div className="space-y-2 text-center">
-                    <h2 className="text-xl font-bold text-gray-900 tracking-tight">
+              {/* CENTER — Primary: one clear place for the eye to land */}
+              <div className="flex-1 flex items-start justify-center min-w-0 py-6 px-6">
+                <div className="w-full max-w-xl bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-5">
+                  <div>
+                    <h1 className="text-lg font-semibold text-gray-900">
                       Trade Impact Assessment
-                    </h2>
-                    <p className="text-sm text-gray-600 leading-relaxed max-w-md mx-auto">
-                      Analyze tariff exposure, geopolitical risk, and survival strategy for Canadian businesses with US supply chain dependencies.
+                    </h1>
+                    <p className="text-sm text-gray-500 mt-0.5">
+                      Select a demo profile or enter your business. The panels left and right update to show supply chain and impact preview.
                     </p>
                   </div>
                   <BusinessInput
@@ -172,8 +170,8 @@ export default function App() {
                 </div>
               </div>
 
-              {/* RIGHT — Intelligence Preview (light theme) */}
-              <div className="w-[300px] shrink-0 border-l border-gray-200 flex flex-col min-h-full bg-white">
+              {/* RIGHT — Supporting snapshot (secondary) */}
+              <div className="w-[260px] shrink-0 border-l border-gray-200 flex flex-col min-h-full bg-white/80">
                 <IntelligencePreview
                   profile={selectedProfile}
                   tariffRatePct={tariffRatePct}

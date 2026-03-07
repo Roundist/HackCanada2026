@@ -49,15 +49,18 @@ export default function IntelligencePreview({
 
   return (
     <div className="flex flex-col h-full min-h-0">
-      <div className={`px-4 py-3 border-b shrink-0 ${isLight ? "border-gray-200" : "border-white/[0.06]"}`}>
-        <div className={`text-[10px] font-mono uppercase tracking-widest ${isLight ? "text-gray-600" : "text-white/25"}`}>
-          Intelligence Preview
+      <div className={`px-3 py-2.5 border-b shrink-0 ${isLight ? "border-gray-200" : "border-white/[0.06]"}`}>
+        <div className={`text-[10px] font-medium uppercase tracking-wider ${isLight ? "text-gray-500" : "text-white/25"}`}>
+          Impact snapshot
+        </div>
+        <div className={`text-[9px] mt-0.5 ${isLight ? "text-gray-400" : "text-white/20"}`}>
+          {profile ? "Based on selected profile" : "Select a profile in the center"}
         </div>
       </div>
-      <div className="flex-1 min-h-0 p-4 space-y-4 overflow-y-auto overflow-x-hidden">
+      <div className="flex-1 min-h-0 p-3 space-y-3 overflow-y-auto overflow-x-hidden">
         <div className={cardClass} style={cardStyle}>
-          <div className={labelClass + " mb-1"}>Current Tariff Rate</div>
-          <div className="flex items-center gap-3 mt-2">
+          <div className={labelClass + " mb-1"}>Stress-test tariff rate</div>
+          <div className="flex items-center gap-2 mt-1.5">
             <input
               type="range"
               min={0}
@@ -70,73 +73,69 @@ export default function IntelligencePreview({
                 background: `linear-gradient(to right, #dc2626 0%, #dc2626 ${(tariffRatePct / 50) * 100}%, ${isLight ? "#e5e7eb" : "rgba(255,255,255,0.08)"} ${(tariffRatePct / 50) * 100}%)`,
               }}
             />
-            <span className="text-lg font-bold tabular-nums min-w-[3rem] text-right text-red-600">
+            <span className="text-sm font-semibold tabular-nums min-w-[2.5rem] text-right text-red-600">
               {tariffRatePct}%
             </span>
           </div>
           <div className={subClass}>
-            US imports to Canada {tariffRatesFromCbsa ? "• CBSA 2025 rates" : "• Stress test"}
-            {tariffRatesFromCbsa && isLight && (
-              <span className="block mt-0.5 text-gray-400" title="Canada Border Services Agency Customs Tariff">
-                Rates: CBSA Customs Tariff 2025
-              </span>
-            )}
+            {tariffRatesFromCbsa ? "CBSA 2025 reference" : "Slider for scenario"}
           </div>
         </div>
 
         <div className={cardClass} style={cardStyle}>
-          <div className={labelClass}>Affected Sectors</div>
-          <div className={`text-lg font-semibold mt-1 ${isLight ? "text-gray-900" : ""}`} style={{ color: isLight ? undefined : "#ffb800" }}>
-            {profile ? affectedSectors : "--"}
+          <div className={labelClass}>US-sourced input categories</div>
+          <div className={`text-base font-semibold mt-0.5 ${isLight ? "text-gray-900" : ""}`} style={{ color: isLight ? undefined : "#ffb800" }}>
+            {profile ? affectedSectors : "—"}
           </div>
           <div className={subClass}>
-            {profile ? `${profile.industry} • US-sourced inputs` : "Select profile"}
+            {profile ? "From this profile; run analysis for full breakdown" : "Select profile"}
           </div>
         </div>
 
         <div className={cardClass} style={cardStyle}>
-          <div className={labelClass}>Avg Margin Erosion</div>
-          <div className={`text-lg font-semibold mt-1 ${isLight ? "text-red-600" : ""}`} style={{ color: isLight ? undefined : "#ff4d4d" }}>
-            {profile ? `${marginErosionPct}%` : "--"}
+          <div className={labelClass}>Projected margin erosion</div>
+          <div className={`text-base font-semibold mt-0.5 ${isLight ? "text-red-600" : ""}`} style={{ color: isLight ? undefined : "#ff4d4d" }}>
+            {profile ? `${marginErosionPct}%` : "—"}
           </div>
-          <div className={subClass}>Cross-sector average (projected)</div>
+          <div className={subClass}>
+            At current tariff; run analysis for actions to reduce it
+          </div>
         </div>
 
         <div className={cardClass} style={cardStyle}>
-          <div className={labelClass}>Alt Suppliers</div>
-          <div className={`text-lg font-semibold mt-1 ${isLight ? "text-gray-900" : ""}`} style={{ color: isLight ? undefined : "#16a34a" }}>
-            {profile ? `${altCount} available` : "--"}
+          <div className={labelClass}>Alternative suppliers in DB</div>
+          <div className={`text-base font-semibold mt-0.5 ${isLight ? "text-gray-900" : ""}`} style={{ color: isLight ? undefined : "#16a34a" }}>
+            {profile ? `${altCount} options` : "—"}
           </div>
           {profile && altSuppliers.length > 0 && (
-            <ul className="mt-3 space-y-2">
-              {altSuppliers.map((s) => (
+            <ul className="mt-2 space-y-1.5">
+              {altSuppliers.slice(0, 3).map((s) => (
                 <motion.li
                   key={s.name}
                   initial={{ opacity: 0, x: -4 }}
                   animate={{ opacity: 1, x: 0 }}
-                  className={`text-[10px] border-l-2 pl-3 pr-2 py-2 rounded-r border-emerald-500/30 transition-colors ${isLight ? "hover:bg-gray-100/80" : "hover:bg-white/[0.04]"}`}
-                  style={{ borderColor: "rgba(22,163,74,0.4)" }}
+                  className={`text-[10px] border-l-2 pl-2 py-1 rounded-r ${isLight ? "border-emerald-300 text-gray-700" : "border-emerald-500/30 text-white/70"}`}
+                  style={!isLight ? { borderColor: "rgba(22,163,74,0.4)" } : undefined}
                 >
-                  <span className={`font-medium ${isLight ? "text-gray-800" : "text-white/70"}`}>{s.name}</span>
-                  <span className={isLight ? "text-gray-500" : "text-white/40"}> {s.country}</span>
-                  <div className="text-[9px] font-mono text-emerald-600 mt-1">
-                    +{s.deltaMarginSavedPct}% margin • Save ${(s.deltaAmountSaved / 1000).toFixed(0)}K
-                  </div>
+                  <span className="font-medium">{s.name}</span>
+                  <span className="text-gray-500"> · Save ${(s.deltaAmountSaved / 1000).toFixed(0)}K</span>
                 </motion.li>
               ))}
+              {altSuppliers.length > 3 && (
+                <li className="text-[9px] text-gray-400">+{altSuppliers.length - 3} more in report</li>
+              )}
             </ul>
           )}
         </div>
 
-        <div className={cardClass} style={cardStyle} title="Model confidence in stress-test projections.">
-          <div className={`${labelClass} flex items-center gap-1.5 min-h-[14px]`}>
-            <span>Confidence Score</span>
-            <span className={`inline-flex items-center justify-center w-3.5 h-3.5 rounded-full border text-[10px] cursor-help shrink-0 ${isLight ? "border-gray-300 text-gray-400" : "border-white/20 text-white/50"}`} aria-label="Explain confidence">ⓘ</span>
+        <div className={cardClass} style={cardStyle}>
+          <div className={labelClass}>Confidence in this snapshot</div>
+          <div className={`text-base font-semibold mt-0.5 ${isLight ? "text-gray-900" : ""}`} style={{ color: isLight ? undefined : "#3b82f6" }}>
+            {profile ? `${confidenceScore}%` : "—"}
           </div>
-          <div className={`text-lg font-semibold mt-1 ${isLight ? "text-gray-900" : ""}`} style={{ color: isLight ? undefined : "#3b82f6" }}>
-            {profile ? `${confidenceScore}%` : "--"}
+          <div className={subClass}>
+            How well this profile matches our tariff database; higher means more reliable projections. Run analysis for full confidence and evidence.
           </div>
-          <div className={subClass}>Uncertainty rises with tariff stress</div>
         </div>
       </div>
     </div>

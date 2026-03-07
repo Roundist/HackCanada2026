@@ -359,91 +359,74 @@ export default function BusinessInput({
                 />
               </Field>
 
-              {/* Submit */}
-              <div className={`flex items-center justify-between pt-3 border-t ${variant === "light" ? "border-gray-300" : "border-gray-600"}`}>
-                <span className="text-[9px] font-mono text-gray-500">
-                  {composed.length} chars generated
-                </span>
+              {/* Submit — clearly attached to the form */}
+              <div className={`pt-3 border-t ${variant === "light" ? "border-gray-200" : "border-gray-600"}`}>
+                <p className="text-[11px] text-gray-500 mb-2">
+                  {canRun ? "Ready to run. Your description will be sent to the analysis pipeline." : "Add at least 50 characters and an industry to run."}
+                </p>
                 <button
                   type="button"
                   onClick={handleSubmit}
                   disabled={!canRun}
-                  className="px-5 py-2 text-[11px] font-semibold uppercase tracking-wider border transition-all disabled:opacity-20 disabled:cursor-not-allowed rounded-md bg-red-600/90 border-red-500/50 text-white hover:bg-red-600 disabled:hover:bg-red-600/90"
+                  className="w-full py-2.5 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 disabled:opacity-40 disabled:cursor-not-allowed rounded-lg transition-colors"
                 >
-                  Run Analysis
+                  Run analysis
                 </button>
               </div>
             </div>
           )}
 
-          {/* Demo profiles (second tab) */}
+          {/* Demo profiles (second tab): compact cards + one clear CTA */}
           {mode === "demos" && (
-            <div className="space-y-2">
-              {businessProfiles.map((profile) => (
-                <button
-                  type="button"
-                  key={profile.id}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handleSelectProfile(profile);
-                  }}
-                  className={`w-full text-left border transition-colors p-3 rounded-lg ${
-                    selectedProfile?.id === profile.id
-                      ? variant === "light"
-                        ? "border-gray-300 bg-gray-100"
-                        : "border-red-500/40 bg-red-500/5"
-                      : variant === "light"
-                        ? "border-gray-200 bg-white hover:border-gray-300"
-                        : "border-white/[0.05] hover:border-white/[0.12]"
-                  }`}
-                  style={variant === "dark" && selectedProfile?.id !== profile.id ? { background: "rgba(15,17,23,0.6)" } : undefined}
-                >
-                  <div className="flex items-center justify-between mb-1.5">
-                    <div className="flex items-center gap-3">
-                      <span className={`text-[12px] font-semibold ${variant === "light" ? "text-gray-900" : "text-white/70"}`}>
-                        {profile.name}
-                      </span>
-                      <span className={`text-[9px] font-mono uppercase tracking-wider ${variant === "light" ? "text-gray-500" : "text-white/25"}`}>
-                        {profile.industry}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <span className={`text-[9px] font-mono ${variant === "light" ? "text-gray-600" : "text-white/20"}`}>
-                        {profile.revenue}
-                      </span>
-                      <span className={`text-[9px] font-mono ${variant === "light" ? "text-gray-600" : "text-white/20"}`}>
-                        {profile.imports}
-                      </span>
-                      <span className={`text-[8px] font-mono uppercase tracking-wider px-1.5 py-0.5 border rounded ${theme.risk}`}>
-                        {profile.risk}
-                      </span>
-                    </div>
-                  </div>
-                  <div className={`text-[10px] leading-relaxed line-clamp-3 ${variant === "light" ? "text-gray-600" : "text-white/30"}`}>
-                    {profile.description}
-                  </div>
-                </button>
-              ))}
+            <div className="space-y-3">
+              <p className="text-[11px] text-gray-500">
+                Choose a profile — the left and right panels update. Then run analysis.
+              </p>
+              <div className="space-y-1.5">
+                {businessProfiles.map((profile) => (
+                  <button
+                    type="button"
+                    key={profile.id}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleSelectProfile(profile);
+                    }}
+                    className={`w-full text-left border transition-colors px-3 py-2.5 rounded-lg flex items-center justify-between gap-2 ${
+                      selectedProfile?.id === profile.id
+                        ? "border-red-500/50 bg-red-50/80 ring-1 ring-red-500/20"
+                        : "border-gray-200 bg-gray-50/50 hover:border-gray-300 hover:bg-gray-50"
+                    }`}
+                  >
+                    <span className="text-[13px] font-semibold text-gray-900 truncate">
+                      {profile.name}
+                    </span>
+                    <span className="text-[10px] text-gray-500 shrink-0">
+                      {profile.industry} · {profile.imports}
+                    </span>
+                    <span className={`text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded shrink-0 ${
+                      profile.risk.toLowerCase() === "high" ? "bg-red-100 text-red-700" : "bg-gray-200 text-gray-600"
+                    }`}>
+                      {profile.risk}
+                    </span>
+                  </button>
+                ))}
+              </div>
 
-              {/* Run selected demo */}
-              {selectedProfile && (
-                <div className="flex flex-col gap-1 pt-2">
-                  <p className={`text-[10px] ${variant === "light" ? "text-gray-500" : "text-white/25"}`}>
-                    {selectedProfile.name} selected
-                  </p>
-                  <div className="flex justify-end">
-                    <button
-                      type="button"
-                      onClick={() =>
-                        onSubmit(selectedProfile.description, selectedProfile)
-                      }
-                      className={variant === "light" ? "px-5 py-2 text-[11px] font-semibold uppercase tracking-wider rounded transition-all bg-gray-800 text-white border border-gray-800 hover:bg-gray-700" : "px-5 py-2 text-[11px] font-semibold uppercase tracking-wider border rounded transition-all"}
-                      style={variant === "dark" ? { borderColor: "rgba(220,38,38,0.5)", background: "rgba(220,38,38,0.08)", color: "#dc2626" } : undefined}
-                    >
-                      Run Analysis
-                    </button>
-                  </div>
+              {/* Single primary CTA attached to selection */}
+              {selectedProfile ? (
+                <div className="pt-2 border-t border-gray-200">
+                  <button
+                    type="button"
+                    onClick={() => onSubmit(selectedProfile.description, selectedProfile)}
+                    className="w-full py-2.5 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
+                  >
+                    Run analysis for {selectedProfile.name}
+                  </button>
                 </div>
+              ) : (
+                <p className="text-[11px] text-gray-400 pt-1">
+                  Select a profile above to run analysis.
+                </p>
               )}
             </div>
           )}
