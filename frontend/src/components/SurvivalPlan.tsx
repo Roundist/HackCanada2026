@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import { downloadSurvivalPlanPdf } from "../utils/exportPdf";
+import TariffChart from "./TariffChart";
 
 interface SurvivalPlanProps {
   result: Record<string, unknown>;
@@ -9,14 +10,23 @@ interface SurvivalPlanProps {
   sessionId?: string | null;
 }
 
+const BASE_TARIFF_RATE = 25;
+
 export default function SurvivalPlan({ result, onReset, sessionId }: SurvivalPlanProps) {
   const [exporting, setExporting] = useState(false);
+  const [simulatedRate, setSimulatedRate] = useState(BASE_TARIFF_RATE);
   const plan = (result.survival_plan || result) as Record<string, unknown>;
   const summary = plan.executive_summary as Record<string, unknown> | undefined;
   const actions = (plan.priority_actions || []) as Record<string, unknown>[];
   const timeline = plan.timeline as Record<string, string[]> | undefined;
   const risks = (plan.risks || []) as Record<string, unknown>[];
   const tariffImpact = result.tariff_impact as Record<string, unknown> | undefined;
+  const inputs = (tariffImpact?.inputs as Array<{ name: string; tariff_cost: number }>) ?? [];
+  const totalExposureBase = (tariffImpact?.total_tariff_exposure as number) ?? 0;
+  const simulatedExposure = useMemo(
+    () => Math.round(totalExposureBase * (simulatedRate / BASE_TARIFF_RATE)),
+    [totalExposureBase, simulatedRate]
+  );
 
   const handleExportPdf = async () => {
     setExporting(true);
@@ -133,6 +143,53 @@ export default function SurvivalPlan({ result, onReset, sessionId }: SurvivalPla
             </>
           )}
         </div>
+
+        {/* Tariff Simulator + Chart (PRD: What If Tariffs Go Higher?) */}
+        {inputs.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="border border-white/[0.06] p-4"
+            style={{ background: "rgba(15,17,23,0.6)" }}
+          >
+            <div className="text-[9px] font-mono uppercase tracking-widest text-white/20 mb-2">
+              What If Tariffs Go Higher?
+            </div>
+            <div className="flex items-center gap-4 mb-3">
+              <input
+                type="range"
+                min={0}
+                max={50}
+                step={1}
+                value={simulatedRate}
+                onChange={(e) => setSimulatedRate(Number(e.target.value))}
+                className="flex-1 h-2 rounded-full appearance-none cursor-pointer accent-red-600"
+                style={{
+                  background: `linear-gradient(to right, #dc2626 0%, #dc2626 ${(simulatedRate / 50) * 100}%, rgba(255,255,255,0.08) ${(simulatedRate / 50) * 100}%)`,
+                }}
+              />
+              <span className="text-sm font-semibold tabular-nums text-red-400 min-w-[3rem]">
+                {simulatedRate}%
+              </span>
+            </div>
+            <div className="text-[10px] font-mono text-white/30 mb-3">
+              Simulated exposure at {simulatedRate}%: ${simulatedExposure.toLocaleString()}
+            </div>
+            <TariffChart
+              inputs={inputs}
+              simulatedRate={simulatedRate}
+              baseRate={BASE_TARIFF_RATE}
+            />
+            <button
+              type="button"
+              onClick={() => setSimulatedRate(BASE_TARIFF_RATE)}
+              className="mt-2 text-[9px] font-mono uppercase tracking-wider text-white/40 hover:text-white/60 transition-colors"
+            >
+              Reset to current rate ({BASE_TARIFF_RATE}%)
+            </button>
+          </motion.div>
+        )}
 
         {/* Priority Actions */}
         {actions.length > 0 && (

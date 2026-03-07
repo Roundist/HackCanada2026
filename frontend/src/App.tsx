@@ -35,6 +35,7 @@ export default function App() {
     finalResult,
     systemEvents,
     chainOfThoughtLog,
+    geopoliticalAlerts,
     handleWSMessage,
     resetAgents,
   } = useAgentState();
@@ -134,8 +135,8 @@ export default function App() {
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="flex-1 overflow-hidden">
+      {/* Main Content — scrollable so all content is visible */}
+      <main className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden">
         <AnimatePresence mode="wait">
           {/* INPUT VIEW */}
           {view === "input" && (
@@ -144,14 +145,14 @@ export default function App() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="h-full flex"
+              className="min-h-full flex"
             >
               {/* LEFT panel — Chain of Thought terminal + Supply Chain Map */}
-              <div className="w-[400px] shrink-0 border-r border-white/[0.06] flex flex-col" style={{ background: "rgba(10,10,10,0.8)" }}>
-                <div className="px-4 py-3 border-b border-white/[0.06]">
+              <div className="w-[400px] shrink-0 border-r border-white/[0.06] flex flex-col min-h-full" style={{ background: "rgba(10,10,10,0.8)" }}>
+                <div className="px-4 py-3 border-b border-white/[0.06] shrink-0">
                   <div className="text-[10px] font-mono uppercase tracking-widest text-white/25">Agent Intelligence Engine</div>
                 </div>
-                <div className="flex-1 min-h-0 flex flex-col" style={{ minHeight: 180 }}>
+                <div className="flex-1 flex flex-col min-h-[340px]" style={{ minHeight: 340 }}>
                   <AgentTerminalLog
                     log={chainOfThoughtLog}
                     isRunning={false}
@@ -170,13 +171,13 @@ export default function App() {
               </div>
 
               {/* CENTER — Business Input */}
-              <div className="flex-1 flex items-center justify-center p-8">
-                <div className="w-full max-w-2xl space-y-6">
-                  <div className="space-y-2">
+              <div className="flex-1 flex items-start justify-center p-8 min-w-0">
+                <div className="w-full max-w-2xl space-y-6 py-4">
+                  <div className="space-y-2 text-center">
                     <h2 className="text-xl font-semibold text-white/80 tracking-tight">
                       Trade Impact Assessment
                     </h2>
-                    <p className="text-xs text-white/30 leading-relaxed max-w-md">
+                    <p className="text-xs text-white/30 leading-relaxed max-w-md mx-auto">
                       Describe your Canadian business, supply chain dependencies, and import sources.
                       Our AI agents will analyze tariff exposure, geopolitical risk, and survival strategy.
                     </p>
@@ -191,7 +192,7 @@ export default function App() {
               </div>
 
               {/* RIGHT — Intelligence Preview (slider + alt suppliers + reactive metrics) */}
-              <div className="w-[300px] shrink-0 border-l border-white/[0.06] flex flex-col" style={{ background: "rgba(10,10,10,0.8)" }}>
+              <div className="w-[300px] shrink-0 border-l border-white/[0.06] flex flex-col min-h-full" style={{ background: "rgba(10,10,10,0.8)" }}>
                 <IntelligencePreview
                   profile={selectedProfile}
                   tariffRatePct={tariffRatePct}
@@ -210,7 +211,7 @@ export default function App() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="h-full flex"
+              className="min-h-full flex"
             >
               {/* LEFT — Neural Graph + Execution Steps */}
               <div className="flex-1 relative flex flex-col">
@@ -229,16 +230,16 @@ export default function App() {
               </div>
 
               {/* RIGHT — Chain of Thought log + Live Findings */}
-              <div className="w-[380px] shrink-0 border-l border-white/[0.06] flex flex-col" style={{ background: "rgba(10,10,10,0.8)" }}>
-                <div className="shrink-0" style={{ minHeight: 200, maxHeight: 220 }}>
+              <div className="w-[380px] shrink-0 border-l border-white/[0.06] flex flex-col min-h-0 overflow-y-auto" style={{ background: "rgba(10,10,10,0.8)" }}>
+                <div className="shrink-0 min-h-[200px]" style={{ maxHeight: 280 }}>
                   <AgentTerminalLog
                     log={chainOfThoughtLog}
                     isRunning={agents.some((a) => a.status === "running")}
                     isComplete={pipelineDone}
                   />
                 </div>
-                <div className="flex-1 min-h-0 overflow-hidden flex flex-col border-t border-white/[0.06]">
-                  <FindingsPanel agents={agents} pipelineDone={pipelineDone} />
+                <div className="flex-1 min-h-0 overflow-y-auto flex flex-col border-t border-white/[0.06]">
+                  <FindingsPanel agents={agents} pipelineDone={pipelineDone} geopoliticalAlerts={geopoliticalAlerts} />
                 </div>
                 <RagTracePanel agents={agents} systemEvents={systemEvents} />
               </div>
@@ -252,7 +253,7 @@ export default function App() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="h-full overflow-y-auto"
+              className="min-h-full overflow-y-auto overflow-x-hidden"
             >
               <SurvivalPlan result={finalResult} onReset={handleReset} sessionId={sessionId} />
             </motion.div>

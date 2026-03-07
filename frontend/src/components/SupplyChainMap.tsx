@@ -48,18 +48,18 @@ export default function SupplyChainMap({ profile, highlightedCommodity = null, t
 
   const n = Math.max(routes.length, 1);
   const w = 320;
-  const h = 224;
+  const h = 230;
   const col1 = 56;
   const col2 = w / 2;
   const col3 = w - 56;
   const headerH = 30;
-  const bottomPad = 34;
+  const bottomPad = 40;
   const rowH = (h - headerH - bottomPad) / n;
   const startY = headerH + rowH / 2;
   const boxH = Math.min(26, rowH - 6);
   const businessCenterY = headerH + (n * rowH) / 2;
-  const businessBoxW = 108;
-  const businessBoxH = 28;
+  const businessBoxW = 112;
+  const businessBoxH = 32;
 
   return (
     <div className="supply-chain-map">
@@ -132,7 +132,7 @@ export default function SupplyChainMap({ profile, highlightedCommodity = null, t
             </g>
           ))}
           {routes.length > 0 && (
-            <text x={col2} y={h - 18} fill="rgba(255,77,77,0.7)" fontSize="7" fontFamily="monospace" textAnchor="middle">
+            <text x={col2} y={h - 22} fill="rgba(255,77,77,0.7)" fontSize="7" fontFamily="monospace" textAnchor="middle">
               Tariff {displayRate}%
             </text>
           )}
@@ -150,10 +150,10 @@ export default function SupplyChainMap({ profile, highlightedCommodity = null, t
                 stroke="rgba(22,163,74,0.3)"
                 strokeWidth={1}
               />
-              <text x={col3} y={businessCenterY - 5} fill="rgba(255,255,255,0.9)" fontSize="8" fontFamily="monospace" textAnchor="middle" fontWeight="600">
+              <text x={col3} y={businessCenterY - 6} fill="rgba(255,255,255,0.9)" fontSize="8" fontFamily="monospace" textAnchor="middle" fontWeight="600">
                 {profile.name.length > 18 ? profile.name.slice(0, 16) + "…" : profile.name}
               </text>
-              <text x={col3} y={businessCenterY + 8} fill="rgba(255,255,255,0.35)" fontSize="7" fontFamily="monospace" textAnchor="middle">
+              <text x={col3} y={businessCenterY + 7} fill="rgba(255,255,255,0.4)" fontSize="7" fontFamily="monospace" textAnchor="middle">
                 {profile.industry}
               </text>
             </g>

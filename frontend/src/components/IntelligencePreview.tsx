@@ -39,13 +39,13 @@ export default function IntelligencePreview({
   const altCount = altSuppliers.length;
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="px-4 py-3 border-b border-white/[0.06]">
+    <div className="flex flex-col h-full min-h-0">
+      <div className="px-4 py-3 border-b border-white/[0.06] shrink-0">
         <div className="text-[10px] font-mono uppercase tracking-widest text-white/25">
           Intelligence Preview
         </div>
       </div>
-      <div className="flex-1 p-4 space-y-4 overflow-y-auto">
+      <div className="flex-1 min-h-0 p-4 space-y-4 overflow-y-auto overflow-x-hidden">
         {/* Current Tariff Rate — with stress test slider */}
         <div className="border border-white/[0.06] p-3 rounded" style={{ background: "rgba(15,17,23,0.6)" }}>
           <div className="text-[9px] font-mono uppercase tracking-wider text-white/25 mb-1">
@@ -135,9 +135,9 @@ export default function IntelligencePreview({
           style={{ background: "rgba(15,17,23,0.6)" }}
           title="Model confidence in stress-test projections. Drops as tariff rate increases because higher tariffs add uncertainty to margin and exposure estimates."
         >
-          <div className="text-[9px] font-mono uppercase tracking-wider text-white/25 flex items-center gap-1">
-            Confidence Score
-            <span className="text-white/10 cursor-help" aria-label="Explain confidence">ⓘ</span>
+          <div className="text-[9px] font-mono uppercase tracking-wider text-white/25 flex items-center gap-1.5 min-h-[14px]">
+            <span>Confidence Score</span>
+            <span className="inline-flex items-center justify-center w-3.5 h-3.5 rounded-full border border-white/20 text-[10px] text-white/50 cursor-help shrink-0" aria-label="Explain confidence" title="Model confidence in stress-test projections. Drops as tariff rate increases.">ⓘ</span>
           </div>
           <div className="text-lg font-semibold mt-1" style={{ color: "#3b82f6" }}>
             {profile ? `${confidenceScore}%` : "--"}

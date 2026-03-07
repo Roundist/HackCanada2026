@@ -8,11 +8,19 @@
   box-sizing: border-box;
 }
 
+html {
+  overflow-x: hidden;
+}
+
 body {
-  font-family: "Inter", system-ui, sans-serif;
+  font-family: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
   background: #0a0a0a;
   color: #c8ccd4;
-  overflow: hidden;
+  overflow-x: hidden;
+  /* vertical scroll handled by main; prevent double scrollbar */
+  overflow-y: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* Grid background pattern */

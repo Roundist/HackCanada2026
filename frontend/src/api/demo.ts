@@ -15,6 +15,12 @@ function buildPipelineDoneData(profile: BusinessProfile | null): Record<string, 
         total_tariff_exposure: 342000,
         total_margin_erosion_pct: 8.4,
         risk_level: "high",
+        inputs: [
+          { name: "Hardwood Lumber", tariff_cost: 120000 },
+          { name: "Upholstery Fabrics", tariff_cost: 85000 },
+          { name: "Steel Hardware", tariff_cost: 72000 },
+          { name: "Finishing Chemicals", tariff_cost: 65000 },
+        ],
       },
       survival_plan: {
         executive_summary: {
@@ -41,6 +47,13 @@ function buildPipelineDoneData(profile: BusinessProfile | null): Record<string, 
 
   const totalExposure = Math.round(profile.revenueNumeric * 1e6 * 0.065 * (profile.baseMarginErosionPct / 8.4));
   const riskLevel = profile.risk.toLowerCase();
+  // Per-input tariff cost for chart (split by route count)
+  const nRoutes = Math.max(profile.routes.length, 1);
+  const costPerRoute = Math.round(totalExposure / nRoutes);
+  const inputs = profile.routes.map((r, i) => ({
+    name: r.commodity,
+    tariff_cost: i < nRoutes - 1 ? costPerRoute : totalExposure - costPerRoute * (nRoutes - 1),
+  }));
   const priorityActions: Array<{
     rank: number;
     action: string;
@@ -73,6 +86,7 @@ function buildPipelineDoneData(profile: BusinessProfile | null): Record<string, 
       total_tariff_exposure: totalExposure,
       total_margin_erosion_pct: profile.baseMarginErosionPct,
       risk_level: riskLevel,
+      inputs,
     },
     survival_plan: {
       executive_summary: {
@@ -136,6 +150,7 @@ function buildDemoMessages(opts: DemoRunOptions = {}): { delay: number; msg: WSM
   { delay: t(7000), msg: { type: "agent_log", agent: "Tariff Calculator", message: "Running margin erosion scenarios at 25%, 30%, 35%, 40%" } },
   { delay: t(8000), msg: { type: "agent_log", agent: "Tariff Calculator", message: `Total tariff exposure: $${totalExposure.toLocaleString()} — Risk level: ${riskLevel}` } },
   { delay: t(8500), msg: { type: "agent_done", agent: "Tariff Calculator", data: {} } },
+  { delay: t(9000), msg: { type: "geopolitical_alert", urgency: "high", headline: "US Considers Additional 10% Lumber Tariff", source: "Reuters", relevance: "Direct impact on lumber inputs — potential April 1 increase.", affected_inputs: ["Hardwood Lumber"], risk_adjustment: { from: "high", to: "critical" }, actionable_alert: "Lock in lumber contracts NOW before potential April 1 increase." } },
   { delay: t(9500), msg: { type: "agent_log", agent: "Geopolitical Analyst", message: "Escalation risk: elevated (trend: worsening) — 3 urgent alerts" } },
   { delay: t(10000), msg: { type: "agent_done", agent: "Geopolitical Analyst", data: {} } },
 

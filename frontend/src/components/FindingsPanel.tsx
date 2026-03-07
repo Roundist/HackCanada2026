@@ -1,12 +1,14 @@
 import { motion, AnimatePresence } from "framer-motion";
-import type { AgentInfo } from "../types";
+import type { AgentInfo, GeopoliticalAlert } from "../types";
+import GeopoliticalAlertCard from "./GeopoliticalAlertCard";
 
 interface FindingsPanelProps {
   agents: AgentInfo[];
   pipelineDone: boolean;
+  geopoliticalAlerts?: GeopoliticalAlert[];
 }
 
-export default function FindingsPanel({ agents, pipelineDone }: FindingsPanelProps) {
+export default function FindingsPanel({ agents, pipelineDone, geopoliticalAlerts = [] }: FindingsPanelProps) {
   const allMessages: { agent: AgentInfo; message: string; index: number }[] = [];
   let globalIndex = 0;
 
@@ -77,6 +79,18 @@ export default function FindingsPanel({ agents, pipelineDone }: FindingsPanelPro
           />
         </div>
       </div>
+
+      {/* Geopolitical Alerts (PRD: breaking news cards) */}
+      {geopoliticalAlerts.length > 0 && (
+        <div className="px-4 py-2 border-b border-white/[0.06] space-y-2">
+          <div className="text-[9px] font-mono uppercase tracking-widest text-amber-400/60">
+            Geopolitical alerts
+          </div>
+          {geopoliticalAlerts.map((alert, i) => (
+            <GeopoliticalAlertCard key={i} alert={alert} index={i} />
+          ))}
+        </div>
+      )}
 
       {/* Live Feed */}
       <div className="flex-1 overflow-y-auto p-4 space-y-1">

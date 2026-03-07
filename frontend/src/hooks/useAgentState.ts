@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import { AgentInfo, AgentStatus, ChainOfThoughtEntry, SystemEvent, WSMessage } from "../types";
+import { AgentInfo, AgentStatus, ChainOfThoughtEntry, GeopoliticalAlert, SystemEvent, WSMessage } from "../types";
 
 /** Short “what this agent is doing” when idle (before run) */
 export const AGENT_IDLE_ACTIVITY: Record<string, string> = {
@@ -87,6 +87,7 @@ export function useAgentState() {
   const [finalResult, setFinalResult] = useState<Record<string, unknown> | null>(null);
   const [systemEvents, setSystemEvents] = useState<SystemEvent[]>([]);
   const [chainOfThoughtLog, setChainOfThoughtLog] = useState<ChainOfThoughtEntry[]>([]);
+  const [geopoliticalAlerts, setGeopoliticalAlerts] = useState<GeopoliticalAlert[]>([]);
 
   const resetAgents = useCallback(() => {
     setAgents(INITIAL_AGENTS);
@@ -94,6 +95,7 @@ export function useAgentState() {
     setFinalResult(null);
     setSystemEvents([]);
     setChainOfThoughtLog([]);
+    setGeopoliticalAlerts([]);
   }, []);
 
   const updateAgent = useCallback(
@@ -145,6 +147,21 @@ export function useAgentState() {
             timestamp: Date.now(),
           },
         ]);
+      }
+
+      // Geopolitical alert (PRD: breaking news card)
+      if (msg.type === "geopolitical_alert" || msg.event_type === "geopolitical_alert") {
+        const alert: GeopoliticalAlert = {
+          urgency: (msg.urgency as GeopoliticalAlert["urgency"]) ?? "medium",
+          headline: msg.headline ?? "Trade development",
+          source: msg.source ?? "News",
+          published: msg.published,
+          relevance: msg.relevance ?? "Relevant to your supply chain.",
+          affected_inputs: msg.affected_inputs,
+          risk_adjustment: msg.risk_adjustment,
+          actionable_alert: msg.actionable_alert ?? "Monitor for updates.",
+        };
+        setGeopoliticalAlerts((prev) => [...prev, alert]);
       }
 
       switch (msgType) {
@@ -203,6 +220,7 @@ export function useAgentState() {
     finalResult,
     systemEvents,
     chainOfThoughtLog,
+    geopoliticalAlerts,
     handleWSMessage,
     resetAgents,
   };

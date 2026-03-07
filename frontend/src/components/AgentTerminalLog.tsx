@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { ChainOfThoughtEntry } from "../types";
-import WorldMapIdle from "./WorldMapIdle";
+import TradeIntelligenceMap from "./TradeIntelligenceMap";
 
 interface AgentTerminalLogProps {
   log: ChainOfThoughtEntry[];
@@ -25,9 +25,11 @@ export default function AgentTerminalLog({ log, isRunning, isComplete }: AgentTe
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [log.length]);
 
+  const showGraph = log.length === 0 && !isRunning;
+
   return (
     <div className="flex flex-col h-full min-h-0">
-      <div className="px-3 py-2 border-b border-white/[0.06] flex items-center gap-2">
+      <div className="px-3 py-2 border-b border-white/[0.06] flex items-center gap-2 shrink-0">
         <span className="text-[9px] font-mono uppercase tracking-widest text-white/25">
           Chain of Thought
         </span>
@@ -40,13 +42,14 @@ export default function AgentTerminalLog({ log, isRunning, isComplete }: AgentTe
       </div>
       <div
         ref={scrollRef}
-        className={`flex-1 min-h-0 overflow-y-auto font-mono text-[10px] leading-relaxed ${log.length > 0 ? "p-3 space-y-0.5" : ""}`}
+        className={`flex-1 min-h-[300px] overflow-y-auto overflow-x-hidden font-mono text-[10px] leading-relaxed ${log.length > 0 ? "p-3 space-y-0.5" : ""}`}
         style={{
-          background: log.length === 0 && !isRunning ? "transparent" : "rgba(0,0,0,0.35)",
+          background: showGraph ? "transparent" : "rgba(0,0,0,0.35)",
           borderBottom: "1px solid rgba(255,255,255,0.04)",
+          WebkitOverflowScrolling: "touch",
         }}
       >
-        {log.length === 0 && !isRunning && <WorldMapIdle />}
+        {showGraph && <TradeIntelligenceMap />}
         <AnimatePresence initial={false}>
           {log.map((entry, i) => (
             <motion.div

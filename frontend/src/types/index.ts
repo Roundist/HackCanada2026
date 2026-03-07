@@ -23,9 +23,21 @@ export interface ChainOfThoughtEntry {
   timestamp: number;
 }
 
+/** Geopolitical Alert (PRD: breaking news card from Geopolitical Analyst). */
+export interface GeopoliticalAlert {
+  urgency: "high" | "medium" | "low";
+  headline: string;
+  source: string;
+  published?: string;
+  relevance: string;
+  affected_inputs?: string[];
+  risk_adjustment?: { from: string; to: string };
+  actionable_alert: string;
+}
+
 export interface WSMessage {
   // Demo simulation format
-  type?: "agent_start" | "agent_log" | "agent_done" | "agent_error" | "pipeline_done";
+  type?: "agent_start" | "agent_log" | "agent_done" | "agent_error" | "pipeline_done" | "geopolitical_alert";
   // Backend format
   event_type?: string;
   status?: string;
@@ -33,6 +45,15 @@ export interface WSMessage {
   agent?: string;
   message?: string;
   data?: Record<string, unknown>;
+  // Geopolitical alert payload
+  urgency?: string;
+  headline?: string;
+  source?: string;
+  published?: string;
+  relevance?: string;
+  affected_inputs?: string[];
+  risk_adjustment?: { from: string; to: string };
+  actionable_alert?: string;
 }
 
 export interface DemoProfile {

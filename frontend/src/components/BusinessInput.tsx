@@ -30,20 +30,6 @@ export default function BusinessInput({ onSubmit, onSelectProfile, selectedProfi
 
   return (
     <div className="space-y-5">
-      {/* Floating CTA when ready — visible without scrolling to bottom */}
-      {!isRunning && canRun && (
-        <div className="flex items-center justify-between py-2.5 px-4 rounded-lg border border-red-500/25" style={{ background: "rgba(30,12,12,0.6)" }}>
-          <span className="text-[10px] font-mono text-white/50">Profile ready</span>
-          <button
-            type="button"
-            onClick={handleSubmit}
-            className="px-4 py-1.5 text-[10px] font-semibold uppercase tracking-wider border border-red-500/40 rounded"
-            style={{ background: "rgba(220,38,38,0.12)", color: "#dc2626" }}
-          >
-            Run Analysis
-          </button>
-        </div>
-      )}
       {showDemos && !isRunning && (
         <div className="space-y-2">
           <div className="text-[9px] font-mono uppercase tracking-widest text-white/20">
@@ -78,8 +64,8 @@ export default function BusinessInput({ onSubmit, onSelectProfile, selectedProfi
                     </span>
                   </div>
                 </div>
-                <div className="text-[10px] text-white/25 leading-relaxed line-clamp-2">
-                  {profile.description.slice(0, 140)}...
+                <div className="text-[10px] text-white/30 leading-relaxed line-clamp-3">
+                  {profile.description}
                 </div>
               </button>
             ))}
@@ -110,8 +96,9 @@ export default function BusinessInput({ onSubmit, onSelectProfile, selectedProfi
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Describe your Canadian business... Include supply chain details, import sources, industry, revenue, margins. (Min 50 characters)"
-              className="w-full h-28 p-3 border border-white/[0.08] rounded text-[12px] text-white/70 placeholder-white/20 resize-none focus:outline-none focus:border-white/[0.2] transition-colors font-mono"
-              style={{ background: "rgba(8,10,14,0.8)" }}
+              className="w-full min-h-[140px] p-3 border border-white/[0.08] rounded text-[12px] leading-relaxed text-white/70 placeholder-white/20 resize-y focus:outline-none focus:border-white/[0.2] transition-colors font-mono"
+              style={{ background: "rgba(8,10,14,0.8)", lineHeight: 1.5 }}
+              rows={6}
             />
             <div className="flex items-center justify-between mt-3">
               <span className="text-[9px] font-mono text-white/20">
