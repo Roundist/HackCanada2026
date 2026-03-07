@@ -11,7 +11,8 @@ from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-load_dotenv()
+load_dotenv()  # backend/.env
+load_dotenv(Path(__file__).resolve().parent.parent / ".env")  # project root .env
 
 # Ensure backend package is on the path
 sys.path.insert(0, str(Path(__file__).parent))
