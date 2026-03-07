@@ -29,25 +29,22 @@ export default function AgentTerminalLog({ log, isRunning, isComplete }: AgentTe
 
   return (
     <div className="flex flex-col h-full min-h-0">
-      <div className="px-3 py-2 border-b border-white/[0.06] flex items-center gap-2 shrink-0">
-        <span className="text-[9px] font-mono uppercase tracking-widest text-white/25">
+      <div className="px-3 py-2 border-b border-gray-200 flex items-center gap-2 shrink-0 bg-white">
+        <span className="text-[9px] font-mono uppercase tracking-widest text-gray-500">
           Chain of Thought
         </span>
         {isRunning && (
-          <span className="text-[8px] font-mono text-amber-400/80 animate-pulse">LIVE</span>
+          <span className="text-[8px] font-mono text-amber-600 animate-pulse">LIVE</span>
         )}
         {isComplete && (
-          <span className="text-[8px] font-mono text-emerald-400/80">COMPLETE</span>
+          <span className="text-[8px] font-mono text-emerald-600">COMPLETE</span>
         )}
       </div>
       <div
         ref={scrollRef}
         className={`flex-1 min-h-[300px] overflow-y-auto overflow-x-hidden font-mono text-[10px] leading-relaxed ${log.length > 0 ? "p-3 space-y-0.5" : ""}`}
-        style={{
-          background: showGraph ? "transparent" : "rgba(0,0,0,0.35)",
-          borderBottom: "1px solid rgba(255,255,255,0.04)",
-          WebkitOverflowScrolling: "touch",
-        }}
+        className={`flex-1 min-h-[300px] overflow-y-auto overflow-x-hidden font-mono text-[10px] leading-relaxed bg-gray-50 border-b border-gray-200 ${log.length > 0 ? "p-3 space-y-0.5" : ""}`}
+        style={{ WebkitOverflowScrolling: "touch" }}
       >
         {showGraph && <TradeIntelligenceMap />}
         <AnimatePresence initial={false}>
@@ -60,11 +57,11 @@ export default function AgentTerminalLog({ log, isRunning, isComplete }: AgentTe
             >
               <span
                 className="shrink-0 font-semibold uppercase tracking-wider"
-                style={{ color: AGENT_COLORS[entry.agent] ?? "#94a3b8", minWidth: "8rem" }}
+                style={{ color: AGENT_COLORS[entry.agent] ?? "#64748b", minWidth: "8rem" }}
               >
                 [{entry.agent}]
               </span>
-              <span className="text-white/70 break-words">{entry.message}</span>
+              <span className="text-gray-700 break-words">{entry.message}</span>
             </motion.div>
           ))}
         </AnimatePresence>
@@ -72,7 +69,7 @@ export default function AgentTerminalLog({ log, isRunning, isComplete }: AgentTe
           <motion.span
             animate={{ opacity: [0.4, 1, 0.4] }}
             transition={{ duration: 1, repeat: Infinity }}
-            className="inline-block w-2 h-3 mt-0.5 bg-amber-400/80"
+            className="inline-block w-2 h-3 mt-0.5 bg-amber-500"
           />
         )}
       </div>

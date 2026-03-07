@@ -33,23 +33,23 @@ export default function FindingsPanel({ agents, pipelineDone, geopoliticalAlerts
   const runningAgents = agents.filter((a) => a.status === "running");
 
   return (
-    <div className="h-full flex flex-col">
-      <div className="px-4 py-3 border-b border-white/10 flex items-center justify-between">
-        <div className="text-[10px] font-mono uppercase tracking-[0.3em] text-white/45">Agent Console</div>
+    <div className="h-full flex flex-col bg-white">
+      <div className="px-4 py-3 border-b border-gray-200 flex items-center justify-between">
+        <div className="text-[10px] font-mono uppercase tracking-[0.3em] text-gray-600">Agent Console</div>
         <div className="flex items-center gap-2 text-[9px] font-mono">
-          <span className={`w-2 h-2 rounded-full ${pipelineDone ? "bg-green-400" : "bg-cyan-400 status-blink"}`} />
-          <span className="text-white/50">{pipelineDone ? "stable" : "live"}</span>
+          <span className={`w-2 h-2 rounded-full ${pipelineDone ? "bg-green-500" : "bg-cyan-500 status-blink"}`} />
+          <span className="text-gray-500">{pipelineDone ? "stable" : "live"}</span>
         </div>
       </div>
 
-      <div className="border-b border-white/10 grid grid-cols-2 gap-0 text-[10px] font-mono text-white/60">
-        <div className="px-4 py-2 border-r border-white/10">{runningAgents.length} agents active</div>
+      <div className="border-b border-gray-200 grid grid-cols-2 gap-0 text-[10px] font-mono text-gray-600 bg-gray-50">
+        <div className="px-4 py-2 border-r border-gray-200">{runningAgents.length} agents active</div>
         <div className="px-4 py-2">{feed.length} events</div>
       </div>
 
       {geopoliticalAlerts.length > 0 && (
-        <div className="px-4 py-2 border-b border-white/[0.06] space-y-2">
-          <div className="text-[9px] font-mono uppercase tracking-widest text-amber-400/60">
+        <div className="px-4 py-2 border-b border-gray-200 space-y-2 bg-white">
+          <div className="text-[9px] font-mono uppercase tracking-widest text-amber-600">
             Geopolitical alerts
           </div>
           {geopoliticalAlerts.map((alert, i) => (
@@ -58,7 +58,7 @@ export default function FindingsPanel({ agents, pipelineDone, geopoliticalAlerts
         </div>
       )}
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-1.5">
+      <div className="flex-1 overflow-y-auto p-4 space-y-1.5 bg-white">
         <AnimatePresence>
           {feed.slice(-50).map((item) => (
             <motion.div
@@ -69,13 +69,13 @@ export default function FindingsPanel({ agents, pipelineDone, geopoliticalAlerts
               className="flex items-start gap-2 text-[11px] font-mono"
             >
               <span className="w-1.5 h-1.5 rounded-full mt-1.5 shrink-0" style={{ background: item.agent.color }} />
-              <span className="text-white/30 shrink-0" style={{ minWidth: 62 }}>
+              <span className="text-gray-400 shrink-0" style={{ minWidth: 62 }}>
                 {new Date(item.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
               </span>
-              <span className="text-white/45 uppercase tracking-[0.14em] truncate" style={{ minWidth: 82 }}>
+              <span className="text-gray-600 uppercase tracking-[0.14em] truncate" style={{ minWidth: 82 }}>
                 {shortName(item.agent.name)}
               </span>
-              <span className="text-white/80 leading-relaxed flex-1">{item.message}</span>
+              <span className="text-gray-800 leading-relaxed flex-1">{item.message}</span>
             </motion.div>
           ))}
         </AnimatePresence>
@@ -83,7 +83,7 @@ export default function FindingsPanel({ agents, pipelineDone, geopoliticalAlerts
         {runningAgents.length > 0 && (
           <div className="mt-3 space-y-1">
             {runningAgents.map((agent) => (
-              <div key={agent.id} className="flex items-center gap-2 text-[10px] font-mono text-white/50">
+              <div key={agent.id} className="flex items-center gap-2 text-[10px] font-mono text-gray-600">
                 <span className="w-1.5 h-1.5 rounded-full" style={{ background: agent.color }} />
                 <div className="flex gap-1">
                   <div className="typing-dot w-1 h-1 rounded-full" style={{ background: agent.color }} />

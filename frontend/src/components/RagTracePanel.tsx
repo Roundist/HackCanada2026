@@ -34,24 +34,24 @@ export default function RagTracePanel({ agents, systemEvents, hsClassifications,
   }, [agents, byId, systemEvents]);
 
   return (
-    <div className="border-t border-white/[0.06] flex flex-col" style={{ maxHeight: 420 }}>
+    <div className="border-t border-gray-200 flex flex-col bg-white" style={{ maxHeight: 420 }}>
       {/* Tab header */}
-      <div className="flex items-center gap-0 border-b border-white/[0.06] shrink-0">
+      <div className="flex items-center gap-0 border-b border-gray-200 shrink-0">
         <button
           onClick={() => setTab("rag")}
-          className={`flex-1 px-4 py-2.5 text-[9px] font-mono uppercase tracking-widest transition-colors ${tab === "rag" ? "text-white/60 bg-white/[0.03]" : "text-white/25 hover:text-white/40"}`}
+          className={`flex-1 px-4 py-2.5 text-[9px] font-mono uppercase tracking-widest transition-colors ${tab === "rag" ? "text-gray-800 bg-gray-100" : "text-gray-500 hover:text-gray-700"}`}
         >
           RAG Evidence ({hsClassifications.length})
         </button>
         <button
           onClick={() => setTab("reasoning")}
-          className={`flex-1 px-4 py-2.5 text-[9px] font-mono uppercase tracking-widest transition-colors ${tab === "reasoning" ? "text-white/60 bg-white/[0.03]" : "text-white/25 hover:text-white/40"}`}
+          className={`flex-1 px-4 py-2.5 text-[9px] font-mono uppercase tracking-widest transition-colors ${tab === "reasoning" ? "text-gray-800 bg-gray-100" : "text-gray-500 hover:text-gray-700"}`}
         >
           Reasoning Chain ({reasoningSteps.length})
         </button>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-3 space-y-2">
+      <div className="flex-1 overflow-y-auto p-3 space-y-2 bg-gray-50">
         {tab === "rag" && (
           <>
             {/* Pipeline stages */}
@@ -59,28 +59,27 @@ export default function RagTracePanel({ agents, systemEvents, hsClassifications,
               {stages.map((stage) => (
                 <div
                   key={stage.id}
-                  className="relative border px-2.5 py-1.5 overflow-hidden"
+                  className="relative border px-2.5 py-1.5 overflow-hidden rounded-md bg-white"
                   style={{
-                    borderColor: stage.done ? "rgba(34,197,94,0.35)" : stage.active ? "rgba(59,130,246,0.35)" : "rgba(255,255,255,0.06)",
-                    background: stage.done ? "rgba(22,163,74,0.07)" : "rgba(15,17,23,0.6)",
+                    borderColor: stage.done ? "rgba(34,197,94,0.5)" : stage.active ? "rgba(59,130,246,0.5)" : "#e5e7eb",
                   }}
                 >
                   {stage.active && (
                     <motion.div
-                      className="absolute inset-y-0 w-14 bg-gradient-to-r from-transparent via-blue-300/20 to-transparent"
+                      className="absolute inset-y-0 w-14 bg-gradient-to-r from-transparent via-blue-200/40 to-transparent"
                       animate={{ x: [-80, 280] }}
                       transition={{ duration: 1.2, repeat: Infinity, ease: "linear" }}
                     />
                   )}
                   <div className="relative flex items-center justify-between gap-2">
-                    <span className="text-[10px] text-white/60">{stage.label}</span>
+                    <span className="text-[10px] text-gray-700">{stage.label}</span>
                     <span className="text-[8px] font-mono uppercase tracking-wider" style={{
-                      color: stage.done ? "#22c55e" : stage.active ? "#60a5fa" : "rgba(255,255,255,0.25)",
+                      color: stage.done ? "#059669" : stage.active ? "#2563eb" : "#9ca3af",
                     }}>
                       {stage.done ? "Done" : stage.active ? "Active" : "Queued"}
                     </span>
                   </div>
-                  <div className="relative text-[8px] font-mono text-white/20 mt-0.5">{stage.source}</div>
+                  <div className="relative text-[8px] font-mono text-gray-500 mt-0.5">{stage.source}</div>
                 </div>
               ))}
             </div>
@@ -88,7 +87,7 @@ export default function RagTracePanel({ agents, systemEvents, hsClassifications,
             {/* HS Classification Evidence */}
             {hsClassifications.length > 0 && (
               <div className="space-y-1.5 mt-3">
-                <div className="text-[9px] font-mono uppercase tracking-widest text-white/25">
+                <div className="text-[9px] font-mono uppercase tracking-widest text-gray-600">
                   HS Code Classification Evidence
                 </div>
                 <AnimatePresence>
@@ -100,22 +99,21 @@ export default function RagTracePanel({ agents, systemEvents, hsClassifications,
                         initial={{ opacity: 0, y: 6 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: i * 0.08 }}
-                        className="border border-white/[0.06] overflow-hidden"
-                        style={{ background: "rgba(15,17,23,0.7)" }}
+                        className="border border-gray-200 overflow-hidden rounded-md bg-white"
                       >
                         <button
                           onClick={() => setExpandedHs(isExpanded ? null : cls.input)}
-                          className="w-full text-left px-2.5 py-2 flex items-center justify-between hover:bg-white/[0.02] transition-colors"
+                          className="w-full text-left px-2.5 py-2 flex items-center justify-between hover:bg-gray-50 transition-colors"
                         >
                           <div className="flex items-center gap-2 min-w-0">
-                            <span className="text-[10px] text-white/60 truncate">{cls.input}</span>
-                            <span className="text-[9px] font-mono text-cyan-400/70 shrink-0">→ {cls.selectedCode}</span>
+                            <span className="text-[10px] text-gray-700 truncate">{cls.input}</span>
+                            <span className="text-[9px] font-mono text-cyan-600 shrink-0">→ {cls.selectedCode}</span>
                           </div>
                           <div className="flex items-center gap-2 shrink-0 ml-2">
-                            <span className="text-[8px] font-mono text-green-400/60">
+                            <span className="text-[8px] font-mono text-green-600">
                               {(cls.candidates[0]?.similarity * 100).toFixed(0)}% match
                             </span>
-                            <span className="text-[10px] text-white/20">{isExpanded ? "▲" : "▼"}</span>
+                            <span className="text-[10px] text-gray-400">{isExpanded ? "▲" : "▼"}</span>
                           </div>
                         </button>
 
@@ -129,42 +127,42 @@ export default function RagTracePanel({ agents, systemEvents, hsClassifications,
                             >
                               <div className="px-2.5 pb-2.5 space-y-1.5">
                                 {/* Candidate list with similarity bars */}
-                                <div className="text-[8px] font-mono text-white/20 uppercase tracking-wider">
+                                <div className="text-[8px] font-mono text-gray-500 uppercase tracking-wider">
                                   Top-5 Vector Search Results
                                 </div>
                                 {cls.candidates.map((c, j) => {
                                   const isSelected = c.hsCode === cls.selectedCode;
                                   return (
                                     <div key={c.hsCode} className="flex items-center gap-2">
-                                      <span className={`text-[9px] font-mono shrink-0 w-14 ${isSelected ? "text-cyan-400/80" : "text-white/30"}`}>
+                                      <span className={`text-[9px] font-mono shrink-0 w-14 ${isSelected ? "text-cyan-600" : "text-gray-500"}`}>
                                         {c.hsCode}
                                       </span>
                                       <div className="flex-1 min-w-0">
-                                        <div className="h-1.5 bg-white/[0.04] overflow-hidden">
+                                        <div className="h-1.5 bg-gray-200 overflow-hidden rounded">
                                           <div
-                                            className="h-full transition-all"
+                                            className="h-full transition-all rounded"
                                             style={{
                                               width: `${c.similarity * 100}%`,
-                                              background: isSelected ? "rgba(34,211,238,0.5)" : j === 0 && !isSelected ? "rgba(34,211,238,0.3)" : "rgba(255,255,255,0.1)",
+                                              background: isSelected ? "#0891b2" : j === 0 && !isSelected ? "#22d3ee" : "#d1d5db",
                                             }}
                                           />
                                         </div>
                                       </div>
-                                      <span className={`text-[8px] font-mono shrink-0 w-10 text-right ${isSelected ? "text-cyan-400/70" : "text-white/25"}`}>
+                                      <span className={`text-[8px] font-mono shrink-0 w-10 text-right ${isSelected ? "text-cyan-600" : "text-gray-500"}`}>
                                         {(c.similarity * 100).toFixed(0)}%
                                       </span>
                                     </div>
                                   );
                                 })}
                                 {/* Tariff source citation */}
-                                <div className="mt-1.5 pt-1.5 border-t border-white/[0.04] flex items-start gap-2">
-                                  <span className="text-[8px] font-mono text-white/15 shrink-0">SRC</span>
-                                  <span className="text-[8px] font-mono text-white/30">{cls.source}</span>
+                                <div className="mt-1.5 pt-1.5 border-t border-gray-200 flex items-start gap-2">
+                                  <span className="text-[8px] font-mono text-gray-400 shrink-0">SRC</span>
+                                  <span className="text-[8px] font-mono text-gray-600">{cls.source}</span>
                                 </div>
                                 <div className="flex gap-4 text-[8px] font-mono">
-                                  <span className="text-white/25">MFN: {cls.mfnRate}%</span>
-                                  <span className="text-red-400/60">Surtax: +{cls.surtaxRate}%</span>
-                                  <span className="text-red-400/80">Effective: {cls.effectiveRate}%</span>
+                                  <span className="text-gray-600">MFN: {cls.mfnRate}%</span>
+                                  <span className="text-red-600">Surtax: +{cls.surtaxRate}%</span>
+                                  <span className="text-red-700">Effective: {cls.effectiveRate}%</span>
                                 </div>
                               </div>
                             </motion.div>
@@ -182,7 +180,7 @@ export default function RagTracePanel({ agents, systemEvents, hsClassifications,
         {tab === "reasoning" && (
           <div className="space-y-2">
             {reasoningSteps.length === 0 ? (
-              <div className="text-[9px] text-white/20 font-mono py-4 text-center">
+              <div className="text-[9px] text-gray-500 font-mono py-4 text-center">
                 Waiting for tariff calculations...
               </div>
             ) : (
@@ -193,25 +191,24 @@ export default function RagTracePanel({ agents, systemEvents, hsClassifications,
                     initial={{ opacity: 0, x: -8 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: i * 0.1 }}
-                    className="border border-white/[0.06] p-2.5"
-                    style={{ background: "rgba(15,17,23,0.7)" }}
+                    className="border border-gray-200 p-2.5 rounded-md bg-white"
                   >
                     <div className="flex items-center gap-2 mb-1.5">
-                      <span className="text-[8px] font-mono uppercase tracking-wider text-white/20">Step {i + 1}</span>
-                      <span className="text-[8px] font-mono text-rose-400/50">{step.agent}</span>
+                      <span className="text-[8px] font-mono uppercase tracking-wider text-gray-500">Step {i + 1}</span>
+                      <span className="text-[8px] font-mono text-rose-600">{step.agent}</span>
                     </div>
                     <div className="space-y-1 text-[9px] font-mono">
                       <div className="flex items-start gap-2">
-                        <span className="text-white/20 shrink-0">IN</span>
-                        <span className="text-white/50">{step.input}</span>
+                        <span className="text-gray-500 shrink-0">IN</span>
+                        <span className="text-gray-700">{step.input}</span>
                       </div>
                       <div className="flex items-start gap-2">
-                        <span className="text-cyan-400/40 shrink-0">OP</span>
-                        <span className="text-cyan-400/60">{step.operation}</span>
+                        <span className="text-cyan-600 shrink-0">OP</span>
+                        <span className="text-cyan-700">{step.operation}</span>
                       </div>
                       <div className="flex items-start gap-2">
-                        <span className="text-green-400/40 shrink-0">OUT</span>
-                        <span className="text-green-400/60">{step.result}</span>
+                        <span className="text-green-600 shrink-0">OUT</span>
+                        <span className="text-green-700">{step.result}</span>
                       </div>
                     </div>
                   </motion.div>

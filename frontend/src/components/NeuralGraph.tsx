@@ -133,10 +133,10 @@ export default function NeuralGraph({ agents, onSelectAgent, selectedAgent }: Ne
         animated: active,
         className: active ? "flowing" : "",
         style: {
-          stroke: color,
+          stroke: active || done ? color : "#94a3b8",
           strokeWidth: active ? 2 : 1,
           strokeDasharray: active ? "" : "6 10",
-          opacity: done ? 0.7 : 0.55,
+          opacity: done ? 0.8 : 0.7,
         },
         markerEnd: {
           type: MarkerType.ArrowClosed,
@@ -170,7 +170,7 @@ export default function NeuralGraph({ agents, onSelectAgent, selectedAgent }: Ne
         nodesConnectable={false}
         elementsSelectable={false}
       >
-        <Background variant={BackgroundVariant.Lines} gap={60} size={0.5} color="rgba(255,255,255,0.04)" />
+        <Background variant={BackgroundVariant.Lines} gap={60} size={0.5} color="rgba(0,0,0,0.06)" />
       </ReactFlow>
 
       <AnimatePresence>
@@ -180,14 +180,13 @@ export default function NeuralGraph({ agents, onSelectAgent, selectedAgent }: Ne
             animate={{ x: 0, opacity: 1 }}
             exit={{ x: 300, opacity: 0 }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="absolute top-3 right-3 w-72 max-h-[calc(100%-1.5rem)] overflow-hidden border border-white/[0.08]"
-            style={{ background: "rgba(10,11,16,0.95)" }}
+            className="absolute top-3 right-3 w-72 max-h-[calc(100%-1.5rem)] overflow-hidden border border-gray-200 rounded-lg bg-white shadow-lg"
           >
-            <div className="p-3 flex items-center justify-between border-b border-white/[0.06]">
+            <div className="p-3 flex items-center justify-between border-b border-gray-200">
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full" style={{ background: selectedAgentInfo.color }} />
                 <div>
-                  <h3 className="text-[11px] font-semibold text-white/70">{selectedAgentInfo.name}</h3>
+                  <h3 className="text-[11px] font-semibold text-gray-900">{selectedAgentInfo.name}</h3>
                   <p className="text-[9px] font-mono uppercase tracking-wider" style={{ color: selectedAgentInfo.color }}>
                     {selectedAgentInfo.status}
                   </p>
@@ -195,16 +194,16 @@ export default function NeuralGraph({ agents, onSelectAgent, selectedAgent }: Ne
               </div>
               <button
                 onClick={() => onSelectAgent(null)}
-                className="text-white/20 hover:text-white/50 transition-colors text-xs font-mono"
+                className="text-gray-400 hover:text-gray-600 transition-colors text-xs font-mono"
               >
                 [x]
               </button>
             </div>
 
-            <div className="p-3 overflow-y-auto max-h-80">
-              <div className="text-[9px] font-mono uppercase tracking-wider text-white/20 mb-2">Output Log</div>
+            <div className="p-3 overflow-y-auto max-h-80 bg-gray-50">
+              <div className="text-[9px] font-mono uppercase tracking-wider text-gray-500 mb-2">Output Log</div>
               {selectedAgentInfo.messages.length === 0 ? (
-                <div className="text-[10px] text-white/15 font-mono">
+                <div className="text-[10px] text-gray-500 font-mono">
                   {selectedAgentInfo.status === "idle" ? "Awaiting activation..." : "Processing..."}
                 </div>
               ) : (
@@ -214,7 +213,7 @@ export default function NeuralGraph({ agents, onSelectAgent, selectedAgent }: Ne
                       key={i}
                       initial={{ opacity: 0, y: 3 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className="text-[10px] text-white/40 font-mono leading-relaxed flex items-start gap-1.5"
+                      className="text-[10px] text-gray-700 font-mono leading-relaxed flex items-start gap-1.5"
                     >
                       <span style={{ color: selectedAgentInfo.color }} className="shrink-0">{">"}</span>
                       <span>{msg}</span>
