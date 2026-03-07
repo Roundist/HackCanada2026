@@ -109,6 +109,13 @@ const inputStyle = { background: "rgba(8,10,14,0.8)" };
 
 const light = { label: "text-gray-500", border: "border-gray-200", input: "bg-white border-gray-200 text-gray-900 placeholder-gray-400", card: "bg-gray-50 border-gray-200", cardSelected: "bg-gray-100 border-gray-300", tabActive: "text-gray-900 border-gray-900", tabInactive: "text-gray-500 border-transparent hover:text-gray-700", risk: "text-amber-700 border-amber-200 bg-amber-50", runBtn: "bg-gray-800 text-white border-gray-800 hover:bg-gray-700" };
 const dark = { label: "text-white/40", border: "border-white/[0.06]", input: "bg-[rgba(8,10,14,0.8)] border-white/[0.08] text-white/70 placeholder-white/20", card: "rgba(15,17,23,0.6)", cardSelected: "border-red-500/40 bg-red-500/5", tabActive: "text-white/70 border-red-500/60", tabInactive: "text-white/25 border-transparent hover:text-white/40", risk: "text-amber-400/70 border-amber-500/20 bg-amber-500/5", runBtn: "border-red-500/50 bg-red-500/10 text-red-600 hover:bg-red-500/20" };
+const lightFormPanelStyle = {
+  backgroundImage:
+    "linear-gradient(rgba(232,232,232,0.88), rgba(232,232,232,0.88)), url('/images/newspaper.jpg'), url('/images/newspaper.jpg')",
+  backgroundRepeat: "no-repeat, no-repeat, no-repeat",
+  backgroundSize: "100% 100%, 100% 50%, 100% 50%",
+  backgroundPosition: "0 0, center top, center bottom",
+} as const;
 
 export default function BusinessInput({
   onSubmit,
@@ -172,7 +179,11 @@ export default function BusinessInput({
                   ? "bg-[#e8e8e8] border-gray-300"
                   : "border-white/[0.1]"
               }`}
-              style={variant === "dark" ? { background: "rgba(44,44,44,0.98)" } : undefined}
+              style={
+                variant === "dark"
+                  ? { background: "rgba(44,44,44,0.98)" }
+                  : lightFormPanelStyle
+              }
             >
               {/* Row 1: Company name + Industry */}
               <div className="grid grid-cols-2 gap-4">

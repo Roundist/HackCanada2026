@@ -14,6 +14,7 @@ import SupplyChainFlowTable from "./components/SupplyChainFlowTable";
 import RoutesMap from "./components/RoutesMap";
 import { ReactFlowProvider } from "@xyflow/react";
 import NeuralGraph from "./components/NeuralGraph";
+import LiveTelemetryStrip from "./components/LiveTelemetryStrip";
 import { useAgentState } from "./hooks/useAgentState";
 import { useWebSocket } from "./hooks/useWebSocket";
 import { startAnalysis } from "./api/client";
@@ -160,9 +161,26 @@ export default function App() {
               </div>
 
               {/* CENTER — Middle band + white card so three panels are obvious */}
-              <div className="flex-1 overflow-y-auto min-w-0 bg-gray-200">
-                <div className="min-h-full flex justify-center py-6 px-6">
-                <div className="w-full max-w-xl bg-white rounded-xl border border-gray-200 shadow-md p-6 space-y-5">
+              <div className="relative flex-1 overflow-y-auto min-w-0 bg-gray-200">
+                <div
+                  aria-hidden
+                  className="absolute inset-0 bg-[url('/images/newspaper.jpg')] bg-repeat opacity-35 [background-size:280px_auto] [background-position:top_left]"
+                />
+                <div
+                  aria-hidden
+                  className="absolute inset-0 bg-gradient-to-b from-gray-100/85 via-gray-200/80 to-gray-100/88"
+                />
+                <div className="relative min-h-full flex justify-center py-6 px-6">
+                <div
+                  className="relative w-full max-w-xl rounded-xl border border-gray-200 shadow-md p-6 space-y-5 overflow-hidden"
+                  style={{
+                    backgroundImage:
+                      "linear-gradient(rgba(255,255,255,0.90), rgba(255,255,255,0.90)), url('/images/newspaper.jpg'), url('/images/newspaper.jpg')",
+                    backgroundRepeat: "no-repeat, no-repeat, no-repeat",
+                    backgroundSize: "100% 100%, 100% 50%, 100% 50%",
+                    backgroundPosition: "0 0, center top, center bottom",
+                  }}
+                >
                   {submitError && (
                     <div className="rounded-lg bg-amber-50 border border-amber-200 px-3 py-2.5 text-sm text-amber-800">
                       {submitError}
@@ -209,53 +227,61 @@ export default function App() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="absolute inset-0 flex bg-gray-50"
+              className="absolute inset-0 flex flex-col bg-gray-50"
             >
-              {/* LEFT — Neural Graph + Execution Steps */}
-              <div className="flex-1 relative flex flex-col bg-white border-r border-gray-200 min-w-0">
-                <div className="flex-1 relative min-h-0">
-                  <ReactFlowProvider>
-                    <NeuralGraph
-                      agents={agents}
-                      onSelectAgent={setSelectedAgent}
-                      selectedAgent={selectedAgent}
-                    />
-                  </ReactFlowProvider>
-                </div>
-                <div className="shrink-0 border-t border-gray-200 bg-gray-50 px-4 py-2">
-                  <ExecutionSteps agents={agents} />
-                </div>
-              </div>
+              <LiveTelemetryStrip
+                agents={agents}
+                architectureEvents={architectureEvents}
+                systemEvents={systemEvents}
+                hsClassifications={hsClassifications}
+                pipelineDone={pipelineDone}
+              />
 
-              {/* RIGHT — Chain of Thought (top) + RAG Pipeline (bottom) */}
-              <div className="w-[420px] shrink-0 border-l border-gray-200 flex flex-col overflow-hidden bg-white">
-                {/* Chain of thought: fixed height */}
-                <div className="shrink-0" style={{ height: 170 }}>
-                  <AgentTerminalLog
-                    log={chainOfThoughtLog}
-                    isRunning={agents.some((a) => a.status === "running")}
-                    isComplete={pipelineDone}
-                  />
+              <div className="flex-1 min-h-0 flex">
+                {/* LEFT — Neural Graph + Execution Steps */}
+                <div className="flex-1 relative flex flex-col bg-white border-r border-gray-200 min-w-0">
+                  <div className="flex-1 relative min-h-0">
+                    <ReactFlowProvider>
+                      <NeuralGraph
+                        agents={agents}
+                        onSelectAgent={setSelectedAgent}
+                        selectedAgent={selectedAgent}
+                      />
+                    </ReactFlowProvider>
+                  </div>
+                  <div className="shrink-0 border-t border-gray-200 bg-gray-50 px-4 py-2">
+                    <ExecutionSteps agents={agents} />
+                  </div>
                 </div>
-                <div className="shrink-0 border-t border-gray-200" style={{ height: 180 }}>
-                  <SponsorArchitecturePanel
-                    events={architectureEvents}
-                    pipelineDone={pipelineDone}
-                  />
-                </div>
-                {/* RAG Pipeline — fills the rest, scrolls internally */}
-                <div className="flex-1 min-h-0 overflow-hidden border-t border-gray-200">
-                  <RagClassificationLive
-                    agents={agents}
-                    systemEvents={systemEvents}
-                    hsClassifications={hsClassifications}
-                  />
+
+                {/* RIGHT — Chain of Thought (top) + RAG Pipeline (bottom) */}
+                <div className="w-[420px] shrink-0 border-l border-gray-200 flex flex-col overflow-hidden bg-white">
+                  {/* Chain of thought: fixed height */}
+                  <div className="shrink-0" style={{ height: 170 }}>
+                    <AgentTerminalLog
+                      log={chainOfThoughtLog}
+                      isRunning={agents.some((a) => a.status === "running")}
+                      isComplete={pipelineDone}
+                    />
+                  </div>
+                  <div className="shrink-0 border-t border-gray-200" style={{ height: 180 }}>
+                    <SponsorArchitecturePanel
+                      events={architectureEvents}
+                      pipelineDone={pipelineDone}
+                    />
+                  </div>
+                  {/* RAG Pipeline — fills the rest, scrolls internally */}
+                  <div className="flex-1 min-h-0 overflow-hidden border-t border-gray-200">
+                    <RagClassificationLive
+                      agents={agents}
+                      systemEvents={systemEvents}
+                      hsClassifications={hsClassifications}
+                    />
+                  </div>
                 </div>
               </div>
             </motion.div>
           )}
-
-          {/* RESULTS VIEW — light theme */}
           {view === "results" && finalResult && (
             <motion.div
               key="results"

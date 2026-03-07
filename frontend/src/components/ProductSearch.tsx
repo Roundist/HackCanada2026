@@ -71,9 +71,17 @@ export default function ProductSearch({ variant = "dark" }: ProductSearchProps) 
 
   const isLight = variant === "light";
   const containerClass = isLight
-    ? "border border-gray-200 rounded-lg overflow-hidden bg-white shadow-sm"
+    ? "border border-gray-200 rounded-lg overflow-hidden shadow-sm"
     : "border border-white/[0.08] rounded-lg overflow-hidden";
-  const containerStyle = isLight ? undefined : { background: "rgba(15,17,23,0.7)" };
+  const containerStyle = isLight
+    ? {
+        backgroundImage:
+          "linear-gradient(rgba(245,245,245,0.84), rgba(245,245,245,0.84)), url('/images/newspaper.jpg'), url('/images/newspaper.jpg')",
+        backgroundRepeat: "no-repeat, no-repeat, no-repeat",
+        backgroundSize: "100% 100%, 100% 50%, 100% 50%",
+        backgroundPosition: "0 0, center top, center bottom",
+      }
+    : { background: "rgba(15,17,23,0.7)" };
   const headerBorder = isLight ? "border-b border-gray-200" : "border-b border-white/[0.06]";
   const titleClass = isLight ? "text-[9px] font-mono uppercase tracking-widest text-gray-500 mb-1" : "text-[9px] font-mono uppercase tracking-widest text-white/25 mb-1";
   const subTitleClass = isLight ? "text-[8px] font-mono text-gray-400 mb-2" : "text-[8px] font-mono text-white/20 mb-2";
