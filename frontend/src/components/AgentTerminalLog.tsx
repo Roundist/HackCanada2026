@@ -42,7 +42,6 @@ export default function AgentTerminalLog({ log, isRunning, isComplete }: AgentTe
       </div>
       <div
         ref={scrollRef}
-        className={`flex-1 min-h-[300px] overflow-y-auto overflow-x-hidden font-mono text-[10px] leading-relaxed ${log.length > 0 ? "p-3 space-y-0.5" : ""}`}
         className={`flex-1 min-h-[300px] overflow-y-auto overflow-x-hidden font-mono text-[10px] leading-relaxed bg-gray-50 border-b border-gray-200 ${log.length > 0 ? "p-3 space-y-0.5" : ""}`}
         style={{ WebkitOverflowScrolling: "touch" }}
       >

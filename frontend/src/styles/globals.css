@@ -3,12 +3,12 @@
 @tailwind utilities;
 
 :root {
-  --bg: #0a0e17;
-  --bg-2: #0d111c;
-  --panel: rgba(13, 17, 28, 0.9);
-  --line: rgba(255, 255, 255, 0.08);
-  --text: #d8dde8;
-  --muted: #7f8497;
+  --bg: #f9fafb;
+  --bg-2: #f3f4f6;
+  --panel: rgba(255, 255, 255, 0.95);
+  --line: rgba(0, 0, 0, 0.08);
+  --text: #111827;
+  --muted: #6b7280;
 }
 
 * {
@@ -23,8 +23,8 @@ html {
 
 body {
   font-family: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
-  background: #0a0a0a;
-  color: #c8ccd4;
+  background: #f9fafb;
+  color: #111827;
   overflow-x: hidden;
   overflow-y: hidden;
   -webkit-font-smoothing: antialiased;
@@ -67,9 +67,9 @@ body {
 }
 
 /* Scrollbar */
-::-webkit-scrollbar { width: 4px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #1f2431; border-radius: 2px; }
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #f3f4f6; }
+::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
 
 /* Typing dots */
 @keyframes blink {

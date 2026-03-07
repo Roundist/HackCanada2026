@@ -52,24 +52,24 @@ export default function TradeIntelligenceMap() {
 
   return (
     <div
-      className="relative w-full overflow-hidden"
-      style={{ background: "#050505", minHeight: 320 }}
+      className="relative w-full overflow-hidden bg-gray-50 border border-gray-200 rounded-lg"
+      style={{ minHeight: 320 }}
     >
-      {/* Precision dot grid — Bloomberg / Palantir style */}
+      {/* Precision dot grid */}
       <div
-        className="absolute inset-0 opacity-[0.06]"
+        className="absolute inset-0 opacity-40"
         style={{
-          backgroundImage: "radial-gradient(circle, rgba(255,255,255,0.9) 0.8px, transparent 0)",
+          backgroundImage: "radial-gradient(circle, #9ca3af 0.8px, transparent 0)",
           backgroundSize: "14px 14px",
         }}
       />
 
-      {/* Status line — intelligence-dashboard typography */}
-      <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between px-3 py-2 border-b border-white/[0.06]">
-        <span className="text-[8px] font-mono font-light uppercase tracking-[0.2em] text-white/35">
+      {/* Status line */}
+      <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between px-3 py-2 border-b border-gray-200 bg-white/80">
+        <span className="text-[8px] font-mono font-light uppercase tracking-[0.2em] text-gray-600">
           Import flow active
         </span>
-        <span className="text-[8px] font-mono font-light uppercase tracking-[0.2em] text-white/25">
+        <span className="text-[8px] font-mono font-light uppercase tracking-[0.2em] text-gray-500">
           Export route tracked
         </span>
       </div>
@@ -89,21 +89,19 @@ export default function TradeIntelligenceMap() {
             </feMerge>
           </filter>
           <marker id="arrow" markerWidth="4" markerHeight="4" refX="3" refY="2" orient="auto">
-            <path d="M0 0 L4 2 L0 4 Z" fill="rgba(255,255,255,0.4)" />
+            <path d="M0 0 L4 2 L0 4 Z" fill="#64748b" />
           </marker>
-          {/* Boat icon — minimal cargo vessel, radar-like */}
           <g id="boat">
             <path
               d="M0 0 L4 -1 L8 0 L7 2 L1 2 Z"
-              fill="rgba(255,255,255,0.75)"
-              stroke="rgba(255,255,255,0.35)"
+              fill="#94a3b8"
+              stroke="#64748b"
               strokeWidth="0.4"
             />
-            {/* Wake */}
             <path
               d="M-2 0.5 Q-1.5 1 0 1 Q1.5 1 2 0.5"
               fill="none"
-              stroke="rgba(255,255,255,0.12)"
+              stroke="#cbd5e1"
               strokeWidth="0.6"
               strokeLinecap="round"
             />
@@ -117,7 +115,7 @@ export default function TradeIntelligenceMap() {
             y1={H / 2}
             x2={W / 2}
             y2={0}
-            stroke="rgba(255,255,255,0.045)"
+            stroke="rgba(0,0,0,0.06)"
             strokeWidth="0.5"
           />
         </g>
@@ -130,41 +128,40 @@ export default function TradeIntelligenceMap() {
         >
           <path
             d={USA_PATH}
-            fill="rgba(255,255,255,0.02)"
-            stroke="rgba(255,255,255,0.12)"
+            fill="rgba(255,255,255,0.8)"
+            stroke="#94a3b8"
             strokeWidth="0.6"
           />
           <path
             d={CANADA_PATH}
-            fill={canadaHover ? "rgba(255,255,255,0.04)" : "rgba(255,255,255,0.025)"}
-            stroke={canadaHover ? "rgba(255,255,255,0.2)" : "rgba(255,255,255,0.14)"}
+            fill={canadaHover ? "#e2e8f0" : "rgba(255,255,255,0.9)"}
+            stroke={canadaHover ? "#64748b" : "#94a3b8"}
             strokeWidth="0.7"
             style={{ transition: "fill 0.3s, stroke 0.3s" }}
           />
-          {/* Province pulse on Canada hover */}
           <path
             d={ONTARIO_PATH}
             fill="none"
-            stroke="rgba(255,255,255,0.08)"
+            stroke="#cbd5e1"
             strokeWidth="0.5"
             className={canadaHover ? "animate-pulse" : ""}
-            style={{ opacity: canadaHover ? 1 : 0.4, transition: "opacity 0.3s" }}
+            style={{ opacity: canadaHover ? 1 : 0.5, transition: "opacity 0.3s" }}
           />
           <path
             d={BC_PATH}
             fill="none"
-            stroke="rgba(255,255,255,0.08)"
+            stroke="#cbd5e1"
             strokeWidth="0.5"
             className={canadaHover ? "animate-pulse" : ""}
-            style={{ opacity: canadaHover ? 1 : 0.4, transition: "opacity 0.3s", animationDelay: "0.2s" }}
+            style={{ opacity: canadaHover ? 1 : 0.5, transition: "opacity 0.3s", animationDelay: "0.2s" }}
           />
           <path
             d={QUEBEC_PATH}
             fill="none"
-            stroke="rgba(255,255,255,0.08)"
+            stroke="#cbd5e1"
             strokeWidth="0.5"
             className={canadaHover ? "animate-pulse" : ""}
-            style={{ opacity: canadaHover ? 1 : 0.4, transition: "opacity 0.3s", animationDelay: "0.4s" }}
+            style={{ opacity: canadaHover ? 1 : 0.5, transition: "opacity 0.3s", animationDelay: "0.4s" }}
           />
         </g>
 
@@ -175,10 +172,10 @@ export default function TradeIntelligenceMap() {
           const isActive = activeRoute === i;
           const isBoatRoute = r.from === "Chicago" && r.to === "Toronto";
           const strokeColor = r.risk
-            ? "rgba(220, 38, 38, 0.5)"
+            ? "#dc2626"
             : isActive
-              ? "rgba(255,255,255,0.45)"
-              : "rgba(255,255,255,0.18)";
+              ? "#475569"
+              : "#94a3b8";
           const pathD = `M ${start[0]} ${start[1]} L ${end[0]} ${end[1]}`;
           return (
             <g
@@ -217,14 +214,14 @@ export default function TradeIntelligenceMap() {
               cx={x}
               cy={y}
               r={2}
-              fill="rgba(255,255,255,0.15)"
-              stroke="rgba(255,255,255,0.25)"
+              fill="#e2e8f0"
+              stroke="#64748b"
               strokeWidth="0.5"
             />
             <text
               x={x}
               y={y + 12}
-              fill="rgba(255,255,255,0.3)"
+              fill="#475569"
               fontSize="6"
               fontFamily="ui-monospace, monospace"
               textAnchor="middle"
@@ -235,15 +232,15 @@ export default function TradeIntelligenceMap() {
           </g>
         ))}
 
-        {/* Intelligence nodes — tariff spikes, delays, alerts */}
+        {/* Intelligence nodes */}
         {NODES.map((node, i) => (
           <g key={i}>
             <circle
               cx={node.x}
               cy={node.y}
               r={node.risk ? 3.5 : 2.5}
-              fill={node.risk ? "rgba(220,38,38,0.2)" : "rgba(255,255,255,0.06)"}
-              stroke={node.risk ? "rgba(220,38,38,0.5)" : "rgba(255,255,255,0.2)"}
+              fill={node.risk ? "#fecaca" : "#e2e8f0"}
+              stroke={node.risk ? "#dc2626" : "#94a3b8"}
               strokeWidth="0.5"
               className="animate-pulse"
               style={{
@@ -254,7 +251,7 @@ export default function TradeIntelligenceMap() {
             <text
               x={node.x}
               y={node.y - 6}
-              fill="rgba(255,255,255,0.5)"
+              fill="#475569"
               fontSize="5.5"
               fontFamily="ui-monospace, monospace"
               textAnchor="middle"
@@ -267,22 +264,22 @@ export default function TradeIntelligenceMap() {
       </svg>
 
       {/* Legend */}
-      <div className="absolute bottom-0 left-0 right-0 flex items-center justify-center gap-6 px-3 py-2 border-t border-white/[0.06] bg-[#050505]/90">
+      <div className="absolute bottom-0 left-0 right-0 flex items-center justify-center gap-6 px-3 py-2 border-t border-gray-200 bg-white/90">
         <span className="flex items-center gap-1.5">
-          <span className="w-1.5 h-0.5 rounded-full bg-red-500/60" />
-          <span className="text-[7px] font-mono uppercase tracking-widest text-white/25">Tariff risk</span>
+          <span className="w-1.5 h-0.5 rounded-full bg-red-500" />
+          <span className="text-[7px] font-mono uppercase tracking-widest text-gray-600">Tariff risk</span>
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="w-1.5 h-0.5 rounded-full bg-white/50" />
-          <span className="text-[7px] font-mono uppercase tracking-widest text-white/25">Active route</span>
+          <span className="w-1.5 h-0.5 rounded-full bg-slate-500" />
+          <span className="text-[7px] font-mono uppercase tracking-widest text-gray-600">Active route</span>
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="w-1.5 h-0.5 rounded-full bg-white/20" />
-          <span className="text-[7px] font-mono uppercase tracking-widest text-white/25">Inactive</span>
+          <span className="w-1.5 h-0.5 rounded-full bg-gray-300" />
+          <span className="text-[7px] font-mono uppercase tracking-widest text-gray-600">Inactive</span>
         </span>
       </div>
 
-      <p className="absolute bottom-8 left-0 right-0 px-3 text-center text-[8px] font-mono font-light uppercase tracking-widest text-white/20">
+      <p className="absolute bottom-8 left-0 right-0 px-3 text-center text-[8px] font-mono font-light uppercase tracking-widest text-gray-500">
         Select a profile and click Run Analysis to start.
       </p>
 
