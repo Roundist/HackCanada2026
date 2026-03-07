@@ -133,7 +133,7 @@ export default function App() {
         </div>
       </header>
 
-      <main className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden">
+      <main className="flex-1 min-h-0 overflow-hidden relative">
         <AnimatePresence mode="wait">
           {/* INPUT VIEW */}
           {view === "input" && (
@@ -193,11 +193,11 @@ export default function App() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="min-h-full flex bg-gray-50"
+              className="absolute inset-0 flex bg-gray-50"
             >
               {/* LEFT — Neural Graph + Execution Steps */}
-              <div className="flex-1 relative flex flex-col bg-white border-r border-gray-200">
-                <div className="flex-1 relative">
+              <div className="flex-1 relative flex flex-col bg-white border-r border-gray-200 min-w-0">
+                <div className="flex-1 relative min-h-0">
                   <ReactFlowProvider>
                     <NeuralGraph
                       agents={agents}
@@ -211,8 +211,8 @@ export default function App() {
                 </div>
               </div>
 
-              {/* RIGHT — Split: top half Chain of Thought + bottom half RAG Pipeline */}
-              <div className="w-[420px] shrink-0 border-l border-gray-200 flex flex-col min-h-0 bg-white">
+              {/* RIGHT — Chain of Thought (top) + RAG Pipeline (bottom) */}
+              <div className="w-[420px] shrink-0 border-l border-gray-200 flex flex-col overflow-hidden bg-white">
                 {/* Chain of thought: fixed height */}
                 <div className="shrink-0" style={{ height: 220 }}>
                   <AgentTerminalLog
@@ -221,7 +221,7 @@ export default function App() {
                     isComplete={pipelineDone}
                   />
                 </div>
-                {/* RAG Pipeline — first-class, fills the rest */}
+                {/* RAG Pipeline — fills the rest, scrolls internally */}
                 <div className="flex-1 min-h-0 overflow-hidden border-t border-gray-200">
                   <RagClassificationLive
                     agents={agents}

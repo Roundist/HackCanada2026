@@ -28,7 +28,7 @@ export default function AgentTerminalLog({ log, isRunning, isComplete }: AgentTe
   const showGraph = log.length === 0 && !isRunning;
 
   return (
-    <div className="flex flex-col h-full min-h-0">
+    <div className="flex flex-col h-full min-h-0 overflow-hidden">
       <div className="px-3 py-2 border-b border-gray-200 flex items-center gap-2 shrink-0 bg-white">
         <span className="text-[9px] font-mono uppercase tracking-widest text-gray-500">
           Chain of Thought
@@ -42,7 +42,7 @@ export default function AgentTerminalLog({ log, isRunning, isComplete }: AgentTe
       </div>
       <div
         ref={scrollRef}
-        className={`flex-1 min-h-[300px] overflow-y-auto overflow-x-hidden font-mono text-[10px] leading-relaxed bg-gray-50 border-b border-gray-200 ${log.length > 0 ? "p-3 space-y-0.5" : ""}`}
+        className={`flex-1 min-h-0 overflow-y-auto overflow-x-hidden font-mono text-[10px] leading-relaxed bg-gray-50 border-b border-gray-200 ${log.length > 0 ? "p-3 space-y-0.5" : ""}`}
         style={{ WebkitOverflowScrolling: "touch" }}
       >
         {showGraph && <TradeIntelligenceMap />}
