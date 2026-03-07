@@ -1,12 +1,15 @@
 from __future__ import annotations
 
 import sys
+import time
+from collections import defaultdict
 from contextlib import asynccontextmanager
 from pathlib import Path
 
 from dotenv import load_dotenv
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 load_dotenv()
 
@@ -17,6 +20,45 @@ from api.analyze import router as analyze_router
 from api.tariff import router as tariff_router
 from api.websocket import connect, disconnect
 from services.tariff_lookup import load as load_tariff_db
+
+
+# ---------------------------------------------------------------------------
+# In-memory rate limiter (per-IP, sliding window)
+# ---------------------------------------------------------------------------
+
+# path prefix -> (max_requests, window_seconds)
+_RATE_LIMITS: dict[str, tuple[int, int]] = {
+    "/api/analyze": (5, 60),       # 5 analyses per minute per IP
+    "/api/search": (30, 60),       # 30 searches per minute
+    "/api/tariff": (60, 60),       # 60 lookups per minute
+    "/api/session": (20, 60),      # 20 session requests per minute
+}
+_DEFAULT_LIMIT = (120, 60)         # everything else: 120 req/min
+
+# IP -> path_prefix -> list of timestamps
+_request_log: dict[str, dict[str, list[float]]] = defaultdict(lambda: defaultdict(list))
+
+
+def _check_rate_limit(ip: str, path: str) -> tuple[bool, int]:
+    """Return (allowed, retry_after_seconds). Prunes expired entries."""
+    limit, window = _DEFAULT_LIMIT
+    for prefix, (l, w) in _RATE_LIMITS.items():
+        if path.startswith(prefix):
+            limit, window = l, w
+            break
+
+    now = time.time()
+    bucket = _request_log[ip][path.split("/")[2] if len(path.split("/")) > 2 else path]
+    # Prune old entries
+    bucket[:] = [t for t in bucket if now - t < window]
+
+    if len(bucket) >= limit:
+        oldest = bucket[0]
+        retry_after = int(window - (now - oldest)) + 1
+        return False, retry_after
+
+    bucket.append(now)
+    return True, 0
 
 
 @asynccontextmanager
@@ -62,6 +104,23 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.middleware("http")
+async def rate_limit_middleware(request: Request, call_next):
+    """Per-IP rate limiting for API endpoints."""
+    path = request.url.path
+    if path.startswith("/api/"):
+        ip = request.client.host if request.client else "unknown"
+        allowed, retry_after = _check_rate_limit(ip, path)
+        if not allowed:
+            return JSONResponse(
+                status_code=429,
+                content={"detail": "Rate limit exceeded. Please try again later."},
+                headers={"Retry-After": str(retry_after)},
+            )
+    return await call_next(request)
+
 
 app.include_router(analyze_router)
 app.include_router(tariff_router)
