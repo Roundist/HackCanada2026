@@ -38,6 +38,16 @@ class SupplyChainAgent(BaseAgent):
     async def build_user_message(self) -> str:
         return self.business_description
 
+    def fallback_output(self) -> dict[str, Any]:
+        """Minimal supply chain so RAG and downstream agents can still run."""
+        return {
+            "business_name": "Unknown",
+            "industry": "",
+            "annual_revenue_estimate": 0,
+            "inputs": [],
+            "products": [],
+        }
+
     async def process_result(self, result: dict[str, Any]) -> dict[str, Any]:
         await self.emit(f"Mapped {len(result.get('inputs', []))} supply chain inputs")
         us_inputs = [i for i in result.get("inputs", []) if i.get("is_us_sourced")]

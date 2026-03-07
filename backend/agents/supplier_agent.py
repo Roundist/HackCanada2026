@@ -36,9 +36,20 @@ class SupplierScoutAgent(BaseAgent):
             "- priority_switches (array of strings)"
         )
 
+    def fallback_output(self) -> dict[str, Any]:
+        return {
+            "alternatives": [],
+            "total_potential_savings": 0,
+            "priority_switches": [],
+        }
+
     async def build_user_message(self) -> str:
-        supply_chain = self.shared_memory["supply_chain_map"]
-        tariff_rates = self.shared_memory["tariff_rates"]
+        supply_chain = self.shared_memory.get("supply_chain_map") or {}
+        tariff_rates = self.shared_memory.get("tariff_rates") or {}
+        if not isinstance(supply_chain, dict):
+            supply_chain = {}
+        if not isinstance(tariff_rates, dict):
+            tariff_rates = {}
         tariff_impact = self.shared_memory.get("tariff_impact")
         parts = [
             f"Supply Chain Map:\n{json.dumps(supply_chain, indent=2)}",

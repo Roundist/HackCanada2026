@@ -187,6 +187,20 @@ class TariffCalculatorAgent(BaseAgent):
         )
         return output
 
+    def fallback_output(self) -> dict[str, Any]:
+        """Minimal tariff impact when agent fails before run() completes (e.g. dependency timeout)."""
+        try:
+            return self._fallback_tariff_impact()
+        except Exception:
+            return {
+                "total_tariff_exposure": 0,
+                "total_margin_erosion_pct": 0,
+                "risk_level": "unknown",
+                "input_impacts": [],
+                "product_impacts": [],
+                "scenarios": [],
+            }
+
     def _fallback_tariff_impact(self) -> dict[str, Any]:
         """Return computed tariff impact when Gemini fails entirely."""
         computed = self._compute_tariff_impacts()

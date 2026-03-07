@@ -47,19 +47,52 @@ class GeopoliticalAgent(BaseAgent):
         )
 
     async def build_user_message(self) -> str:
-        supply_chain = self.shared_memory["supply_chain_map"]
+        supply_chain = self.shared_memory.get("supply_chain_map") or {}
+        if not isinstance(supply_chain, dict):
+            supply_chain = {}
 
-        industries = [supply_chain.get("industry", "")]
-        materials = [i["name"] for i in supply_chain.get("inputs", []) if i.get("is_us_sourced")]
+        industry = supply_chain.get("industry") or ""
+        industries = [industry] if industry else []
+        inputs_list = supply_chain.get("inputs") or []
+        materials = [
+            i.get("name") or ""
+            for i in inputs_list
+            if isinstance(i, dict) and i.get("is_us_sourced")
+        ]
+        materials = [m for m in materials if m]
 
         await self.emit("Fetching live trade news from the last 24 hours...")
-        articles = await fetch_trade_news(industries, materials)
+        try:
+            articles = await fetch_trade_news(industries, materials)
+        except Exception:
+            articles = []
         await self.emit(f"Found {len(articles)} relevant news articles")
+
+        if not articles:
+            news_section = (
+                "No live news articles could be fetched (RSS/API may be temporarily unavailable). "
+                "Based your analysis only on the business supply chain below. "
+                "State that no recent news was available and focus on structural tariff risk and industry context."
+            )
+        else:
+            news_section = f"Live News Articles (last 24 hours):\n{json.dumps(articles, indent=2)}"
 
         return (
             f"Business Supply Chain:\n{json.dumps(supply_chain, indent=2)}\n\n"
-            f"Live News Articles (last 24 hours):\n{json.dumps(articles, indent=2)}"
+            f"{news_section}"
         )
+
+    def fallback_output(self) -> dict[str, Any]:
+        return {
+            "overall_escalation_risk": "unknown",
+            "risk_trend": "unknown",
+            "headline_summary": "Geopolitical analysis unavailable.",
+            "relevant_articles": [],
+            "actionable_alerts": [],
+            "industry_risk_adjustments": [],
+            "trade_agreement_updates": [],
+            "government_program_updates": [],
+        }
 
     async def process_result(self, result: dict[str, Any]) -> dict[str, Any]:
         risk = result.get("overall_escalation_risk", "unknown")

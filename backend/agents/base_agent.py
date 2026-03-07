@@ -110,6 +110,10 @@ class BaseAgent(ABC):
         """
         ...
 
+    def fallback_output(self) -> dict[str, Any]:
+        """Return a minimal valid output when this agent fails. Pipeline continues with this so downstream agents can run."""
+        return {}
+
     async def run(self):
         """Execute the full agent lifecycle.
 
@@ -154,11 +158,17 @@ class BaseAgent(ABC):
                     "Gemini quota/rate limit reached. Wait briefly or use a higher-quota API key/project.",
                     event_type="error",
                 )
-            elif "gemini_api_key" in err_lower or "api key" in err_lower or "api_key" in err_lower:
+            elif "gemini_api_key" in err_lower or "api key" in err_lower or "api_key" in err_lower or "environment" in err_lower:
                 await self.emit(
-                    "Gemini API key missing or invalid. Set GEMINI_API_KEY in .env (repo root) or backend/.env.",
+                    "Gemini API key missing or invalid. Set GEMINI_API_KEY in backend/.env (see .env.example).",
                     event_type="error",
                 )
             else:
                 await self.emit(f"Error: {err_msg}", event_type="error")
-            raise
+            # Write fallback so downstream agents can still run; do not re-raise
+            fallback = self.fallback_output()
+            self.shared_memory[self.output_key] = fallback
+            try:
+                await write_shared_memory(self.output_key, fallback)
+            except Exception:
+                pass

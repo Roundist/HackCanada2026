@@ -39,12 +39,26 @@ class StrategyArchitectAgent(BaseAgent):
             "- risks (array of objects with: risk, probability, mitigation)"
         )
 
+    def fallback_output(self) -> dict[str, Any]:
+        return {
+            "executive_summary": {"business_name": "Unknown", "total_tariff_exposure": 0, "risk_level": "unknown", "headline": "Analysis incomplete.", "key_finding": "One or more agents failed; partial results only."},
+            "priority_actions": [],
+            "pricing_strategy": {"recommendation": "", "explanation": "", "suggested_price_increases": []},
+            "market_diversification": {"current_us_export_pct": 0, "recommendations": [], "government_programs": []},
+            "timeline": {"days_30": [], "days_60": [], "days_90": []},
+            "risks": [],
+        }
+
     async def build_user_message(self) -> str:
+        supply = self.shared_memory.get("supply_chain_map") or {}
+        tariff = self.shared_memory.get("tariff_impact") or {}
+        suppliers = self.shared_memory.get("alternative_suppliers") or {}
+        geo = self.shared_memory.get("geopolitical_context") or {}
         return (
-            f"Supply Chain Map:\n{json.dumps(self.shared_memory['supply_chain_map'], indent=2)}\n\n"
-            f"Tariff Impact:\n{json.dumps(self.shared_memory['tariff_impact'], indent=2)}\n\n"
-            f"Alternative Suppliers:\n{json.dumps(self.shared_memory['alternative_suppliers'], indent=2)}\n\n"
-            f"Geopolitical Context:\n{json.dumps(self.shared_memory['geopolitical_context'], indent=2)}"
+            f"Supply Chain Map:\n{json.dumps(supply, indent=2)}\n\n"
+            f"Tariff Impact:\n{json.dumps(tariff, indent=2)}\n\n"
+            f"Alternative Suppliers:\n{json.dumps(suppliers, indent=2)}\n\n"
+            f"Geopolitical Context:\n{json.dumps(geo, indent=2)}"
         )
 
     async def process_result(self, result: dict[str, Any]) -> dict[str, Any]:
