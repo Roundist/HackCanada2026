@@ -1,0 +1,26 @@
+[
+  {
+    "id": "furniture-kitchener",
+    "name": "Kitchener Custom Furniture Co.",
+    "industry": "Furniture Manufacturing",
+    "description": "I run a custom furniture company in Kitchener, Ontario. We make dining tables, chairs, bookshelves, and bedroom sets. We import hardwood lumber — mostly oak, maple, and cherry — from mills in Michigan and Wisconsin. We also buy steel fasteners like screws, bolts, and brackets from a US supplier in Ohio, and finishing chemicals like wood stains, lacquers, and polyurethane coatings from Pennsylvania. Our upholstery fabric comes from China. Annual revenue is about $2M, and we sell roughly 60% in Canada and 40% to US customers.",
+    "expected_exposure": 180000,
+    "expected_margin_erosion_pct": 12.1
+  },
+  {
+    "id": "packaging-toronto",
+    "name": "Toronto Food Packaging Solutions Inc.",
+    "industry": "Food Packaging",
+    "description": "We're a food packaging company based in Toronto. We supply corrugated cardboard boxes, plastic containers, shrink wrap, and printed labels to food producers across Ontario and Quebec. Our main raw materials are corrugated cardboard and kraft paper from US mills in the Midwest, plastic resins — mainly polyethylene and polypropylene — from US petrochemical suppliers in Texas, and printing inks from a supplier in New Jersey. We also buy packaging machinery parts from Germany. Our annual revenue is around $3.5M with about 200 employees.",
+    "expected_exposure": 95000,
+    "expected_margin_erosion_pct": 8.2
+  },
+  {
+    "id": "autoparts-vancouver",
+    "name": "Pacific Auto Parts Distribution Ltd.",
+    "industry": "Auto Parts Distribution",
+    "description": "I run an auto parts distribution company in Vancouver. We supply independent mechanics and small auto shops across BC and Alberta. We import brake pads and rotors from manufacturers in Michigan, oil filters and air filters from suppliers in Illinois, suspension parts like shocks and struts from Ohio, and various gaskets and seals from Indiana. We also carry some windshield wipers and lighting components from US brands. Annual revenue is about $5M and we're entirely focused on the Canadian market. We carry roughly 2,000 SKUs across 15 product categories.",
+    "expected_exposure": 320000,
+    "expected_margin_erosion_pct": 18.4
+  }
+]

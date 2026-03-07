@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Trade War Survival Plan — {{ plan.executive_summary.business_name }}</title>
+<style>
+  @page { size: A4; margin: 2cm; }
+  body { font-family: 'Helvetica Neue', Arial, sans-serif; color: #1a1a2e; font-size: 11pt; line-height: 1.5; }
+  h1 { color: #0f3460; font-size: 22pt; border-bottom: 3px solid #e94560; padding-bottom: 8px; margin-top: 0; }
+  h2 { color: #0f3460; font-size: 14pt; margin-top: 24px; border-bottom: 1px solid #ddd; padding-bottom: 4px; }
+  h3 { color: #16213e; font-size: 12pt; margin-top: 16px; }
+  .header { text-align: center; margin-bottom: 24px; }
+  .header .subtitle { color: #666; font-size: 10pt; }
+  .summary-box { background: #f0f4ff; border-left: 4px solid #e94560; padding: 12px 16px; margin: 16px 0; }
+  .summary-box .big-number { font-size: 28pt; font-weight: bold; color: #e94560; }
+  .summary-box .label { font-size: 9pt; color: #666; text-transform: uppercase; }
+  .risk-badge { display: inline-block; padding: 2px 10px; border-radius: 4px; color: #fff; font-size: 9pt; font-weight: bold; text-transform: uppercase; }
+  .risk-high, .risk-critical { background: #e94560; }
+  .risk-medium, .risk-elevated { background: #f59e0b; }
+  .risk-low, .risk-stable { background: #10b981; }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 10pt; }
+  th { background: #0f3460; color: #fff; padding: 6px 8px; text-align: left; }
+  td { padding: 6px 8px; border-bottom: 1px solid #eee; }
+  tr:nth-child(even) { background: #f8f9fa; }
+  .action-card { background: #fff; border: 1px solid #ddd; border-radius: 6px; padding: 12px; margin: 8px 0; page-break-inside: avoid; }
+  .action-rank { display: inline-block; background: #0f3460; color: #fff; width: 24px; height: 24px; border-radius: 50%; text-align: center; line-height: 24px; font-size: 10pt; font-weight: bold; margin-right: 8px; }
+  .timeline-section { display: flex; gap: 16px; margin: 12px 0; }
+  .timeline-col { flex: 1; background: #f8f9fa; border-radius: 6px; padding: 12px; }
+  .timeline-col h4 { margin: 0 0 8px 0; color: #0f3460; font-size: 11pt; }
+  .timeline-col ul { margin: 0; padding-left: 16px; font-size: 10pt; }
+  .footer { text-align: center; color: #999; font-size: 8pt; margin-top: 32px; border-top: 1px solid #ddd; padding-top: 8px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Trade War Survival Plan</h1>
+  <div class="subtitle">{{ plan.executive_summary.business_name }} | Generated {{ generated_date }}</div>
+</div>
+
+<div class="summary-box">
+  <div style="display: flex; justify-content: space-between; align-items: center;">
+    <div>
+      <div class="label">Total Tariff Exposure</div>
+      <div class="big-number">${{ "{:,.0f}".format(plan.executive_summary.total_tariff_exposure) }}</div>
+    </div>
+    <div style="text-align: right;">
+      <div class="label">Risk Level</div>
+      <span class="risk-badge risk-{{ plan.executive_summary.risk_level }}">{{ plan.executive_summary.risk_level }}</span>
+    </div>
+  </div>
+  <p style="margin: 8px 0 0 0;"><strong>{{ plan.executive_summary.headline }}</strong></p>
+  <p style="margin: 4px 0 0 0; color: #555;">{{ plan.executive_summary.key_finding }}</p>
+</div>
+
+{% if tariff_impact and tariff_impact.input_impacts %}
+<h2>Tariff Impact by Input</h2>
+<table>
+  <tr><th>Input</th><th>HS Code</th><th>Tariff Rate</th><th>Annual Spend</th><th>Annual Tariff Cost</th><th>% of Exposure</th></tr>
+  {% for item in tariff_impact.input_impacts %}
+  <tr>
+    <td>{{ item.input_name }}</td>
+    <td>{{ item.hs_code }}</td>
+    <td>{{ item.current_tariff_rate }}%</td>
+    <td>${{ "{:,.0f}".format(item.annual_spend) }}</td>
+    <td>${{ "{:,.0f}".format(item.annual_tariff_cost) }}</td>
+    <td>{{ "%.1f"|format(item.pct_of_total_exposure) }}%</td>
+  </tr>
+  {% endfor %}
+</table>
+{% endif %}
+
+<h2>Priority Actions</h2>
+{% for action in plan.priority_actions %}
+<div class="action-card">
+  <span class="action-rank">{{ action.rank }}</span>
+  <strong>{{ action.action }}</strong>
+  <span style="float: right; color: #10b981; font-weight: bold;">Save ${{ "{:,.0f}".format(action.estimated_savings) }}</span>
+  <p style="margin: 8px 0 0 0; font-size: 10pt; color: #555;">{{ action.description }}</p>
+  <div style="margin-top: 6px; font-size: 9pt; color: #888;">
+    Effort: {{ action.implementation_effort }} | Timeline: {{ action.timeline_days }} days | Category: {{ action.category }}
+  </div>
+</div>
+{% endfor %}
+
+<h2>Pricing Strategy</h2>
+<p><strong>Recommendation:</strong> {{ plan.pricing_strategy.recommendation }}</p>
+<p>{{ plan.pricing_strategy.explanation }}</p>
+{% if plan.pricing_strategy.suggested_price_increases %}
+<table>
+  <tr><th>Product</th><th>Price Increase</th><th>Rationale</th></tr>
+  {% for inc in plan.pricing_strategy.suggested_price_increases %}
+  <tr><td>{{ inc.product }}</td><td>{{ inc.increase_pct }}%</td><td>{{ inc.rationale }}</td></tr>
+  {% endfor %}
+</table>
+{% endif %}
+
+<h2>30/60/90 Day Timeline</h2>
+<div class="timeline-section">
+  <div class="timeline-col">
+    <h4>30 Days</h4>
+    <ul>{% for item in plan.timeline.days_30 %}<li>{{ item }}</li>{% endfor %}</ul>
+  </div>
+  <div class="timeline-col">
+    <h4>60 Days</h4>
+    <ul>{% for item in plan.timeline.days_60 %}<li>{{ item }}</li>{% endfor %}</ul>
+  </div>
+  <div class="timeline-col">
+    <h4>90 Days</h4>
+    <ul>{% for item in plan.timeline.days_90 %}<li>{{ item }}</li>{% endfor %}</ul>
+  </div>
+</div>
+
+<h2>Market Diversification</h2>
+<ul>
+  {% for rec in plan.market_diversification.recommendations %}<li>{{ rec }}</li>{% endfor %}
+</ul>
+{% if plan.market_diversification.government_programs %}
+<h3>Government Programs</h3>
+<ul>
+  {% for prog in plan.market_diversification.government_programs %}<li>{{ prog }}</li>{% endfor %}
+</ul>
+{% endif %}
+
+<h2>Risks</h2>
+<table>
+  <tr><th>Risk</th><th>Probability</th><th>Mitigation</th></tr>
+  {% for risk in plan.risks %}
+  <tr><td>{{ risk.risk }}</td><td>{{ risk.probability }}</td><td>{{ risk.mitigation }}</td></tr>
+  {% endfor %}
+</table>
+
+<div class="footer">
+  TariffTriage — AI-Powered Trade War Survival Platform for Canadian Businesses
+</div>
+
+</body>
+</html>

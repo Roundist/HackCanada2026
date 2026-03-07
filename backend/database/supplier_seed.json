@@ -1,0 +1,284 @@
+{
+  "hardwood_lumber": {
+    "material": "Hardwood Lumber (Oak, Maple, Cherry)",
+    "hs_codes": ["440799", "440791", "440792"],
+    "canadian_suppliers": [
+      {
+        "category": "Eastern Canadian Hardwood Mills",
+        "region": "Ontario / Quebec",
+        "directory": "Canadian Lumbermen's Association (CLA)",
+        "notes": "Ontario and Quebec produce significant volumes of maple, oak, birch, and cherry. Major mill clusters in Muskoka, Haliburton, Ottawa Valley, and Laurentians."
+      },
+      {
+        "category": "BC Interior Hardwood Processors",
+        "region": "British Columbia",
+        "directory": "BC Wood Specialties Group",
+        "notes": "Smaller volumes but high-quality birch, alder, and maple. Higher shipping cost to Eastern Canada."
+      },
+      {
+        "category": "Maritime Hardwood Suppliers",
+        "region": "New Brunswick / Nova Scotia",
+        "directory": "Maritime Lumber Bureau",
+        "notes": "Maple, birch, and beech available. Competitive pricing, shorter supply chains to Ontario."
+      }
+    ],
+    "international_alternatives": [
+      {
+        "country": "EU (Germany / Romania)",
+        "category": "European Hardwood Exporters",
+        "notes": "CETA trade agreement provides zero or preferential tariff rates. Higher shipping costs but no retaliatory tariffs."
+      }
+    ]
+  },
+  "steel_fasteners": {
+    "material": "Steel Fasteners (Screws, Bolts, Brackets)",
+    "hs_codes": ["731815", "731816", "731822"],
+    "canadian_suppliers": [
+      {
+        "category": "Canadian Fastener Manufacturers",
+        "region": "Ontario (Hamilton / Guelph)",
+        "directory": "Canadian Fasteners Institute",
+        "notes": "Hamilton steel corridor has multiple fastener producers. Leland Industries, Infasco are major domestic manufacturers."
+      },
+      {
+        "category": "Quebec Metal Products Manufacturers",
+        "region": "Quebec (Montreal / Trois-Rivieres)",
+        "directory": "Association des Manufacturiers de Quebec",
+        "notes": "Several specialty fastener shops serving furniture and construction industries."
+      }
+    ],
+    "international_alternatives": [
+      {
+        "country": "Taiwan",
+        "category": "Taiwanese Fastener Exporters",
+        "notes": "Taiwan is the world's 3rd largest fastener exporter. Competitive pricing, no retaliatory tariffs apply."
+      },
+      {
+        "country": "India",
+        "category": "Indian Steel Fastener Manufacturers",
+        "notes": "Growing export capacity, lower cost base. Longer lead times (6-8 weeks)."
+      }
+    ]
+  },
+  "finishing_chemicals": {
+    "material": "Finishing Chemicals (Wood Stains, Lacquers, Polyurethane)",
+    "hs_codes": ["320890", "321000", "382490"],
+    "canadian_suppliers": [
+      {
+        "category": "Canadian Paint and Coatings Manufacturers",
+        "region": "Ontario (Toronto / Mississauga)",
+        "directory": "Canadian Paint and Coatings Association (CPCA)",
+        "notes": "Several domestic producers of industrial wood finishes. Saman, Sansin are notable Canadian brands."
+      },
+      {
+        "category": "Quebec Chemical Producers",
+        "region": "Quebec (Montreal)",
+        "directory": "Chemistry Industry Association of Canada",
+        "notes": "Montreal's petrochemical cluster produces coatings and finishing chemicals."
+      }
+    ],
+    "international_alternatives": [
+      {
+        "country": "EU (Germany / Italy)",
+        "category": "European Industrial Coatings",
+        "notes": "High-quality finishes under CETA preferential rates. German and Italian producers well-regarded for wood finishing products."
+      }
+    ]
+  },
+  "corrugated_cardboard": {
+    "material": "Corrugated Cardboard and Kraft Paper",
+    "hs_codes": ["480511", "480519", "480591", "481910"],
+    "canadian_suppliers": [
+      {
+        "category": "Canadian Pulp and Paper Mills",
+        "region": "Ontario / Quebec / BC",
+        "directory": "Forest Products Association of Canada (FPAC)",
+        "notes": "Canada is a major global producer of pulp and paper. Cascades, Kruger Products, and Atlantic Packaging are significant domestic producers."
+      },
+      {
+        "category": "Western Canadian Paper Mills",
+        "region": "British Columbia / Alberta",
+        "directory": "Council of Forest Industries (COFI)",
+        "notes": "BC mills produce kraft paper and corrugating medium. Competitive with US Midwest mills."
+      }
+    ],
+    "international_alternatives": [
+      {
+        "country": "Brazil",
+        "category": "Brazilian Pulp and Paper Exporters",
+        "notes": "Brazil is the world's largest eucalyptus pulp producer. Competitive pricing for kraft paper."
+      }
+    ]
+  },
+  "plastic_resins": {
+    "material": "Plastic Resins (Polyethylene, Polypropylene)",
+    "hs_codes": ["390110", "390120", "390210"],
+    "canadian_suppliers": [
+      {
+        "category": "Alberta Petrochemical Producers",
+        "region": "Alberta (Edmonton / Fort Saskatchewan)",
+        "directory": "Chemistry Industry Association of Canada",
+        "notes": "Alberta's petrochemical corridor produces polyethylene and polypropylene. NOVA Chemicals, Inter Pipeline are major domestic producers."
+      },
+      {
+        "category": "Ontario Polymer Processors",
+        "region": "Ontario (Sarnia / Hamilton)",
+        "directory": "Canadian Plastics Industry Association (CPIA)",
+        "notes": "Sarnia's Chemical Valley produces base resins. Some capacity constraints on specialty grades."
+      }
+    ],
+    "international_alternatives": [
+      {
+        "country": "South Korea",
+        "category": "Korean Petrochemical Exporters",
+        "notes": "LG Chem, Lotte Chemical are major PE/PP exporters. Competitive pricing via Pacific shipping routes."
+      }
+    ]
+  },
+  "printing_inks": {
+    "material": "Printing Inks",
+    "hs_codes": ["321511", "321519", "321590"],
+    "canadian_suppliers": [
+      {
+        "category": "Canadian Ink Manufacturers",
+        "region": "Ontario (Toronto / Mississauga)",
+        "directory": "Canadian Printing Industries Association",
+        "notes": "Some domestic ink production for packaging industry. Smaller scale than US suppliers but serviceable."
+      },
+      {
+        "category": "Quebec Specialty Ink Producers",
+        "region": "Quebec (Montreal)",
+        "directory": "Imprimeries et Industries Graphiques du Quebec",
+        "notes": "Montreal has a printing industry cluster with some ink production capability."
+      }
+    ],
+    "international_alternatives": [
+      {
+        "country": "Japan",
+        "category": "Japanese Ink Manufacturers",
+        "notes": "DIC Corporation (Tokyo) is the world's largest ink manufacturer. High quality, no retaliatory tariffs."
+      }
+    ]
+  },
+  "brake_pads_rotors": {
+    "material": "Brake Pads and Rotors",
+    "hs_codes": ["870830"],
+    "canadian_suppliers": [
+      {
+        "category": "Canadian Automotive Parts Manufacturers",
+        "region": "Ontario (Windsor / Brampton)",
+        "directory": "Automotive Parts Manufacturers' Association (APMA)",
+        "notes": "Ontario's automotive corridor has some brake component manufacturing. Smaller scale than Michigan but growing capacity."
+      },
+      {
+        "category": "Canadian Aftermarket Parts Distributors",
+        "region": "National",
+        "directory": "Automotive Industries Association of Canada (AIA)",
+        "notes": "Several national distributors source from non-US manufacturers. Can redirect supply chains to Asian or European producers."
+      }
+    ],
+    "international_alternatives": [
+      {
+        "country": "China",
+        "category": "Chinese Brake Component Manufacturers",
+        "notes": "Large-scale production of aftermarket brake pads and rotors. Significantly lower cost. Quality varies — require certification verification."
+      },
+      {
+        "country": "EU (Germany / Italy)",
+        "category": "European OEM Brake Manufacturers",
+        "notes": "Premium quality under CETA preferential rates. Higher cost but OE-equivalent quality. Brembo (Italy), TRW (Germany)."
+      }
+    ]
+  },
+  "oil_air_filters": {
+    "material": "Oil Filters and Air Filters",
+    "hs_codes": ["842123", "842131"],
+    "canadian_suppliers": [
+      {
+        "category": "Canadian Filter Manufacturers",
+        "region": "Ontario",
+        "directory": "Automotive Parts Manufacturers' Association (APMA)",
+        "notes": "Limited domestic filter manufacturing. Some repackaging and assembly operations exist."
+      }
+    ],
+    "international_alternatives": [
+      {
+        "country": "South Korea",
+        "category": "Korean Automotive Filter Manufacturers",
+        "notes": "Hyundai/Kia supply chain produces high-quality OE filters. Competitive pricing."
+      },
+      {
+        "country": "China",
+        "category": "Chinese Filter Manufacturers",
+        "notes": "Large-scale aftermarket filter production. Lower cost, adequate quality for aftermarket applications."
+      }
+    ]
+  },
+  "suspension_parts": {
+    "material": "Suspension Parts (Shocks, Struts)",
+    "hs_codes": ["870880"],
+    "canadian_suppliers": [
+      {
+        "category": "Canadian Suspension Component Producers",
+        "region": "Ontario (Windsor / St. Catharines)",
+        "directory": "Automotive Parts Manufacturers' Association (APMA)",
+        "notes": "Some domestic production of suspension components. Multimatic (Markham) is a notable Canadian manufacturer."
+      }
+    ],
+    "international_alternatives": [
+      {
+        "country": "Japan",
+        "category": "Japanese Suspension Manufacturers",
+        "notes": "KYB, Tokico are major global producers. High quality, established distribution to Canada."
+      },
+      {
+        "country": "EU (Germany)",
+        "category": "European Suspension Manufacturers",
+        "notes": "Bilstein, Sachs/ZF produce premium suspension. CETA preferential rates apply."
+      }
+    ]
+  },
+  "gaskets_seals": {
+    "material": "Gaskets and Seals",
+    "hs_codes": ["401693", "401699"],
+    "canadian_suppliers": [
+      {
+        "category": "Canadian Rubber Products Manufacturers",
+        "region": "Ontario / Quebec",
+        "directory": "Canadian Manufacturers & Exporters (CME)",
+        "notes": "Several small-to-medium rubber products manufacturers in Southern Ontario and Quebec. Custom gasket production available."
+      }
+    ],
+    "international_alternatives": [
+      {
+        "country": "Taiwan",
+        "category": "Taiwanese Rubber Seal Manufacturers",
+        "notes": "Strong aftermarket gasket and seal production capability. Competitive pricing."
+      }
+    ]
+  },
+  "packaging_machinery_parts": {
+    "material": "Packaging Machinery Parts",
+    "hs_codes": ["842230", "842290"],
+    "canadian_suppliers": [
+      {
+        "category": "Canadian Packaging Equipment Suppliers",
+        "region": "Ontario (Toronto / Mississauga)",
+        "directory": "Packaging Association of Canada (PAC)",
+        "notes": "Some domestic packaging equipment manufacturers and parts suppliers. Limited compared to US/EU but growing."
+      }
+    ],
+    "international_alternatives": [
+      {
+        "country": "Germany",
+        "category": "German Packaging Machinery Manufacturers",
+        "notes": "World leaders in packaging machinery (Bosch, Krones). CETA preferential rates. Already used by Toronto profile for machinery."
+      },
+      {
+        "country": "Italy",
+        "category": "Italian Packaging Equipment Producers",
+        "notes": "Strong food packaging machinery sector. CETA trade agreement applies."
+      }
+    ]
+  }
+}
