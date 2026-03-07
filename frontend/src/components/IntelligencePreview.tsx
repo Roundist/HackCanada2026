@@ -35,7 +35,7 @@ export default function IntelligencePreview({
     [profile, tariffRatePct]
   );
 
-  const affectedSectors = profile ? 12 : 0;
+  const affectedSectors = profile?.routes?.length ?? 0;
   const altCount = altSuppliers.length;
 
   return (
@@ -86,7 +86,7 @@ export default function IntelligencePreview({
             {profile ? affectedSectors : "--"}
           </div>
           <div className="text-[9px] font-mono text-white/15 mt-0.5">
-            {profile ? "Manufacturing, Food, Tech" : "Select profile"}
+            {profile ? `${profile.industry} · US-sourced inputs` : "Select profile"}
           </div>
         </div>
 
@@ -109,18 +109,18 @@ export default function IntelligencePreview({
             {profile ? `${altCount} non-tariff options` : "Select a demo profile"}
           </div>
           {profile && altSuppliers.length > 0 && (
-            <ul className="mt-2 space-y-1.5">
+            <ul className="mt-3 space-y-2">
               {altSuppliers.map((s) => (
                 <motion.li
                   key={s.name}
                   initial={{ opacity: 0, x: -4 }}
                   animate={{ opacity: 1, x: 0 }}
-                  className="text-[10px] border-l-2 pl-2 border-emerald-500/30"
+                  className="text-[10px] border-l-2 pl-3 pr-2 py-2 rounded-r border-emerald-500/30 transition-colors hover:bg-white/[0.04]"
                   style={{ borderColor: "rgba(22,163,74,0.4)" }}
                 >
                   <span className="font-medium text-white/70">{s.name}</span>
                   <span className="text-white/40"> · {s.country}</span>
-                  <div className="text-[9px] font-mono text-emerald-400/80 mt-0.5">
+                  <div className="text-[9px] font-mono text-emerald-400/80 mt-1">
                     Δ +{s.deltaMarginSavedPct}% margin · Save ${(s.deltaAmountSaved / 1000).toFixed(0)}K
                   </div>
                 </motion.li>
@@ -129,13 +129,20 @@ export default function IntelligencePreview({
           )}
         </div>
 
-        {/* Confidence Score — reactive to slider */}
-        <div className="border border-white/[0.06] p-3 rounded" style={{ background: "rgba(15,17,23,0.6)" }}>
-          <div className="text-[9px] font-mono uppercase tracking-wider text-white/25">Confidence Score</div>
+        {/* Confidence Score — with tooltip so low % doesn't confuse */}
+        <div
+          className="border border-white/[0.06] p-3 rounded"
+          style={{ background: "rgba(15,17,23,0.6)" }}
+          title="Model confidence in stress-test projections. Drops as tariff rate increases because higher tariffs add uncertainty to margin and exposure estimates."
+        >
+          <div className="text-[9px] font-mono uppercase tracking-wider text-white/25 flex items-center gap-1">
+            Confidence Score
+            <span className="text-white/10 cursor-help" aria-label="Explain confidence">ⓘ</span>
+          </div>
           <div className="text-lg font-semibold mt-1" style={{ color: "#3b82f6" }}>
             {profile ? `${confidenceScore}%` : "--"}
           </div>
-          <div className="text-[9px] font-mono text-white/15 mt-0.5">Model confidence (reactive to tariff)</div>
+          <div className="text-[9px] font-mono text-white/15 mt-0.5">Uncertainty rises with tariff stress — hover for details</div>
         </div>
       </div>
     </div>

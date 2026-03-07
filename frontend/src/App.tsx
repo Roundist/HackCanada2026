@@ -3,10 +3,11 @@ import { ReactFlowProvider } from "@xyflow/react";
 import { motion, AnimatePresence } from "framer-motion";
 import NeuralGraph from "./components/NeuralGraph";
 import BusinessInput from "./components/BusinessInput";
+import SupplyChainMap from "./components/SupplyChainMap";
 import FindingsPanel from "./components/FindingsPanel";
 import ExecutionSteps from "./components/ExecutionSteps";
 import SurvivalPlan from "./components/SurvivalPlan";
-import SupplyChainMap from "./components/SupplyChainMap";
+import AgentPipelineStatus from "./components/AgentPipelineStatus";
 import AgentTerminalLog from "./components/AgentTerminalLog";
 import IntelligencePreview from "./components/IntelligencePreview";
 import RagTracePanel from "./components/RagTracePanel";
@@ -15,6 +16,7 @@ import { useWebSocket } from "./hooks/useWebSocket";
 import { useTariffRates } from "./hooks/useTariffRates";
 import { startAnalysis } from "./api/client";
 import { runDemoSimulation } from "./api/demo";
+import { businessProfiles } from "./data/businessProfiles";
 import type { BusinessProfile } from "./data/businessProfiles";
 
 type View = "input" | "analyzing" | "results";
@@ -22,8 +24,10 @@ type View = "input" | "analyzing" | "results";
 export default function App() {
   const [view, setView] = useState<View>("input");
   const [selectedAgent, setSelectedAgent] = useState<string | null>(null);
-  const [selectedProfile, setSelectedProfile] = useState<BusinessProfile | null>(null);
+  const [selectedProfile, setSelectedProfile] = useState<BusinessProfile | null>(() => businessProfiles[0] ?? null);
   const [tariffRatePct, setTariffRatePct] = useState(25);
+  const [isDemoMode, setIsDemoMode] = useState(false);
+  const [sessionId, setSessionId] = useState<string | null>(null);
   const demoAbort = useRef<(() => void) | null>(null);
   const {
     agents,
@@ -62,12 +66,15 @@ export default function App() {
     resetAgents();
     setView("analyzing");
     setSelectedAgent(null);
+    setIsDemoMode(false);
 
     try {
       const { session_id } = await startAnalysis(description);
+      setSessionId(session_id);
       connect(session_id);
     } catch {
       console.log("Backend unavailable, running demo simulation");
+      setIsDemoMode(true);
       const activeProfile = profile ?? selectedProfile;
       demoAbort.current = runDemoSimulation(
         handleWSMessage,
@@ -80,6 +87,8 @@ export default function App() {
   const handleReset = () => {
     demoAbort.current?.();
     demoAbort.current = null;
+    setIsDemoMode(false);
+    setSessionId(null);
     resetAgents();
     setView("input");
     setSelectedAgent(null);
@@ -98,6 +107,11 @@ export default function App() {
             </div>
             <span className="text-xs font-semibold tracking-wider uppercase text-white/80">TariffTriage</span>
             <span className="text-[9px] font-mono text-white/20 ml-1">v2.0</span>
+            {isDemoMode && (
+              <span className="ml-2 px-1.5 py-0.5 rounded text-[9px] font-mono uppercase bg-amber-500/20 text-amber-400 border border-amber-500/40" title="Pre-recorded demo — start the backend for real agent analysis">
+                Demo
+              </span>
+            )}
           </div>
           <div className="h-4 w-px bg-white/[0.06]" />
           <span className="text-[10px] font-mono uppercase tracking-widest text-white/25">
@@ -151,6 +165,7 @@ export default function App() {
                     tariffRatePct={tariffRatePct}
                     getRate={tariffRatesLoaded ? getTariffRate : undefined}
                   />
+                  <AgentPipelineStatus />
                 </div>
               </div>
 
@@ -169,6 +184,7 @@ export default function App() {
                   <BusinessInput
                     onSubmit={handleSubmit}
                     onSelectProfile={setSelectedProfile}
+                    selectedProfile={selectedProfile}
                     isRunning={false}
                   />
                 </div>
@@ -238,7 +254,7 @@ export default function App() {
               exit={{ opacity: 0 }}
               className="h-full overflow-y-auto"
             >
-              <SurvivalPlan result={finalResult} onReset={handleReset} />
+              <SurvivalPlan result={finalResult} onReset={handleReset} sessionId={sessionId} />
             </motion.div>
           )}
         </AnimatePresence>

@@ -97,6 +97,9 @@ function buildPipelineDoneData(profile: BusinessProfile | null): Record<string, 
   };
 }
 
+/** Scale factor for demo delays: 1 = original (~20s), 0.25 = ~5s. */
+const DEMO_SPEED = 0.25;
+
 function buildDemoMessages(opts: DemoRunOptions = {}): { delay: number; msg: WSMessage }[] {
   const revenue = opts.revenue ?? "$8M";
   const pipelineData = buildPipelineDoneData(opts.profile ?? null);
@@ -107,49 +110,51 @@ function buildDemoMessages(opts: DemoRunOptions = {}): { delay: number; msg: WSM
   const actions = (survivalPlan?.priority_actions as Record<string, unknown>[] | undefined) ?? [];
   const totalSavings = actions.reduce((sum, a) => sum + (typeof a.estimated_savings === "number" ? a.estimated_savings : 0), 0);
 
+  const t = (ms: number) => Math.round(ms * DEMO_SPEED);
+
   return [
   // Supply Chain Analyst — chain-of-thought style
-  { delay: 300, msg: { type: "agent_start", agent: "Supply Chain Analyst" } },
-  { delay: 600, msg: { type: "agent_log", agent: "Supply Chain Analyst", message: "GET /v1/trade-data/HS-code-4407 — Fetching tariff schedule" } },
-  { delay: 1200, msg: { type: "agent_log", agent: "Supply Chain Analyst", message: "GET /v1/trade-data/HS-code-8471 — Classifying inputs" } },
-  { delay: 1800, msg: { type: "agent_log", agent: "Supply Chain Analyst", message: "Parsing business description... Mapped 7 supply chain inputs" } },
-  { delay: 2500, msg: { type: "agent_log", agent: "Supply Chain Analyst", message: "Identified 5 US-sourced inputs exposed to tariffs" } },
-  { delay: 3500, msg: { type: "agent_done", agent: "Supply Chain Analyst", data: {} } },
+  { delay: t(300), msg: { type: "agent_start", agent: "Supply Chain Analyst" } },
+  { delay: t(600), msg: { type: "agent_log", agent: "Supply Chain Analyst", message: "GET /v1/trade-data/HS-code-4407 — Fetching tariff schedule" } },
+  { delay: t(1200), msg: { type: "agent_log", agent: "Supply Chain Analyst", message: "GET /v1/trade-data/HS-code-8471 — Classifying inputs" } },
+  { delay: t(1800), msg: { type: "agent_log", agent: "Supply Chain Analyst", message: "Parsing business description... Mapped 7 supply chain inputs" } },
+  { delay: t(2500), msg: { type: "agent_log", agent: "Supply Chain Analyst", message: "Identified 5 US-sourced inputs exposed to tariffs" } },
+  { delay: t(3500), msg: { type: "agent_done", agent: "Supply Chain Analyst", data: {} } },
 
   // System RAG
-  { delay: 3800, msg: { type: "agent_log", agent: "System", status: "working", message: "Running RAG pipeline: classifying HS codes via semantic search..." } },
-  { delay: 3950, msg: { type: "agent_log", agent: "System", status: "working", message: "Retrieved top-5 HS candidates per US-sourced input from vector index" } },
-  { delay: 4150, msg: { type: "agent_log", agent: "System", status: "complete", message: "Classified 5 inputs to HS codes with tariff rates" } },
+  { delay: t(3800), msg: { type: "agent_log", agent: "System", status: "working", message: "Running RAG pipeline: classifying HS codes via semantic search..." } },
+  { delay: t(3950), msg: { type: "agent_log", agent: "System", status: "working", message: "Retrieved top-5 HS candidates per US-sourced input from vector index" } },
+  { delay: t(4150), msg: { type: "agent_log", agent: "System", status: "complete", message: "Classified 5 inputs to HS codes with tariff rates" } },
 
   // Tariff Calculator + Geopolitical — CoT style (numbers match selected profile)
-  { delay: 4000, msg: { type: "agent_start", agent: "Tariff Calculator" } },
-  { delay: 4200, msg: { type: "agent_start", agent: "Geopolitical Analyst" } },
-  { delay: 4800, msg: { type: "agent_log", agent: "Tariff Calculator", message: `Calculating margin impact on ${revenue} revenue...` } },
-  { delay: 5300, msg: { type: "agent_log", agent: "Geopolitical Analyst", message: "Analyzing US-Canada 2026 Tariff Amendments" } },
-  { delay: 6000, msg: { type: "agent_log", agent: "Geopolitical Analyst", message: "GET /v1/news/trade — Fetching live trade news (24h)" } },
-  { delay: 6500, msg: { type: "agent_log", agent: "Geopolitical Analyst", message: "Found 12 relevant news articles" } },
-  { delay: 7000, msg: { type: "agent_log", agent: "Tariff Calculator", message: "Running margin erosion scenarios at 25%, 30%, 35%, 40%" } },
-  { delay: 8000, msg: { type: "agent_log", agent: "Tariff Calculator", message: `Total tariff exposure: $${totalExposure.toLocaleString()} — Risk level: ${riskLevel}` } },
-  { delay: 8500, msg: { type: "agent_done", agent: "Tariff Calculator", data: {} } },
-  { delay: 9500, msg: { type: "agent_log", agent: "Geopolitical Analyst", message: "Escalation risk: elevated (trend: worsening) — 3 urgent alerts" } },
-  { delay: 10000, msg: { type: "agent_done", agent: "Geopolitical Analyst", data: {} } },
+  { delay: t(4000), msg: { type: "agent_start", agent: "Tariff Calculator" } },
+  { delay: t(4200), msg: { type: "agent_start", agent: "Geopolitical Analyst" } },
+  { delay: t(4800), msg: { type: "agent_log", agent: "Tariff Calculator", message: `Calculating margin impact on ${revenue} revenue...` } },
+  { delay: t(5300), msg: { type: "agent_log", agent: "Geopolitical Analyst", message: "Analyzing US-Canada 2026 Tariff Amendments" } },
+  { delay: t(6000), msg: { type: "agent_log", agent: "Geopolitical Analyst", message: "GET /v1/news/trade — Fetching live trade news (24h)" } },
+  { delay: t(6500), msg: { type: "agent_log", agent: "Geopolitical Analyst", message: "Found 12 relevant news articles" } },
+  { delay: t(7000), msg: { type: "agent_log", agent: "Tariff Calculator", message: "Running margin erosion scenarios at 25%, 30%, 35%, 40%" } },
+  { delay: t(8000), msg: { type: "agent_log", agent: "Tariff Calculator", message: `Total tariff exposure: $${totalExposure.toLocaleString()} — Risk level: ${riskLevel}` } },
+  { delay: t(8500), msg: { type: "agent_done", agent: "Tariff Calculator", data: {} } },
+  { delay: t(9500), msg: { type: "agent_log", agent: "Geopolitical Analyst", message: "Escalation risk: elevated (trend: worsening) — 3 urgent alerts" } },
+  { delay: t(10000), msg: { type: "agent_done", agent: "Geopolitical Analyst", data: {} } },
 
   // Supplier Scout
-  { delay: 10500, msg: { type: "agent_start", agent: "Supplier Scout" } },
-  { delay: 11500, msg: { type: "agent_log", agent: "Supplier Scout", message: "Searching for Canadian alternatives for 5 US-sourced inputs..." } },
-  { delay: 13000, msg: { type: "agent_log", agent: "Supplier Scout", message: `Found alternatives for ${actions.length || 5} inputs — potential savings: $${totalSavings > 0 ? totalSavings.toLocaleString() : "127,000"}` } },
-  { delay: 13500, msg: { type: "agent_done", agent: "Supplier Scout", data: {} } },
+  { delay: t(10500), msg: { type: "agent_start", agent: "Supplier Scout" } },
+  { delay: t(11500), msg: { type: "agent_log", agent: "Supplier Scout", message: "Searching for Canadian alternatives for 5 US-sourced inputs..." } },
+  { delay: t(13000), msg: { type: "agent_log", agent: "Supplier Scout", message: `Found alternatives for ${actions.length || 5} inputs — potential savings: $${totalSavings > 0 ? totalSavings.toLocaleString() : "127,000"}` } },
+  { delay: t(13500), msg: { type: "agent_done", agent: "Supplier Scout", data: {} } },
 
   // Strategy Architect
-  { delay: 14000, msg: { type: "agent_start", agent: "Strategy Architect" } },
-  { delay: 15000, msg: { type: "agent_log", agent: "Strategy Architect", message: "Synthesizing supply chain, tariff, geopolitical, and supplier data..." } },
-  { delay: 17000, msg: { type: "agent_log", agent: "Strategy Architect", message: "Generating priority actions ranked by impact..." } },
-  { delay: 19000, msg: { type: "agent_log", agent: "Strategy Architect", message: "Survival plan ready — 6 priority actions identified." } },
-  { delay: 19500, msg: { type: "agent_done", agent: "Strategy Architect", data: {} } },
+  { delay: t(14000), msg: { type: "agent_start", agent: "Strategy Architect" } },
+  { delay: t(15000), msg: { type: "agent_log", agent: "Strategy Architect", message: "Synthesizing supply chain, tariff, geopolitical, and supplier data..." } },
+  { delay: t(17000), msg: { type: "agent_log", agent: "Strategy Architect", message: "Generating priority actions ranked by impact..." } },
+  { delay: t(19000), msg: { type: "agent_log", agent: "Strategy Architect", message: "Survival plan ready — 6 priority actions identified." } },
+  { delay: t(19500), msg: { type: "agent_done", agent: "Strategy Architect", data: {} } },
 
   // Pipeline done — data is built from selected profile so results match the business
   {
-    delay: 20000,
+    delay: t(20000),
     msg: {
       type: "pipeline_done",
       data: pipelineData,

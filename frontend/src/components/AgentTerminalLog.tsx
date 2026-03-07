@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { ChainOfThoughtEntry } from "../types";
+import WorldMapIdle from "./WorldMapIdle";
 
 interface AgentTerminalLogProps {
   log: ChainOfThoughtEntry[];
@@ -39,17 +40,13 @@ export default function AgentTerminalLog({ log, isRunning, isComplete }: AgentTe
       </div>
       <div
         ref={scrollRef}
-        className="flex-1 overflow-y-auto p-3 font-mono text-[10px] leading-relaxed space-y-0.5"
+        className={`flex-1 min-h-0 overflow-y-auto font-mono text-[10px] leading-relaxed ${log.length > 0 ? "p-3 space-y-0.5" : ""}`}
         style={{
-          background: "rgba(0,0,0,0.35)",
+          background: log.length === 0 && !isRunning ? "transparent" : "rgba(0,0,0,0.35)",
           borderBottom: "1px solid rgba(255,255,255,0.04)",
         }}
       >
-        {log.length === 0 && !isRunning && (
-          <div className="text-white/20">
-            <span className="text-white/40">&gt;</span> System ready. Select a profile and click Run Analysis.
-          </div>
-        )}
+        {log.length === 0 && !isRunning && <WorldMapIdle />}
         <AnimatePresence initial={false}>
           {log.map((entry, i) => (
             <motion.div

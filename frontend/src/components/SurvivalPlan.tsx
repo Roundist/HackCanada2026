@@ -1,17 +1,47 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
+import { downloadSurvivalPlanPdf } from "../utils/exportPdf";
 
 interface SurvivalPlanProps {
   result: Record<string, unknown>;
   onReset: () => void;
+  /** When set, export uses backend PDF; otherwise client-generated PDF. */
+  sessionId?: string | null;
 }
 
-export default function SurvivalPlan({ result, onReset }: SurvivalPlanProps) {
+export default function SurvivalPlan({ result, onReset, sessionId }: SurvivalPlanProps) {
+  const [exporting, setExporting] = useState(false);
   const plan = (result.survival_plan || result) as Record<string, unknown>;
   const summary = plan.executive_summary as Record<string, unknown> | undefined;
   const actions = (plan.priority_actions || []) as Record<string, unknown>[];
   const timeline = plan.timeline as Record<string, string[]> | undefined;
   const risks = (plan.risks || []) as Record<string, unknown>[];
   const tariffImpact = result.tariff_impact as Record<string, unknown> | undefined;
+
+  const handleExportPdf = async () => {
+    setExporting(true);
+    try {
+      if (sessionId) {
+        const res = await fetch(`/api/session/${sessionId}/pdf`);
+        if (!res.ok) throw new Error("PDF not ready");
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `survival-plan-${sessionId.slice(0, 8)}.pdf`;
+        a.click();
+        URL.revokeObjectURL(url);
+      } else {
+        const name = (summary?.business_name as string)?.replace(/\s+/g, "-") ?? "survival-plan";
+        downloadSurvivalPlanPdf(result, `tariff-triage-${name}.pdf`);
+      }
+    } catch (e) {
+      console.error(e);
+      downloadSurvivalPlanPdf(result, "tariff-triage-survival-plan.pdf");
+    } finally {
+      setExporting(false);
+    }
+  };
 
   return (
     <div className="max-w-6xl mx-auto">
@@ -34,12 +64,22 @@ export default function SurvivalPlan({ result, onReset }: SurvivalPlanProps) {
             </span>
           )}
         </div>
-        <button
-          onClick={onReset}
-          className="px-3 py-1.5 text-[10px] font-mono uppercase tracking-wider border border-white/[0.06] text-white/30 hover:text-white/60 hover:border-white/[0.15] transition-all"
-        >
-          New Analysis
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleExportPdf}
+            disabled={exporting}
+            className="px-3 py-1.5 text-[10px] font-mono uppercase tracking-wider border transition-all disabled:opacity-50"
+            style={{ borderColor: "rgba(34,197,94,0.5)", color: "#22c55e", background: "rgba(34,197,94,0.08)" }}
+          >
+            {exporting ? "Exporting…" : "Export PDF"}
+          </button>
+          <button
+            onClick={onReset}
+            className="px-3 py-1.5 text-[10px] font-mono uppercase tracking-wider border border-white/[0.06] text-white/30 hover:text-white/60 hover:border-white/[0.15] transition-all"
+          >
+            New Analysis
+          </button>
+        </div>
       </div>
 
       <div className="p-6 space-y-6">
