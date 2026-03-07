@@ -36,6 +36,13 @@ async def _run_pipeline(session_id: str, business_description: str):
             "event_type": "pipeline_complete",
             "status": "complete",
             "message": "All agents complete. Survival plan ready.",
+            "data": {
+                "survival_plan": result.get("survival_plan"),
+                "tariff_impact": result.get("tariff_impact"),
+                "supply_chain_map": result.get("supply_chain_map"),
+                "alternative_suppliers": result.get("alternative_suppliers"),
+                "geopolitical_context": result.get("geopolitical_context"),
+            },
         })
     except Exception as e:
         await broadcast(session_id, {
