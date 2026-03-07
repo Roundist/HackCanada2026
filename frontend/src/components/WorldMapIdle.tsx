@@ -32,9 +32,9 @@ const NODES = [
 
 // Floating intel labels
 const INTEL_LABELS = [
-  { text: "+12% Lumber Tariff Risk", x: 95, y: 82 },
-  { text: "Electronics Exposure Rising", x: 248, y: 85 },
-  { text: "Supplier Shift Recommended", x: 165, y: 128 },
+  { text: "Softwood Lumber: 25% Surtax Active", x: 95, y: 82 },
+  { text: "HS 8542 Semiconductors: 25% Duty", x: 248, y: 85 },
+  { text: "CPTPP/CETA Alt Routes Available", x: 165, y: 128 },
 ];
 
 export default function WorldMapIdle() {

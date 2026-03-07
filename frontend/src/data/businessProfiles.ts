@@ -51,7 +51,7 @@ export const businessProfiles: BusinessProfile[] = [
     baseMarginErosionPct: 8.4,
     routes: [
       { commodity: "Hardwood Lumber", sourceCountry: "USA", sourceRegion: "Michigan, WI", transitPoint: "Detroit–Windsor", hsCode: "4407", tariffRatePct: 25 },
-      { commodity: "Upholstery Fabrics", sourceCountry: "USA", sourceRegion: "North Carolina", transitPoint: "Buffalo–Fort Erie", hsCode: "9401", tariffRatePct: 25 },
+      { commodity: "Upholstery Fabrics", sourceCountry: "USA", sourceRegion: "North Carolina", transitPoint: "Buffalo–Fort Erie", hsCode: "5907", tariffRatePct: 25 },
       { commodity: "Steel Hardware", sourceCountry: "USA", sourceRegion: "Ohio", transitPoint: "Detroit–Windsor", hsCode: "8302", tariffRatePct: 25 },
       { commodity: "Finishing Chemicals", sourceCountry: "USA", sourceRegion: "Pennsylvania", transitPoint: "Buffalo–Fort Erie", hsCode: "3209", tariffRatePct: 25 },
     ],

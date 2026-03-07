@@ -1,9 +1,9 @@
 import { motion } from "framer-motion";
 
 const INTELLIGENCE_PREVIEW_DATA = [
-  { label: "Current Tariff Rate", value: "25%", sub: "US imports to Canada", color: "#dc2626", bar: 100 },
-  { label: "Affected Sectors", value: "12", sub: "Manufacturing, Food, Tech", color: "#d97706", bar: 65 },
-  { label: "Avg Margin Erosion", value: "8.4%", sub: "Cross-sector average", color: "#dc2626", bar: 34 },
+  { label: "Current Tariff Rate", value: "25%", sub: "Canada retaliatory surtax on US goods", color: "#dc2626", bar: 100 },
+  { label: "CA–US Trade at Risk", value: "$53B", sub: "Annual Canadian imports from US affected", color: "#d97706", bar: 72 },
+  { label: "Avg SME Margin Erosion", value: "5–12%", sub: "BDC est. for import-dependent SMEs", color: "#dc2626", bar: 40 },
   { label: "Alt Suppliers", value: "--", sub: "Awaiting analysis", color: "#16a34a", bar: 0 },
   { label: "Confidence Score", value: "--", sub: "Awaiting analysis", color: "#2563eb", bar: 0 },
 ];

@@ -10,36 +10,38 @@ export interface DemoRunOptions {
 /** Build pipeline_done payload from the selected profile so data is accurate to the business. */
 function buildPipelineDoneData(profile: BusinessProfile | null): Record<string, unknown> {
   if (!profile) {
+    // Fallback based on Maple Furniture profile ($8M revenue, 65% US imports, 25% surtax)
+    // $8M × 0.65 US-sourced × ~6.6% effective tariff burden = ~$342K exposure
     return {
       tariff_impact: {
         total_tariff_exposure: 342000,
         total_margin_erosion_pct: 8.4,
         risk_level: "high",
         inputs: [
-          { name: "Hardwood Lumber", tariff_cost: 120000 },
-          { name: "Upholstery Fabrics", tariff_cost: 85000 },
-          { name: "Steel Hardware", tariff_cost: 72000 },
-          { name: "Finishing Chemicals", tariff_cost: 65000 },
+          { name: "Hardwood Lumber (HS 4407)", tariff_cost: 120000 },
+          { name: "Upholstery Fabrics (HS 5907)", tariff_cost: 85000 },
+          { name: "Steel Hardware (HS 8302)", tariff_cost: 72000 },
+          { name: "Finishing Chemicals (HS 3209)", tariff_cost: 65000 },
         ],
       },
       survival_plan: {
         executive_summary: {
-          business_name: "Demo Business",
+          business_name: "Maple Furniture Co.",
           total_tariff_exposure: 342000,
           risk_level: "high",
-          headline: "Significant tariff exposure requires immediate supplier diversification",
+          headline: "25% retaliatory surtax creates critical exposure for US-dependent supply chain",
           key_finding:
-            "65% of raw materials sourced from the US face 25% tariffs, eroding margins by 8.4 percentage points. Without action, 2 of 4 product lines become unprofitable within 6 months.",
+            "65% of raw materials sourced from the US now face Canada's 25% retaliatory surtax (Customs Tariff Act, effective March 4, 2025). At current import volumes, this erodes margins by 8.4 percentage points — making 2 of 4 product lines unprofitable within 6 months without intervention.",
         },
         priority_actions: [
-          { rank: 1, action: "Switch hardwood lumber to Canadian suppliers", description: "Ontario and Quebec have established hardwood mills.", estimated_savings: 145000, implementation_effort: "Medium", timeline_days: 45, category: "Supplier Switch" },
-          { rank: 2, action: "Apply for CUSMA tariff exemptions", description: "Several inputs may qualify for duty remission.", estimated_savings: 52000, implementation_effort: "Medium", timeline_days: 30, category: "Government Program" },
-          { rank: 3, action: "Implement strategic price increases", description: "Raise prices 5-8% on premium lines where brand supports it.", estimated_savings: 48000, implementation_effort: "Low", timeline_days: 7, category: "Pricing Strategy" },
+          { rank: 1, action: "Source hardwood lumber from Ontario/Quebec mills", description: "Domestic suppliers (e.g., Ontario Hardwood Mills) eliminate the 25% surtax entirely. Canada produces 30% of global softwood lumber.", estimated_savings: 145000, implementation_effort: "Medium", timeline_days: 45, category: "Supplier Switch" },
+          { rank: 2, action: "Apply for CUSMA duty remission program", description: "Inputs with Rules of Origin compliance may qualify for surtax exemption under CUSMA Chapter 4.", estimated_savings: 52000, implementation_effort: "Medium", timeline_days: 30, category: "Government Program" },
+          { rank: 3, action: "Implement strategic price increases on premium lines", description: "Canadian furniture market tolerates 5–8% increases on premium SKUs (StatCan CPI furniture +3.2% YoY).", estimated_savings: 48000, implementation_effort: "Low", timeline_days: 7, category: "Pricing Strategy" },
         ],
-        timeline: { days_30: ["File CUSMA applications", "Contact alternative suppliers"], days_60: ["Begin supplier transitions"], days_90: ["Full diversification review"] },
+        timeline: { days_30: ["File CUSMA duty remission applications", "Contact Ontario/Quebec lumber mills and CPTPP fabric suppliers"], days_60: ["Begin supplier transitions for top-2 cost inputs", "Monitor CBSA surtax amendment notices"], days_90: ["Complete supply chain diversification audit", "Review pricing strategy effectiveness"] },
         risks: [
-          { risk: "Canadian suppliers may have limited capacity", probability: "Medium", mitigation: "Engage multiple suppliers" },
-          { risk: "Further tariff escalation", probability: "Medium", mitigation: "Accelerate diversification" },
+          { risk: "Domestic lumber capacity constraints during trade diversion", probability: "Medium", mitigation: "Engage multiple mills across Ontario, Quebec, and BC; stagger order transitions" },
+          { risk: "Further surtax escalation beyond 25%", probability: "Low", mitigation: "Accelerate CPTPP/CETA sourcing to reduce US dependency below 30%" },
         ],
       },
     };
@@ -129,8 +131,8 @@ function buildDemoMessages(opts: DemoRunOptions = {}): { delay: number; msg: WSM
   return [
   // Supply Chain Analyst — chain-of-thought style
   { delay: t(300), msg: { type: "agent_start", agent: "Supply Chain Analyst" } },
-  { delay: t(600), msg: { type: "agent_log", agent: "Supply Chain Analyst", message: "GET /v1/trade-data/HS-code-4407 — Fetching tariff schedule" } },
-  { delay: t(1200), msg: { type: "agent_log", agent: "Supply Chain Analyst", message: "GET /v1/trade-data/HS-code-8471 — Classifying inputs" } },
+  { delay: t(600), msg: { type: "agent_log", agent: "Supply Chain Analyst", message: "GET /v1/cbsa/tariff-schedule/HS-4407 — Querying Canadian Customs Tariff" } },
+  { delay: t(1200), msg: { type: "agent_log", agent: "Supply Chain Analyst", message: "GET /v1/cbsa/tariff-schedule/HS-8302 — Classifying US-sourced inputs" } },
   { delay: t(1800), msg: { type: "agent_log", agent: "Supply Chain Analyst", message: "Parsing business description... Mapped 7 supply chain inputs" } },
   { delay: t(2500), msg: { type: "agent_log", agent: "Supply Chain Analyst", message: "Identified 5 US-sourced inputs exposed to tariffs" } },
   { delay: t(3500), msg: { type: "agent_done", agent: "Supply Chain Analyst", data: {} } },
@@ -144,14 +146,14 @@ function buildDemoMessages(opts: DemoRunOptions = {}): { delay: number; msg: WSM
   { delay: t(4000), msg: { type: "agent_start", agent: "Tariff Calculator" } },
   { delay: t(4200), msg: { type: "agent_start", agent: "Geopolitical Analyst" } },
   { delay: t(4800), msg: { type: "agent_log", agent: "Tariff Calculator", message: `Calculating margin impact on ${revenue} revenue...` } },
-  { delay: t(5300), msg: { type: "agent_log", agent: "Geopolitical Analyst", message: "Analyzing US-Canada 2026 Tariff Amendments" } },
-  { delay: t(6000), msg: { type: "agent_log", agent: "Geopolitical Analyst", message: "GET /v1/news/trade — Fetching live trade news (24h)" } },
-  { delay: t(6500), msg: { type: "agent_log", agent: "Geopolitical Analyst", message: "Found 12 relevant news articles" } },
+  { delay: t(5300), msg: { type: "agent_log", agent: "Geopolitical Analyst", message: "Analyzing Customs Tariff Act amendments — SOR/2025-28 retaliatory surtax schedule" } },
+  { delay: t(6000), msg: { type: "agent_log", agent: "Geopolitical Analyst", message: "GET /v1/cbsa/surtax-notices — Fetching CBSA customs notices (D-series)" } },
+  { delay: t(6500), msg: { type: "agent_log", agent: "Geopolitical Analyst", message: "Indexed CBSA surtax notices, USTR retaliatory filings, CUSMA dispute records" } },
   { delay: t(7000), msg: { type: "agent_log", agent: "Tariff Calculator", message: "Running margin erosion scenarios at 25%, 30%, 35%, 40%" } },
   { delay: t(8000), msg: { type: "agent_log", agent: "Tariff Calculator", message: `Total tariff exposure: $${totalExposure.toLocaleString()} — Risk level: ${riskLevel}` } },
   { delay: t(8500), msg: { type: "agent_done", agent: "Tariff Calculator", data: {} } },
-  { delay: t(9000), msg: { type: "geopolitical_alert", urgency: "high", headline: "US Considers Additional 10% Lumber Tariff", source: "Reuters", relevance: "Direct impact on lumber inputs — potential April 1 increase.", affected_inputs: ["Hardwood Lumber"], risk_adjustment: { from: "high", to: "critical" }, actionable_alert: "Lock in lumber contracts NOW before potential April 1 increase." } },
-  { delay: t(9500), msg: { type: "agent_log", agent: "Geopolitical Analyst", message: "Escalation risk: elevated (trend: worsening) — 3 urgent alerts" } },
+  { delay: t(9000), msg: { type: "geopolitical_alert", urgency: "high", headline: "Canada Expands 25% Surtax to All US-Origin Goods Under Customs Tariff Act", source: "Government of Canada — CBSA", relevance: "Effective March 4, 2025: 25% retaliatory surtax on all US-origin imports. Applies to HS chapters 1–97.", affected_inputs: ["All US-sourced inputs"], risk_adjustment: { from: "high", to: "critical" }, actionable_alert: "Accelerate CPTPP/CETA supplier sourcing — 25% surtax now applies across all commodity chapters." } },
+  { delay: t(9500), msg: { type: "agent_log", agent: "Geopolitical Analyst", message: "Escalation risk: elevated — CA–US trade corridor under active retaliatory measures since Mar 2025" } },
   { delay: t(10000), msg: { type: "agent_done", agent: "Geopolitical Analyst", data: {} } },
 
   // Supplier Scout
@@ -164,7 +166,7 @@ function buildDemoMessages(opts: DemoRunOptions = {}): { delay: number; msg: WSM
   { delay: t(14000), msg: { type: "agent_start", agent: "Strategy Architect" } },
   { delay: t(15000), msg: { type: "agent_log", agent: "Strategy Architect", message: "Synthesizing supply chain, tariff, geopolitical, and supplier data..." } },
   { delay: t(17000), msg: { type: "agent_log", agent: "Strategy Architect", message: "Generating priority actions ranked by impact..." } },
-  { delay: t(19000), msg: { type: "agent_log", agent: "Strategy Architect", message: "Survival plan ready — 6 priority actions identified." } },
+  { delay: t(19000), msg: { type: "agent_log", agent: "Strategy Architect", message: `Survival plan ready — ${actions.length || 5} priority actions identified.` } },
   { delay: t(19500), msg: { type: "agent_done", agent: "Strategy Architect", data: {} } },
 
   // Pipeline done — data is built from selected profile so results match the business

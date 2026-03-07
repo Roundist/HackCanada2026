@@ -40,10 +40,10 @@ const ROUTES: { from: string; to: string; type: "import" | "export"; risk?: bool
 
 // Intelligence nodes: [x, y, label, risk]
 const NODES: { x: number; y: number; label: string; risk: boolean }[] = [
-  { x: 128, y: 88, label: "Steel +12%", risk: true },
-  { x: 228, y: 118, label: "Auto Parts Delay", risk: true },
-  { x: 248, y: 78, label: "Border Risk Elevated", risk: true },
-  { x: 95, y: 155, label: "Pacific Clear", risk: false },
+  { x: 128, y: 88, label: "Steel HS7208 +25%", risk: true },
+  { x: 228, y: 118, label: "Auto Parts HS8708 +25%", risk: true },
+  { x: 248, y: 78, label: "Windsor–Detroit Congestion", risk: true },
+  { x: 95, y: 155, label: "CPTPP Pacific Route Open", risk: false },
 ];
 
 export default function TradeIntelligenceMap() {

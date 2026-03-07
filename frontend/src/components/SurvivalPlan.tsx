@@ -119,22 +119,33 @@ export default function SurvivalPlan({ result, onReset, sessionId }: SurvivalPla
               />
             </>
           )}
-          {summary && (
-            <>
-              <StatCard
-                label="Risk Level"
-                value={(summary.risk_level as string)?.toUpperCase() || "N/A"}
-                color="#dc2626"
-                delay={0.2}
-              />
-              <StatCard
-                label="Confidence"
-                value="87%"
-                color="#2563eb"
-                delay={0.25}
-              />
-            </>
-          )}
+          {summary && (() => {
+            const riskLevel = ((summary.risk_level as string) ?? "").toUpperCase();
+            // Confidence derived from data completeness: base 60 + up to 40 from having actions, timeline, risk assessment
+            const dataScore = Math.min(40,
+              (actions.length > 0 ? 15 : 0) +
+              (timeline ? 10 : 0) +
+              (risks.length > 0 ? 10 : 0) +
+              (tariffImpact ? 5 : 0)
+            );
+            const confidence = 60 + dataScore;
+            return (
+              <>
+                <StatCard
+                  label="Risk Level"
+                  value={riskLevel || "N/A"}
+                  color="#dc2626"
+                  delay={0.2}
+                />
+                <StatCard
+                  label="Confidence"
+                  value={`${confidence}%`}
+                  color="#2563eb"
+                  delay={0.25}
+                />
+              </>
+            );
+          })()}
         </div>
 
         {/* Tariff Simulator + Chart (PRD: What If Tariffs Go Higher?) */}
