@@ -98,18 +98,24 @@ class BaseAgent(ABC):
         ...
 
     async def run(self):
-        """Execute the full agent lifecycle."""
+        """Execute the full agent lifecycle.
+
+        Includes deliberate pacing delays so each agent phase is visible
+        in the frontend neural graph during a live demo (~40s total pipeline).
+        """
         try:
             await self.wait_for_dependencies()
 
             self.status = AgentStatus.WORKING
             await self.emit("Starting analysis...")
+            await asyncio.sleep(2)
 
             user_message = await self.build_user_message()
             await self.emit("Calling Gemini for analysis...")
 
             result = await self.call_gemini(user_message)
             await self.emit("Processing results...")
+            await asyncio.sleep(2)
 
             processed = await self.process_result(result)
             self.shared_memory[self.output_key] = processed
@@ -117,6 +123,7 @@ class BaseAgent(ABC):
             # Persist to Backboard.io shared memory
             await write_shared_memory(self.output_key, processed)
 
+            await asyncio.sleep(1)
             self.status = AgentStatus.COMPLETE
             await self.emit("Analysis complete.")
 
