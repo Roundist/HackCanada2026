@@ -160,8 +160,11 @@ export default function SurvivalPlan({ result, onReset, sessionId, hsClassificat
             className="border border-white/[0.06] p-4"
             style={{ background: "rgba(15,17,23,0.6)" }}
           >
-            <div className="text-[9px] font-mono uppercase tracking-widest text-white/20 mb-2">
+            <div className="text-[9px] font-mono uppercase tracking-widest text-white/20 mb-1">
               What If Tariffs Go Higher?
+            </div>
+            <div className="text-[8px] font-mono text-white/25 mb-3" title="Canada Border Services Agency">
+              Based on CBSA Customs Tariff 2025
             </div>
             <div className="flex items-center gap-4 mb-3">
               <input

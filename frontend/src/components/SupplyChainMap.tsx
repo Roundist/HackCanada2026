@@ -159,6 +159,11 @@ export default function SupplyChainMap({ profile, highlightedCommodity = null, t
             </g>
           )}
         </svg>
+        {getRate && (
+          <div className="text-[7px] font-mono text-white/20 mt-2 text-center" title="Rates from Canada Border Services Agency Customs Tariff 2025">
+            Rates: CBSA Customs Tariff 2025
+          </div>
+        )}
       </div>
     </div>
   );

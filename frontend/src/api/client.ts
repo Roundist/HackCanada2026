@@ -29,10 +29,20 @@ export interface TariffRow {
   notes?: string;
 }
 
+/** Response from /api/tariffs — includes CBSA source attribution. */
+export interface TariffsResponse {
+  tariffs: TariffRow[];
+  source?: string;
+  source_name?: string;
+  source_description?: string;
+  source_url?: string;
+  effective_date?: string;
+}
+
 export async function fetchTariffs(): Promise<TariffRow[]> {
   const res = await fetch("/api/tariffs");
   if (!res.ok) return [];
-  const data = await res.json();
+  const data: TariffsResponse = await res.json();
   return data?.tariffs ?? [];
 }
 
@@ -47,9 +57,23 @@ export interface SearchResult {
   effective_date: string;
 }
 
+/** Response from /api/search — results from CBSA tariff vector store. */
+export interface SearchResponse {
+  results: SearchResult[];
+  query?: string;
+  source?: string;
+  source_name?: string;
+  source_description?: string;
+  source_url?: string;
+  effective_date?: string;
+}
+
 export async function searchProducts(query: string): Promise<SearchResult[]> {
   const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
-  if (!res.ok) return [];
-  const data = await res.json();
+  if (!res.ok) {
+    if (res.status === 503) throw new Error("CBSA_LOADING");
+    throw new Error("CBSA_UNAVAILABLE");
+  }
+  const data: SearchResponse = await res.json();
   return data?.results ?? [];
 }

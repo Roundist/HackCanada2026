@@ -74,7 +74,9 @@ export default function IntelligencePreview({
           <div className="text-[9px] font-mono text-white/15 mt-1.5">
             US imports to Canada · Stress test
             {tariffRatesFromCbsa && (
-              <span className="block mt-0.5 text-white/20">Rates from CBSA (2025)</span>
+              <span className="block mt-0.5 text-white/20" title="Canada Border Services Agency Customs Tariff">
+                Rates: CBSA Customs Tariff 2025
+              </span>
             )}
           </div>
         </div>

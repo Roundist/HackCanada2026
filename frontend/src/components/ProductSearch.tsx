@@ -2,27 +2,38 @@ import { useState, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { searchProducts, type SearchResult } from "../api/client";
 
+const CBSA_ATTRIBUTION = "Canada Border Services Agency (CBSA) Customs Tariff 2025";
+
 export default function ProductSearch() {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
-  const debounceRef = useRef<ReturnType<typeof setTimeout>>();
+  const [searchError, setSearchError] = useState<string | null>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const doSearch = useCallback(async (q: string) => {
     if (q.trim().length < 2) {
       setResults([]);
       setSearched(false);
+      setSearchError(null);
       return;
     }
     setLoading(true);
+    setSearchError(null);
     try {
       const res = await searchProducts(q.trim());
       setResults(res);
       setSearched(true);
-    } catch {
+      setSearchError(null);
+    } catch (e) {
       setResults([]);
       setSearched(true);
+      setSearchError(
+        e instanceof Error && e.message === "CBSA_LOADING"
+          ? "CBSA tariff database is still loading. Try again in a moment."
+          : "CBSA tariff database unavailable. Start the backend for live data."
+      );
     } finally {
       setLoading(false);
     }
@@ -56,8 +67,11 @@ export default function ProductSearch() {
   return (
     <div className="border border-white/[0.08] rounded-lg overflow-hidden" style={{ background: "rgba(15,17,23,0.7)" }}>
       <div className="px-4 py-3 border-b border-white/[0.06]">
-        <div className="text-[9px] font-mono uppercase tracking-widest text-white/25 mb-2">
+        <div className="text-[9px] font-mono uppercase tracking-widest text-white/25 mb-1">
           Quick Tariff Lookup
+        </div>
+        <div className="text-[8px] font-mono text-white/20 mb-2" title={CBSA_ATTRIBUTION}>
+          Data: CBSA Customs Tariff 2025
         </div>
         <div className="relative">
           <input
@@ -86,6 +100,9 @@ export default function ProductSearch() {
             exit={{ opacity: 0, height: 0 }}
             className="divide-y divide-white/[0.04]"
           >
+            <div className="px-4 py-2 border-b border-white/[0.04] text-[8px] font-mono text-white/25">
+              Rates from {CBSA_ATTRIBUTION}
+            </div>
             {results.map((r, i) => (
               <motion.div
                 key={r.hs_code}
@@ -142,8 +159,17 @@ export default function ProductSearch() {
             exit={{ opacity: 0 }}
             className="px-4 py-6 text-center"
           >
-            <div className="text-[11px] text-white/30">No matching products found</div>
-            <div className="text-[9px] font-mono text-white/15 mt-1">Try a different search term</div>
+            {searchError ? (
+              <>
+                <div className="text-[11px] text-amber-400/80">{searchError}</div>
+                <div className="text-[9px] font-mono text-white/20 mt-1">Rates are from CBSA when backend is running</div>
+              </>
+            ) : (
+              <>
+                <div className="text-[11px] text-white/30">No matching products found in CBSA tariff database</div>
+                <div className="text-[9px] font-mono text-white/15 mt-1">Try a different search term</div>
+              </>
+            )}
           </motion.div>
         )}
       </AnimatePresence>

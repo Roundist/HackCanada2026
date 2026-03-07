@@ -23,6 +23,8 @@ function buildPipelineDoneData(profile: BusinessProfile | null): Record<string, 
           { name: "Steel Hardware (HS 8302)", tariff_cost: 72000 },
           { name: "Finishing Chemicals (HS 3209)", tariff_cost: 65000 },
         ],
+        source: "CBSA",
+        source_description: "CBSA Customs Tariff 2025 (demo structure)",
       },
       survival_plan: {
         executive_summary: {
@@ -89,6 +91,9 @@ function buildPipelineDoneData(profile: BusinessProfile | null): Record<string, 
       total_margin_erosion_pct: profile.baseMarginErosionPct,
       risk_level: riskLevel,
       inputs,
+      /** Attribution: demo uses same structure as CBSA Customs Tariff 2025. */
+      source: "CBSA",
+      source_description: "CBSA Customs Tariff 2025 (demo structure)",
     },
     survival_plan: {
       executive_summary: {

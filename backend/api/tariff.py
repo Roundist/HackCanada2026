@@ -17,9 +17,21 @@ async def get_tariff(hs_code: str):
     return result
 
 
+# Official source for tariff data (used by frontend for attribution)
+TARIFF_SOURCE = {
+    "source": "CBSA",
+    "source_name": "Canada Border Services Agency",
+    "source_description": "CBSA Customs Tariff",
+    "source_url": "https://www.cbsa-asfc.gc.ca/trade-commerce/tariff-tarif/2025",
+    "effective_date": "2025-01-01",
+}
+
+
 @router.get("/api/tariffs")
 async def list_tariffs():
-    """Return all tariff rates (hs_code, effective_rate, description, etc.) for frontend lookup."""
+    """Return all tariff rates (hs_code, effective_rate, description, etc.) for frontend lookup.
+    Data is loaded from tariff_data.csv, populated by the CBSA scraper (refresh_tariff_data.py).
+    """
     rows = get_all_rates()
     out = []
     for r in rows:
@@ -30,7 +42,7 @@ async def list_tariffs():
             else:
                 row[k] = v
         out.append(row)
-    return {"tariffs": out}
+    return {"tariffs": out, **TARIFF_SOURCE}
 
 
 def _clean_row(r: dict) -> dict:
@@ -69,4 +81,4 @@ async def search_products(q: str = Query(..., min_length=2, description="Product
             "effective_date": row.get("effective_date", "") if row else "",
         })
 
-    return {"query": q, "results": results}
+    return {"query": q, "results": results, **TARIFF_SOURCE}
