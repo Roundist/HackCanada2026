@@ -104,16 +104,20 @@ export default function SharedMemorySnapshot({ data }: SharedMemorySnapshotProps
           summary={`${alternatives} alternatives`}
           detail={`Potential savings: ${supplierSavings}`}
         />
-        <MemoryCard
-          keyName="geopolitical_context"
-          summary={`${articles} articles · ${alerts} alerts`}
-          detail={`Escalation: ${escalation}`}
-        />
-        <MemoryCard
-          keyName="survival_plan"
-          summary={`${actions} priority actions · ${risks} risks`}
-          detail={`Timeline items: ${timelineItems}`}
-        />
+        <div className="lg:col-span-3 flex flex-col lg:flex-row lg:justify-center gap-2.5">
+          <MemoryCard
+            keyName="geopolitical_context"
+            summary={`${articles} articles · ${alerts} alerts`}
+            detail={`Escalation: ${escalation}`}
+            className="lg:w-[32%]"
+          />
+          <MemoryCard
+            keyName="survival_plan"
+            summary={`${actions} priority actions · ${risks} risks`}
+            detail={`Timeline items: ${timelineItems}`}
+            className="lg:w-[32%]"
+          />
+        </div>
       </div>
     </div>
   );
@@ -123,13 +127,15 @@ function MemoryCard({
   keyName,
   summary,
   detail,
+  className = "",
 }: {
   keyName: string;
   summary: ReactNode;
   detail: ReactNode;
+  className?: string;
 }) {
   return (
-    <div className="border border-violet-200 bg-white rounded p-2.5">
+    <div className={`border border-violet-200 bg-white rounded p-2.5 ${className}`}>
       <div className="text-[8px] font-mono uppercase tracking-wider text-violet-700">
         {keyName}
       </div>

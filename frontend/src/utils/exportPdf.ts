@@ -211,14 +211,25 @@ export function downloadSurvivalPlanPdf(
       const savings = typeof a.estimated_savings === "number" ? a.estimated_savings : null;
       const effort = typeof a.implementation_effort === "string" ? a.implementation_effort : "";
       const days = typeof a.timeline_days === "number" ? a.timeline_days : null;
+      const textAreaW = contentW - 40; // leave room for number + savings column
 
       const tags: string[] = [];
       if (days !== null) tags.push(`${days} days`);
       if (effort) tags.push(`Effort: ${effort}`);
-      const descLines = desc ? doc.splitTextToSize(desc, contentW - 4).length : 0;
-      const descH = descLines * (8.5 * 0.4) + 2;
-      const blockH = 8 + descH + (tags.length > 0 ? 5 : 0) + 6;
+      const titleLines = doc.splitTextToSize(actionName, textAreaW);
+      const descLines = desc ? doc.splitTextToSize(desc, textAreaW) : [];
+      const tagLines = tags.length > 0 ? doc.splitTextToSize(tags.join("   |   "), textAreaW) : [];
+      const titleLineH = 4.5;
+      const descLineH = 3.6;
+      const tagLineH = 3.2;
+      const titleH = Math.max(8, titleLines.length * titleLineH + 2);
+      const descH = descLines.length ? descLines.length * descLineH + 2 : 0;
+      const tagsH = tagLines.length ? tagLines.length * tagLineH + 2 : 0;
+      const blockH = titleH + descH + tagsH + 6;
       checkPage(blockH + 2);
+      const blockStartY = y;
+      const contentH = titleH + descH + tagsH;
+      const yStart = y + Math.max(2, (blockH - contentH) / 2);
 
       if (i % 2 === 0) {
         doc.setFillColor(248, 250, 252);
@@ -226,7 +237,7 @@ export function downloadSurvivalPlanPdf(
       }
 
       const circleX = mL + 5;
-      const circleY = y + 3.5;
+      const circleY = yStart + 3.5;
       doc.setFillColor(...navy);
       doc.circle(circleX, circleY, 3.5, "F");
       doc.setFont("helvetica", "bold");
@@ -237,29 +248,40 @@ export function downloadSurvivalPlanPdf(
       doc.setFont("helvetica", "bold");
       doc.setFontSize(10);
       doc.setTextColor(...navy);
-      doc.text(actionName, mL + 12, y + 3.5);
+      const titleStartY = yStart + 3.5;
+      titleLines.forEach((line, idx) => {
+        doc.text(line, mL + 12, titleStartY + idx * titleLineH);
+      });
 
       if (savings !== null) {
         doc.setFont("helvetica", "bold");
         doc.setFontSize(9);
         doc.setTextColor(...green);
-        doc.text(`Save $${savings.toLocaleString()}`, pageW - mR, y + 3.5, { align: "right" });
+        doc.text(`Save $${savings.toLocaleString()}`, pageW - mR, titleStartY, { align: "right" });
       }
 
-      y += 8;
+      y = yStart + titleH;
 
       if (desc) {
-        bodyText(desc, 8.5, midGray);
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(8.5);
+        doc.setTextColor(...midGray);
+        descLines.forEach((line, idx) => {
+          doc.text(line, mL + 12, y + (idx + 1) * descLineH);
+        });
+        y += descH;
       }
 
       if (tags.length > 0) {
         doc.setFont("helvetica", "normal");
         doc.setFontSize(7);
         doc.setTextColor(...midGray);
-        doc.text(tags.join("   |   "), mL + 12, y);
-        y += 5;
+        tagLines.forEach((line, idx) => {
+          doc.text(line, mL + 12, y + (idx + 1) * tagLineH);
+        });
+        y += tagsH;
       }
-      y += 4;
+      y = blockStartY + blockH;
     }
     y += 4;
   }
