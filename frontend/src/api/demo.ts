@@ -1,4 +1,4 @@
-import type { WSMessage } from "../types";
+import type { WSMessage, HsClassification, ReasoningStep } from "../types";
 import type { BusinessProfile } from "../data/businessProfiles";
 
 export interface DemoRunOptions {
@@ -113,6 +113,160 @@ function buildPipelineDoneData(profile: BusinessProfile | null): Record<string, 
   };
 }
 
+// HS code candidate data for realistic vector search results
+const HS_CANDIDATE_DB: Record<string, { hsCode: string; description: string; similarity: number }[]> = {
+  "Hardwood Lumber": [
+    { hsCode: "4407.11", description: "Wood sawn lengthwise — coniferous (pine, fir, spruce)", similarity: 0.82 },
+    { hsCode: "4407.29", description: "Wood sawn lengthwise — tropical hardwoods, other", similarity: 0.87 },
+    { hsCode: "4407.99", description: "Wood sawn lengthwise — other non-coniferous (oak, maple, walnut)", similarity: 0.94 },
+    { hsCode: "4403.99", description: "Wood in rough — other non-coniferous", similarity: 0.76 },
+    { hsCode: "4412.10", description: "Plywood — bamboo or with bamboo face", similarity: 0.61 },
+  ],
+  "Upholstery Fabrics": [
+    { hsCode: "5907.00", description: "Textile fabrics coated/impregnated — upholstery and furnishing", similarity: 0.93 },
+    { hsCode: "5903.20", description: "Textile fabrics impregnated with polyurethane", similarity: 0.85 },
+    { hsCode: "5811.00", description: "Quilted textile products — for furnishing", similarity: 0.78 },
+    { hsCode: "5407.52", description: "Woven fabrics of polyester — dyed", similarity: 0.71 },
+    { hsCode: "5112.19", description: "Woven fabrics of combed wool — mixed", similarity: 0.63 },
+  ],
+  "Steel Hardware": [
+    { hsCode: "8302.10", description: "Base metal hinges for furniture, doors", similarity: 0.96 },
+    { hsCode: "8302.42", description: "Base metal mountings and fittings — for furniture", similarity: 0.91 },
+    { hsCode: "8301.40", description: "Locks — padlocks, clasp locks", similarity: 0.74 },
+    { hsCode: "7318.15", description: "Threaded screws and bolts — other", similarity: 0.68 },
+    { hsCode: "7326.90", description: "Other articles of iron or steel, n.e.s.", similarity: 0.59 },
+  ],
+  "Finishing Chemicals": [
+    { hsCode: "3209.10", description: "Paints/varnishes — acrylic polymer base, aqueous", similarity: 0.92 },
+    { hsCode: "3208.90", description: "Paints/varnishes — non-aqueous, other synthetic polymer", similarity: 0.88 },
+    { hsCode: "3210.00", description: "Other paints/varnishes; prepared water pigments", similarity: 0.79 },
+    { hsCode: "3212.90", description: "Pigments/dyes in forms for retail sale — other", similarity: 0.65 },
+    { hsCode: "3214.10", description: "Glaziers' putty and mastics", similarity: 0.52 },
+  ],
+  "PCB & Semiconductors": [
+    { hsCode: "8542.31", description: "Electronic integrated circuits — processors and controllers", similarity: 0.95 },
+    { hsCode: "8542.32", description: "Electronic integrated circuits — memories", similarity: 0.89 },
+    { hsCode: "8534.00", description: "Printed circuits (PCBs)", similarity: 0.91 },
+    { hsCode: "8541.40", description: "Photosensitive semiconductor devices", similarity: 0.72 },
+    { hsCode: "8543.70", description: "Other electrical machines — n.e.s.", similarity: 0.58 },
+  ],
+  "Plastic Housings": [
+    { hsCode: "3926.90", description: "Other articles of plastics — n.e.s.", similarity: 0.93 },
+    { hsCode: "3926.30", description: "Fittings for furniture, coachwork — plastics", similarity: 0.87 },
+    { hsCode: "8473.30", description: "Parts and accessories for data processing machines", similarity: 0.76 },
+    { hsCode: "3920.99", description: "Other plates/sheets of plastics — non-cellular", similarity: 0.69 },
+    { hsCode: "3923.10", description: "Boxes, cases, crates — plastics", similarity: 0.62 },
+  ],
+  "Lithium Batteries": [
+    { hsCode: "8507.60", description: "Lithium-ion accumulators (rechargeable batteries)", similarity: 0.97 },
+    { hsCode: "8507.80", description: "Other electric accumulators", similarity: 0.82 },
+    { hsCode: "8506.50", description: "Primary lithium cells and batteries", similarity: 0.78 },
+    { hsCode: "8507.10", description: "Lead-acid accumulators", similarity: 0.51 },
+    { hsCode: "8504.40", description: "Static converters (power supplies)", similarity: 0.45 },
+  ],
+  "Packaging Materials": [
+    { hsCode: "3923.29", description: "Sacks and bags of plastics — other", similarity: 0.91 },
+    { hsCode: "3923.10", description: "Boxes, cases, crates of plastics", similarity: 0.89 },
+    { hsCode: "4819.10", description: "Cartons/boxes of corrugated paper or board", similarity: 0.84 },
+    { hsCode: "3920.10", description: "Plates/sheets of ethylene polymers", similarity: 0.72 },
+    { hsCode: "7612.90", description: "Aluminium containers — other", similarity: 0.55 },
+  ],
+  "Flavoring Extracts": [
+    { hsCode: "2106.90", description: "Food preparations not elsewhere specified — flavorings", similarity: 0.94 },
+    { hsCode: "3302.10", description: "Mixtures of odoriferous substances — food/beverage industry", similarity: 0.88 },
+    { hsCode: "1302.19", description: "Vegetable saps and extracts — other", similarity: 0.75 },
+    { hsCode: "2103.90", description: "Sauces and preparations — other", similarity: 0.68 },
+    { hsCode: "2101.12", description: "Extracts of tea or maté", similarity: 0.52 },
+  ],
+  "Specialty Grains": [
+    { hsCode: "1001.99", description: "Wheat and meslin — other (specialty grain)", similarity: 0.93 },
+    { hsCode: "1008.90", description: "Other cereals — quinoa, spelt, other specialty", similarity: 0.88 },
+    { hsCode: "1104.29", description: "Cereals otherwise worked — hulled, pearled", similarity: 0.79 },
+    { hsCode: "1001.19", description: "Durum wheat — other", similarity: 0.74 },
+    { hsCode: "1005.90", description: "Maize (corn) — other", similarity: 0.61 },
+  ],
+};
+
+/** Build HS classification messages from profile routes. */
+function buildHsClassifications(
+  profile: BusinessProfile | null,
+  t: (ms: number) => number
+): { delay: number; msg: WSMessage }[] {
+  const routes = profile?.routes ?? [
+    { commodity: "Hardwood Lumber", hsCode: "4407" },
+    { commodity: "Upholstery Fabrics", hsCode: "5907" },
+    { commodity: "Steel Hardware", hsCode: "8302" },
+    { commodity: "Finishing Chemicals", hsCode: "3209" },
+  ];
+
+  return routes.map((route, i) => {
+    const candidates = HS_CANDIDATE_DB[route.commodity] ?? [
+      { hsCode: route.hsCode ?? "0000", description: route.commodity, similarity: 0.95 },
+    ];
+    const selected = candidates[0]?.hsCode.split(".")[0] === route.hsCode
+      ? candidates[0]
+      : candidates.find((c) => c.hsCode.startsWith(route.hsCode ?? "")) ?? candidates[0];
+
+    const classification: HsClassification = {
+      input: route.commodity,
+      candidates: candidates.slice(0, 5),
+      selectedCode: selected?.hsCode ?? route.hsCode ?? "0000",
+      mfnRate: [6.5, 8.0, 5.0, 6.5, 0, 6.5, 0, 8.0, 6.5, 0][i] ?? 6.5,
+      surtaxRate: 25,
+      effectiveRate: 25,
+      source: `CBSA Customs Tariff, Chapter ${(route.hsCode ?? "44").slice(0, 2)}, SOR/2025-28`,
+    };
+
+    return {
+      delay: t(3960 + i * 40),
+      msg: { type: "hs_classification" as const, classification },
+    };
+  });
+}
+
+/** Build reasoning step messages showing how tariff exposure was calculated. */
+function buildReasoningSteps(
+  profile: BusinessProfile | null,
+  totalExposure: number,
+  t: (ms: number) => number
+): { delay: number; msg: WSMessage }[] {
+  const revM = profile?.revenueNumeric ?? 8;
+  const importPct = profile ? parseInt(profile.imports.replace(/[^0-9]/g, "")) : 65;
+  const erosion = profile?.baseMarginErosionPct ?? 8.4;
+  const nRoutes = profile?.routes.length ?? 4;
+  const usImportValue = Math.round(revM * 1_000_000 * (importPct / 100));
+  const perRoute = Math.round(totalExposure / nRoutes);
+
+  const steps: ReasoningStep[] = [
+    {
+      agent: "Tariff Calculator",
+      input: `Revenue: $${revM}M, US imports: ${importPct}%`,
+      operation: `$${revM}M × ${importPct}% = $${(usImportValue / 1000).toFixed(0)}K US-sourced input value`,
+      result: `$${usImportValue.toLocaleString()} exposed to 25% surtax`,
+      timestamp: Date.now(),
+    },
+    {
+      agent: "Tariff Calculator",
+      input: `${nRoutes} classified inputs at 25% effective rate`,
+      operation: `Weighted tariff burden across HS codes: avg ${erosion.toFixed(1)}pp margin erosion`,
+      result: `Total exposure: $${totalExposure.toLocaleString()} (~$${perRoute.toLocaleString()}/input)`,
+      timestamp: Date.now(),
+    },
+    {
+      agent: "Tariff Calculator",
+      input: `Baseline margin: ${profile ? "18–22%" : "18–22%"}, erosion: ${erosion}pp`,
+      operation: `Effective margin: ${(20 - erosion).toFixed(1)}% → ${erosion > 15 ? "UNPROFITABLE" : erosion > 10 ? "CRITICAL" : "PRESSURED"}`,
+      result: erosion > 12 ? "Immediate action required" : `${Math.round(12 / erosion * 6)} months before critical threshold`,
+      timestamp: Date.now(),
+    },
+  ];
+
+  return steps.map((reasoning, i) => ({
+    delay: t(7200 + i * 200),
+    msg: { type: "reasoning_step" as const, reasoning },
+  }));
+}
+
 /** Scale factor for demo delays: 1 = original (~20s), 0.25 = ~5s. */
 const DEMO_SPEED = 0.25;
 
@@ -140,7 +294,11 @@ function buildDemoMessages(opts: DemoRunOptions = {}): { delay: number; msg: WSM
   // System RAG
   { delay: t(3800), msg: { type: "agent_log", agent: "System", status: "working", message: "Running RAG pipeline: classifying HS codes via semantic search..." } },
   { delay: t(3950), msg: { type: "agent_log", agent: "System", status: "working", message: "Retrieved top-5 HS candidates per US-sourced input from vector index" } },
-  { delay: t(4150), msg: { type: "agent_log", agent: "System", status: "complete", message: "Classified 5 inputs to HS codes with tariff rates" } },
+
+  // HS Classification Evidence — shows vector search results with similarity scores
+  ...buildHsClassifications(opts.profile ?? null, t),
+
+  { delay: t(4150), msg: { type: "agent_log", agent: "System", status: "complete", message: `Classified ${(opts.profile?.routes.length ?? 4)} inputs to HS codes with tariff rates` } },
 
   // Tariff Calculator + Geopolitical — CoT style (numbers match selected profile)
   { delay: t(4000), msg: { type: "agent_start", agent: "Tariff Calculator" } },
@@ -150,6 +308,10 @@ function buildDemoMessages(opts: DemoRunOptions = {}): { delay: number; msg: WSM
   { delay: t(6000), msg: { type: "agent_log", agent: "Geopolitical Analyst", message: "GET /v1/cbsa/surtax-notices — Fetching CBSA customs notices (D-series)" } },
   { delay: t(6500), msg: { type: "agent_log", agent: "Geopolitical Analyst", message: "Indexed CBSA surtax notices, USTR retaliatory filings, CUSMA dispute records" } },
   { delay: t(7000), msg: { type: "agent_log", agent: "Tariff Calculator", message: "Running margin erosion scenarios at 25%, 30%, 35%, 40%" } },
+
+  // Reasoning steps — show exactly how exposure was calculated
+  ...buildReasoningSteps(opts.profile ?? null, totalExposure, t),
+
   { delay: t(8000), msg: { type: "agent_log", agent: "Tariff Calculator", message: `Total tariff exposure: $${totalExposure.toLocaleString()} — Risk level: ${riskLevel}` } },
   { delay: t(8500), msg: { type: "agent_done", agent: "Tariff Calculator", data: {} } },
   { delay: t(9000), msg: { type: "geopolitical_alert", urgency: "high", headline: "Canada Expands 25% Surtax to All US-Origin Goods Under Customs Tariff Act", source: "Government of Canada — CBSA", relevance: "Effective March 4, 2025: 25% retaliatory surtax on all US-origin imports. Applies to HS chapters 1–97.", affected_inputs: ["All US-sourced inputs"], risk_adjustment: { from: "high", to: "critical" }, actionable_alert: "Accelerate CPTPP/CETA supplier sourcing — 25% surtax now applies across all commodity chapters." } },

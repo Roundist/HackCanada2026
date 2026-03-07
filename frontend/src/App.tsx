@@ -36,6 +36,8 @@ export default function App() {
     systemEvents,
     chainOfThoughtLog,
     geopoliticalAlerts,
+    hsClassifications,
+    reasoningSteps,
     handleWSMessage,
     resetAgents,
   } = useAgentState();
@@ -238,7 +240,7 @@ export default function App() {
                 <div className="flex-1 min-h-0 overflow-y-auto flex flex-col border-t border-white/[0.06]">
                   <FindingsPanel agents={agents} pipelineDone={pipelineDone} geopoliticalAlerts={geopoliticalAlerts} systemEvents={systemEvents} />
                 </div>
-                <RagTracePanel agents={agents} systemEvents={systemEvents} />
+                <RagTracePanel agents={agents} systemEvents={systemEvents} hsClassifications={hsClassifications} reasoningSteps={reasoningSteps} />
               </div>
             </motion.div>
           )}
@@ -252,7 +254,7 @@ export default function App() {
               exit={{ opacity: 0 }}
               className="min-h-full overflow-y-auto overflow-x-hidden"
             >
-              <SurvivalPlan result={finalResult} onReset={handleReset} sessionId={sessionId} />
+              <SurvivalPlan result={finalResult} onReset={handleReset} sessionId={sessionId} hsClassifications={hsClassifications} reasoningSteps={reasoningSteps} />
             </motion.div>
           )}
         </AnimatePresence>

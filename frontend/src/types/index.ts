@@ -35,9 +35,29 @@ export interface GeopoliticalAlert {
   actionable_alert: string;
 }
 
+/** HS code classification result from RAG vector search. */
+export interface HsClassification {
+  input: string;
+  candidates: { hsCode: string; description: string; similarity: number }[];
+  selectedCode: string;
+  mfnRate: number;
+  surtaxRate: number;
+  effectiveRate: number;
+  source: string;
+}
+
+/** Chain-of-thought reasoning step — shows how a number was derived. */
+export interface ReasoningStep {
+  agent: string;
+  input: string;
+  operation: string;
+  result: string;
+  timestamp: number;
+}
+
 export interface WSMessage {
   // Demo simulation format
-  type?: "agent_start" | "agent_log" | "agent_done" | "agent_error" | "pipeline_done" | "geopolitical_alert";
+  type?: "agent_start" | "agent_log" | "agent_done" | "agent_error" | "pipeline_done" | "geopolitical_alert" | "hs_classification" | "reasoning_step";
   // Backend format
   event_type?: string;
   status?: string;
@@ -54,6 +74,10 @@ export interface WSMessage {
   affected_inputs?: string[];
   risk_adjustment?: { from: string; to: string };
   actionable_alert?: string;
+  // HS classification payload
+  classification?: HsClassification;
+  // Reasoning step payload
+  reasoning?: ReasoningStep;
 }
 
 export interface DemoProfile {

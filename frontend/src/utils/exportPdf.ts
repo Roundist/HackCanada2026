@@ -21,15 +21,16 @@ export function downloadSurvivalPlanPdf(
   let y = 0;
 
   // --- Colors ---
-  const navy = [12, 35, 64] as const;
-  const darkGray = [55, 65, 81] as const;
-  const midGray = [107, 114, 128] as const;
-  const lightGray = [229, 231, 235] as const;
-  const red = [185, 28, 28] as const;
-  const amber = [180, 83, 9] as const;
-  const green = [21, 128, 61] as const;
-  const blue = [30, 64, 175] as const;
-  const white = [255, 255, 255] as const;
+  type RGB = [number, number, number];
+  const navy: RGB = [12, 35, 64];
+  const darkGray: RGB = [55, 65, 81];
+  const midGray: RGB = [107, 114, 128];
+  const lightGray: RGB = [229, 231, 235];
+  const red: RGB = [185, 28, 28];
+  const amber: RGB = [180, 83, 9];
+  const green: RGB = [21, 128, 61];
+  const blue: RGB = [30, 64, 175];
+  const white: RGB = [255, 255, 255];
 
   // --- Helpers ---
   const checkPage = (needed: number) => {
@@ -124,7 +125,7 @@ export function downloadSurvivalPlanPdf(
   // KEY METRICS ROW
   // ============================================================
   if (tariffImpact || summary) {
-    const metrics: { label: string; value: string; color: readonly [number, number, number] }[] = [];
+    const metrics: { label: string; value: string; color: RGB }[] = [];
 
     if (tariffImpact) {
       const exposure = Number(tariffImpact.total_tariff_exposure ?? 0);

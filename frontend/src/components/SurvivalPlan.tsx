@@ -2,17 +2,20 @@ import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import { downloadSurvivalPlanPdf } from "../utils/exportPdf";
 import TariffChart from "./TariffChart";
+import type { HsClassification, ReasoningStep } from "../types";
 
 interface SurvivalPlanProps {
   result: Record<string, unknown>;
   onReset: () => void;
   /** When set, export uses backend PDF; otherwise client-generated PDF. */
   sessionId?: string | null;
+  hsClassifications?: HsClassification[];
+  reasoningSteps?: ReasoningStep[];
 }
 
 const BASE_TARIFF_RATE = 25;
 
-export default function SurvivalPlan({ result, onReset, sessionId }: SurvivalPlanProps) {
+export default function SurvivalPlan({ result, onReset, sessionId, hsClassifications = [], reasoningSteps = [] }: SurvivalPlanProps) {
   const [exporting, setExporting] = useState(false);
   const [simulatedRate, setSimulatedRate] = useState(BASE_TARIFF_RATE);
   const plan = (result.survival_plan || result) as Record<string, unknown>;
@@ -342,6 +345,85 @@ export default function SurvivalPlan({ result, onReset, sessionId }: SurvivalPla
             </div>
           )}
         </div>
+        {/* HS Classification Evidence + Reasoning Chain */}
+        {(hsClassifications.length > 0 || reasoningSteps.length > 0) && (
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.35 }}
+          >
+            <div className="text-[9px] font-mono uppercase tracking-widest text-white/20 mb-3">
+              Methodology & Evidence
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              {/* HS Classification Evidence */}
+              {hsClassifications.length > 0 && (
+                <div className="border border-white/[0.04] p-4" style={{ background: "rgba(15,17,23,0.5)" }}>
+                  <div className="text-[9px] font-mono uppercase tracking-widest text-cyan-500/50 mb-3">
+                    HS Code Classification (RAG Vector Search)
+                  </div>
+                  <div className="space-y-3">
+                    {hsClassifications.map((cls) => (
+                      <div key={cls.input} className="space-y-1">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[11px] text-white/60">{cls.input}</span>
+                          <span className="text-[10px] font-mono text-cyan-400/70">{cls.selectedCode}</span>
+                        </div>
+                        {/* Similarity bar for top candidate */}
+                        <div className="flex items-center gap-2">
+                          <div className="flex-1 h-1 bg-white/[0.04] overflow-hidden">
+                            <div
+                              className="h-full"
+                              style={{ width: `${cls.candidates[0]?.similarity * 100}%`, background: "rgba(34,211,238,0.4)" }}
+                            />
+                          </div>
+                          <span className="text-[8px] font-mono text-cyan-400/50">{(cls.candidates[0]?.similarity * 100).toFixed(0)}%</span>
+                        </div>
+                        {/* Top 3 candidates inline */}
+                        <div className="flex gap-2 text-[8px] font-mono text-white/20">
+                          {cls.candidates.slice(0, 3).map((c) => (
+                            <span key={c.hsCode} className={c.hsCode === cls.selectedCode ? "text-cyan-400/50" : ""}>
+                              {c.hsCode} ({(c.similarity * 100).toFixed(0)}%)
+                            </span>
+                          ))}
+                        </div>
+                        <div className="text-[8px] font-mono text-white/15">
+                          {cls.source} | MFN {cls.mfnRate}% + Surtax {cls.surtaxRate}% = {cls.effectiveRate}%
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Reasoning Chain */}
+              {reasoningSteps.length > 0 && (
+                <div className="border border-white/[0.04] p-4" style={{ background: "rgba(15,17,23,0.5)" }}>
+                  <div className="text-[9px] font-mono uppercase tracking-widest text-rose-400/50 mb-3">
+                    Calculation Trace
+                  </div>
+                  <div className="space-y-3">
+                    {reasoningSteps.map((step, i) => (
+                      <div key={i} className="space-y-1">
+                        <div className="text-[8px] font-mono uppercase tracking-wider text-white/20">
+                          Step {i + 1}
+                        </div>
+                        <div className="text-[9px] font-mono space-y-0.5">
+                          <div className="text-white/40">{step.input}</div>
+                          <div className="text-cyan-400/50">{step.operation}</div>
+                          <div className="text-green-400/60">{step.result}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="mt-3 pt-2 border-t border-white/[0.04] text-[8px] font-mono text-white/15">
+                    All calculations derived from CBSA tariff data + business profile inputs. Not financial advice.
+                  </div>
+                </div>
+              )}
+            </div>
+          </motion.div>
+        )}
       </div>
     </div>
   );

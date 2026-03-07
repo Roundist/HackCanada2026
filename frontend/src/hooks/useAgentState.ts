@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import { AgentInfo, AgentStatus, ChainOfThoughtEntry, GeopoliticalAlert, SystemEvent, WSMessage } from "../types";
+import { AgentInfo, AgentStatus, ChainOfThoughtEntry, GeopoliticalAlert, HsClassification, ReasoningStep, SystemEvent, WSMessage } from "../types";
 
 /** Short “what this agent is doing” when idle (before run) */
 export const AGENT_IDLE_ACTIVITY: Record<string, string> = {
@@ -88,6 +88,8 @@ export function useAgentState() {
   const [systemEvents, setSystemEvents] = useState<SystemEvent[]>([]);
   const [chainOfThoughtLog, setChainOfThoughtLog] = useState<ChainOfThoughtEntry[]>([]);
   const [geopoliticalAlerts, setGeopoliticalAlerts] = useState<GeopoliticalAlert[]>([]);
+  const [hsClassifications, setHsClassifications] = useState<HsClassification[]>([]);
+  const [reasoningSteps, setReasoningSteps] = useState<ReasoningStep[]>([]);
 
   const resetAgents = useCallback(() => {
     setAgents(INITIAL_AGENTS);
@@ -96,6 +98,8 @@ export function useAgentState() {
     setSystemEvents([]);
     setChainOfThoughtLog([]);
     setGeopoliticalAlerts([]);
+    setHsClassifications([]);
+    setReasoningSteps([]);
   }, []);
 
   const updateAgent = useCallback(
@@ -164,6 +168,16 @@ export function useAgentState() {
         setGeopoliticalAlerts((prev) => [...prev, alert]);
       }
 
+      // HS classification evidence
+      if (msg.type === "hs_classification" && msg.classification) {
+        setHsClassifications((prev) => [...prev, msg.classification!]);
+      }
+
+      // Reasoning step
+      if (msg.type === "reasoning_step" && msg.reasoning) {
+        setReasoningSteps((prev) => [...prev, msg.reasoning!]);
+      }
+
       switch (msgType) {
         case "agent_start":
           if (agentId) {
@@ -221,6 +235,8 @@ export function useAgentState() {
     systemEvents,
     chainOfThoughtLog,
     geopoliticalAlerts,
+    hsClassifications,
+    reasoningSteps,
     handleWSMessage,
     resetAgents,
   };
