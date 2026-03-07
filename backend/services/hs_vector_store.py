@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+from pathlib import Path
 
 import chromadb
 import pandas as pd
@@ -9,17 +10,36 @@ from services.gemini_client import embed_text, embed_texts
 
 _collection: chromadb.Collection | None = None
 _client: chromadb.ClientAPI | None = None
+_COLLECTION_NAME = "hs_codes"
+_CHROMA_PATH = Path(__file__).resolve().parent.parent / "database" / "chroma"
 
 
 async def build_index(df: pd.DataFrame) -> None:
-    """Embed all HS code descriptions and store in ChromaDB (in-memory)."""
+    """Embed all HS code descriptions and store in persistent ChromaDB.
+
+    On restart, reuse existing embeddings if the collection size matches the
+    tariff table size to avoid re-consuming Gemini embedding quota.
+    """
     global _collection, _client
 
-    _client = chromadb.Client()
-    _collection = _client.create_collection(
-        name="hs_codes",
+    _CHROMA_PATH.mkdir(parents=True, exist_ok=True)
+    _client = chromadb.PersistentClient(path=str(_CHROMA_PATH))
+    _collection = _client.get_or_create_collection(
+        name=_COLLECTION_NAME,
         metadata={"hnsw:space": "cosine"},
     )
+
+    existing_count = _collection.count()
+    expected_count = len(df)
+    if existing_count == expected_count and existing_count > 0:
+        return
+
+    if existing_count > 0 and existing_count != expected_count:
+        _client.delete_collection(name=_COLLECTION_NAME)
+        _collection = _client.create_collection(
+            name=_COLLECTION_NAME,
+            metadata={"hnsw:space": "cosine"},
+        )
 
     texts = []
     ids = []

@@ -29,7 +29,7 @@ from services.tariff_lookup import load as load_tariff_db
 
 # path prefix -> (max_requests, window_seconds)
 _RATE_LIMITS: dict[str, tuple[int, int]] = {
-    "/api/analyze": (5, 60),       # 5 analyses per minute per IP
+    "/api/analyze": (12, 60),      # 12 analyses per minute per IP
     "/api/search": (30, 60),       # 30 searches per minute
     "/api/tariff": (60, 60),       # 60 lookups per minute
     "/api/session": (20, 60),      # 20 session requests per minute
@@ -113,6 +113,9 @@ async def rate_limit_middleware(request: Request, call_next):
     path = request.url.path
     if path.startswith("/api/"):
         ip = request.client.host if request.client else "unknown"
+        # Local dev traffic should not be throttled during live demos.
+        if ip in {"127.0.0.1", "::1", "localhost"}:
+            return await call_next(request)
         allowed, retry_after = _check_rate_limit(ip, path)
         if not allowed:
             return JSONResponse(

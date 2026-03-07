@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import os
 import time
 from abc import ABC, abstractmethod
 from typing import Any
@@ -74,8 +75,9 @@ class BaseAgent(ABC):
                 )
             await asyncio.sleep(0.3)
 
-    async def call_gemini(self, user_message: str, timeout_seconds: float = 25.0) -> dict[str, Any]:
+    async def call_gemini(self, user_message: str, timeout_seconds: float = 60.0) -> dict[str, Any]:
         """Call Gemini with this agent's system prompt. Fails with TimeoutError if Gemini takes too long."""
+        timeout_seconds = float(os.getenv("GEMINI_TIMEOUT_SECONDS", timeout_seconds))
         return await asyncio.wait_for(
             generate_json(
                 system_prompt=self.system_prompt(),
