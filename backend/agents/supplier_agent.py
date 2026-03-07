@@ -9,7 +9,7 @@ from agents.base_agent import BaseAgent
 class SupplierScoutAgent(BaseAgent):
     name = "Supplier Scout"
     accent_color = "#10B981"
-    dependencies = ["supply_chain_map", "tariff_impact"]
+    dependencies = ["supply_chain_map", "tariff_rates"]
     output_key = "alternative_suppliers"
 
     def system_prompt(self) -> str:
@@ -38,11 +38,15 @@ class SupplierScoutAgent(BaseAgent):
 
     async def build_user_message(self) -> str:
         supply_chain = self.shared_memory["supply_chain_map"]
-        tariff_impact = self.shared_memory["tariff_impact"]
-        return (
-            f"Supply Chain Map:\n{json.dumps(supply_chain, indent=2)}\n\n"
-            f"Tariff Impact Analysis:\n{json.dumps(tariff_impact, indent=2)}"
-        )
+        tariff_rates = self.shared_memory["tariff_rates"]
+        tariff_impact = self.shared_memory.get("tariff_impact")
+        parts = [
+            f"Supply Chain Map:\n{json.dumps(supply_chain, indent=2)}",
+            f"Tariff Rates (from CBSA database):\n{json.dumps(tariff_rates, indent=2)}",
+        ]
+        if tariff_impact:
+            parts.append(f"Tariff Impact Analysis:\n{json.dumps(tariff_impact, indent=2)}")
+        return "\n\n".join(parts)
 
     async def process_result(self, result: dict[str, Any]) -> dict[str, Any]:
         alts = result.get("alternatives", [])

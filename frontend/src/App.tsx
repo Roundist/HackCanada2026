@@ -11,6 +11,7 @@ import AgentPipelineStatus from "./components/AgentPipelineStatus";
 import AgentTerminalLog from "./components/AgentTerminalLog";
 import IntelligencePreview from "./components/IntelligencePreview";
 import RagTracePanel from "./components/RagTracePanel";
+import ProductSearch from "./components/ProductSearch";
 import { useAgentState } from "./hooks/useAgentState";
 import { useWebSocket } from "./hooks/useWebSocket";
 import { useTariffRates } from "./hooks/useTariffRates";
@@ -187,6 +188,7 @@ export default function App() {
                     selectedProfile={selectedProfile}
                     isRunning={false}
                   />
+                  <ProductSearch />
                 </div>
               </div>
 

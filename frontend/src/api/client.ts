@@ -35,3 +35,21 @@ export async function fetchTariffs(): Promise<TariffRow[]> {
   const data = await res.json();
   return data?.tariffs ?? [];
 }
+
+export interface SearchResult {
+  hs_code: string;
+  description: string;
+  category: string;
+  similarity: number;
+  mfn_rate: number;
+  us_retaliatory_rate: number;
+  effective_rate: number;
+  effective_date: string;
+}
+
+export async function searchProducts(query: string): Promise<SearchResult[]> {
+  const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+  if (!res.ok) return [];
+  const data = await res.json();
+  return data?.results ?? [];
+}

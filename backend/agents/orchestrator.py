@@ -17,7 +17,7 @@ class Orchestrator:
     """Coordinates the 5-agent pipeline with dependency management.
 
     Execution flow:
-        Agent 1 (Supply Chain) -> RAG HS classification -> Agent 2 + Agent 4 in parallel -> Agent 3 -> Agent 5
+        Agent 1 + news pre-fetch -> RAG HS classification (parallel) -> Agents 2+3+4 in parallel -> Agent 5
     """
 
     def __init__(
@@ -77,31 +77,50 @@ class Orchestrator:
         })
 
     async def run(self) -> dict[str, Any]:
-        """Execute the full multi-agent pipeline."""
+        """Execute the full multi-agent pipeline.
+
+        Optimised flow:
+            Phase 1: Agent 1 (Supply Chain) + news pre-fetch in parallel
+            Phase 2: RAG HS code classification (parallel per input)
+            Phase 3: Agents 2 + 3 + 4 all in parallel
+            Phase 4: Agent 5 (Strategy Architect)
+        """
 
         # Initialize Backboard.io session thread
         self.backboard_thread_id = await create_session_thread()
 
-        # Phase 1: Supply Chain Analyst (no dependencies)
+        # Phase 1: Supply Chain Analyst + pre-fetch news headlines in parallel
         agent1 = SupplyChainAgent(
             self.shared_memory, self._ws, self.business_description
         )
+        # Start a news pre-fetch that won't block Agent 1.
+        # We cache the result so GeopoliticalAgent picks it up instantly.
+        news_task = asyncio.create_task(self._prefetch_news())
         await agent1.run()
 
-        # Phase 2: RAG HS code classification
+        # Phase 2: RAG HS code classification (inputs classified in parallel)
         await self._run_rag_classification()
 
-        # Phase 3: Tariff Calculator + Geopolitical Analyst in parallel
+        # Make sure news pre-fetch is done before Agent 4 starts
+        await news_task
+
+        # Phase 3: Tariff Calculator + Supplier Scout + Geopolitical Analyst in parallel
         agent2 = TariffCalculatorAgent(self.shared_memory, self._ws)
-        agent4 = GeopoliticalAgent(self.shared_memory, self._ws)
-        await asyncio.gather(agent2.run(), agent4.run())
-
-        # Phase 4: Supplier Scout (needs supply_chain_map + tariff_impact)
         agent3 = SupplierScoutAgent(self.shared_memory, self._ws)
-        await agent3.run()
+        agent4 = GeopoliticalAgent(self.shared_memory, self._ws)
+        await asyncio.gather(agent2.run(), agent3.run(), agent4.run())
 
-        # Phase 5: Strategy Architect (needs all 4 outputs)
+        # Phase 4: Strategy Architect (needs all 4 outputs)
         agent5 = StrategyArchitectAgent(self.shared_memory, self._ws)
         await agent5.run()
 
         return self.shared_memory
+
+    async def _prefetch_news(self):
+        """Pre-fetch news during Agent 1 so Agent 4 gets a cache hit."""
+        try:
+            from services.news_fetcher import fetch_trade_news
+            # Use generic trade queries to warm the cache
+            await fetch_trade_news(["manufacturing", "trade"], ["tariff", "imports"])
+        except Exception:
+            pass  # Non-critical — Agent 4 will fetch itself if cache misses

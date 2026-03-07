@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import json
 from typing import Any
 
@@ -47,10 +48,13 @@ async def classify(product_description: str) -> dict:
 
 
 async def classify_inputs(inputs: list[dict]) -> dict[str, dict]:
-    """Classify multiple inputs, returning a map of input_name -> classification result."""
-    results = {}
-    for inp in inputs:
-        if inp.get("is_us_sourced"):
-            classification = await classify(inp["description"])
-            results[inp["name"]] = classification
-    return results
+    """Classify multiple inputs in parallel, returning a map of input_name -> classification result."""
+    us_inputs = [inp for inp in inputs if inp.get("is_us_sourced")]
+    if not us_inputs:
+        return {}
+
+    classifications = await asyncio.gather(
+        *(classify(inp["description"]) for inp in us_inputs)
+    )
+
+    return {inp["name"]: cls for inp, cls in zip(us_inputs, classifications)}
