@@ -142,5 +142,12 @@ class BaseAgent(ABC):
 
         except Exception as e:
             self.status = AgentStatus.ERROR
-            await self.emit(f"Error: {str(e)}", event_type="error")
+            err_msg = str(e).strip()
+            if "GEMINI_API_KEY" in err_msg or "API key" in err_msg.lower() or "api_key" in err_msg.lower():
+                await self.emit(
+                    "Gemini API key missing or invalid. Set GEMINI_API_KEY in backend/.env (see .env.example).",
+                    event_type="error",
+                )
+            else:
+                await self.emit(f"Error: {err_msg}", event_type="error")
             raise

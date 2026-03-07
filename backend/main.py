@@ -152,11 +152,15 @@ async def health():
 
     from services.backboard_client import is_connected as backboard_connected
 
-    return {
+    gemini_set = bool(os.getenv("GEMINI_API_KEY", "").strip())
+    out = {
         "status": "healthy",
         "tariff_db_loaded": tariff_loaded,
         "tariff_db_rows": tariff_rows,
         "vector_store_ready": _collection is not None,
-        "gemini_api_key_set": bool(os.getenv("GEMINI_API_KEY", "").strip()),
+        "gemini_api_key_set": gemini_set,
         "backboard_connected": backboard_connected(),
     }
+    if not gemini_set:
+        out["gemini_hint"] = "Set GEMINI_API_KEY in backend/.env (copy from backend/.env.example). Get a key: https://aistudio.google.com/app/apikey"
+    return out

@@ -129,13 +129,34 @@ export default function IntelligencePreview({
         </div>
 
         <div className={cardClass} style={cardStyle}>
-          <div className={labelClass}>Data coverage (preview)</div>
-          <p className={`text-[11px] leading-snug mt-1 ${isLight ? "text-gray-600" : "text-white/50"}`}>
-            This is not a grade. It reflects how much of this profile we can match to CBSA tariff codes. Higher = more inputs mapped; run analysis to see the full evidence and exact HS codes.
-          </p>
-          <div className={`text-base font-semibold mt-2 ${isLight ? "text-gray-900" : ""}`} style={{ color: isLight ? undefined : "#3b82f6" }}>
-            {profile ? `${confidenceScore}%` : "—"} coverage
+          <div className={`flex items-center justify-between gap-2 ${labelClass}`}>
+            <span>Data coverage</span>
+            {profile && (
+              <span className={`text-sm font-semibold tabular-nums ${isLight ? "text-gray-900" : ""}`} style={{ color: isLight ? undefined : "#3b82f6" }}>
+                {confidenceScore}%
+              </span>
+            )}
           </div>
+          {profile ? (
+            <>
+              <div className={`mt-2 h-2 rounded-full overflow-hidden ${isLight ? "bg-gray-200" : "bg-white/10"}`}>
+                <div
+                  className="h-full rounded-full transition-all duration-500"
+                  style={{
+                    width: `${Math.min(100, Math.max(0, confidenceScore))}%`,
+                    background: confidenceScore >= 70 ? "#16a34a" : confidenceScore >= 40 ? "#d97706" : "#dc2626",
+                  }}
+                />
+              </div>
+              <p className={`text-[10px] mt-1.5 ${isLight ? "text-gray-500" : "text-white/40"}`}>
+                Profile inputs matched to CBSA codes. Run analysis for full evidence.
+              </p>
+            </>
+          ) : (
+            <p className={`text-[10px] mt-1 ${isLight ? "text-gray-400" : "text-white/40"}`}>
+              Select a profile to see coverage.
+            </p>
+          )}
         </div>
       </div>
     </div>
