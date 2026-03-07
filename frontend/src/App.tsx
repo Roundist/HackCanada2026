@@ -7,6 +7,7 @@ import AgentTerminalLog from "./components/AgentTerminalLog";
 import IntelligencePreview from "./components/IntelligencePreview";
 import RagClassificationLive from "./components/RagClassificationLive";
 import SponsorArchitecturePanel from "./components/SponsorArchitecturePanel";
+import SharedMemorySnapshot from "./components/SharedMemorySnapshot";
 import ProductSearch from "./components/ProductSearch";
 import AgentIntelligencePanel from "./components/AgentIntelligencePanel";
 import SupplyChainFlowTable from "./components/SupplyChainFlowTable";
@@ -264,6 +265,9 @@ export default function App() {
               className="absolute inset-0 bg-gray-50"
               style={{ overflow: "auto" }}
             >
+              <div className="max-w-6xl mx-auto px-2 sm:px-4 pt-4">
+                <SharedMemorySnapshot data={finalResult} />
+              </div>
               <SurvivalPlan result={finalResult} onReset={handleReset} sessionId={sessionId} hsClassifications={hsClassifications} reasoningSteps={reasoningSteps} variant="light" onTariffImpactUpdate={updateTariffImpact} />
             </motion.div>
           )}
