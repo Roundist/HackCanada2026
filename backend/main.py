@@ -162,5 +162,5 @@ async def health():
         "backboard_connected": backboard_connected(),
     }
     if not gemini_set:
-        out["gemini_hint"] = "Set GEMINI_API_KEY in backend/.env (copy from backend/.env.example). Get a key: https://aistudio.google.com/app/apikey"
+        out["gemini_hint"] = "Set GEMINI_API_KEY in .env (repo root) or backend/.env. Get a key: https://aistudio.google.com/app/apikey"
     return out

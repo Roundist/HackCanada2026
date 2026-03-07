@@ -8,7 +8,13 @@ import re
 from typing import Any
 
 import google.generativeai as genai
-from google.api_core.exceptions import ResourceExhausted, ServiceUnavailable
+from google.api_core.exceptions import (
+    DeadlineExceeded,
+    InternalServerError,
+    ResourceExhausted,
+    ServiceUnavailable,
+    TooManyRequests,
+)
 from tenacity import (
     retry,
     retry_if_exception_type,
@@ -23,7 +29,15 @@ _GENERATION_MODEL = "gemini-2.5-flash"
 _EMBEDDING_MODEL = "models/gemini-embedding-001"
 
 _retry_decorator = retry(
-    retry=retry_if_exception_type((ResourceExhausted, ServiceUnavailable)),
+    retry=retry_if_exception_type(
+        (
+            ResourceExhausted,
+            TooManyRequests,
+            ServiceUnavailable,
+            DeadlineExceeded,
+            InternalServerError,
+        )
+    ),
     stop=stop_after_attempt(3),
     wait=wait_exponential(multiplier=1, min=2, max=30),
     before_sleep=before_sleep_log(logger, logging.WARNING),
