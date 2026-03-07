@@ -252,7 +252,8 @@ export default function App() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="absolute top-0 left-0 right-0 bottom-0 overflow-y-auto overflow-x-hidden bg-gray-50"
+              className="absolute inset-0 bg-gray-50"
+              style={{ overflow: "auto" }}
             >
               <SurvivalPlan result={finalResult} onReset={handleReset} sessionId={sessionId} hsClassifications={hsClassifications} reasoningSteps={reasoningSteps} variant="light" onTariffImpactUpdate={updateTariffImpact} />
             </motion.div>
