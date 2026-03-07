@@ -149,7 +149,7 @@ export default function App() {
               </div>
 
               {/* CENTER — Primary: one clear place for the eye to land */}
-              <div className="flex-1 flex items-start justify-center min-w-0 py-6 px-6">
+              <div className="flex-1 flex items-start justify-center min-w-0 py-6 px-6 overflow-y-auto">
                 <div className="w-full max-w-xl bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-5">
                   <div>
                     <h1 className="text-lg font-semibold text-gray-900">
