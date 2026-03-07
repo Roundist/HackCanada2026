@@ -113,7 +113,7 @@ class Orchestrator:
         self.backboard_thread_id = await create_session_thread()
 
         # Phase 1: Supply Chain Analyst + pre-fetch news headlines in parallel
-        await self._phase_delay("Initializing Supply Chain Analyst...", 3)
+        await self._phase_delay("Initializing Supply Chain Analyst...", 1)
         agent1 = SupplyChainAgent(
             self.shared_memory, self._ws, self.business_description
         )
@@ -121,13 +121,13 @@ class Orchestrator:
         await agent1.run()
 
         # Transition: Phase 1 → Phase 2
-        await self._phase_delay("Supply chain mapped. Preparing RAG classification...", 3)
+        await self._phase_delay("Supply chain mapped. Preparing RAG classification...", 1)
 
         # Phase 2: RAG HS code classification (inputs classified in parallel)
         await self._run_rag_classification()
 
         # Transition: Phase 2 → Phase 3
-        await self._phase_delay("HS codes classified. Dispatching parallel agents...", 3)
+        await self._phase_delay("HS codes classified. Dispatching parallel agents...", 1)
         await news_task
 
         # Phase 3: Tariff Calculator + Supplier Scout + Geopolitical Analyst in parallel
@@ -137,7 +137,7 @@ class Orchestrator:
         await asyncio.gather(agent2.run(), agent3.run(), agent4.run())
 
         # Transition: Phase 3 → Phase 4
-        await self._phase_delay("All intelligence gathered. Synthesizing survival strategy...", 3)
+        await self._phase_delay("All intelligence gathered. Synthesizing survival strategy...", 1)
 
         # Phase 4: Strategy Architect (needs all 4 outputs)
         agent5 = StrategyArchitectAgent(self.shared_memory, self._ws)

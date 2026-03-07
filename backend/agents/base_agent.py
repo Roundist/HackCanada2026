@@ -12,9 +12,9 @@ from services.backboard_client import write_shared_memory, log_agent_activity
 # ---------------------------------------------------------------------------
 # Demo pacing: each agent's run() is guaranteed to take at least this many
 # seconds (wall-clock).  If the real work finishes faster, we pad with sleep.
-# This keeps the neural-graph animation consistent across demo runs.
+# Reduced to ~2s so full pipeline stays under ~1 minute for live demos.
 # ---------------------------------------------------------------------------
-AGENT_MIN_DURATION_SECS: float = 8.0
+AGENT_MIN_DURATION_SECS: float = 2.0
 
 
 class AgentStatus:
@@ -59,7 +59,7 @@ class BaseAgent(ABC):
         # Log to Backboard for audit trail
         await log_agent_activity(self.name, message)
 
-    async def wait_for_dependencies(self, timeout: float = 60.0):
+    async def wait_for_dependencies(self, timeout: float = 30.0):
         """Block until all dependency keys are present in shared memory."""
         if not self.dependencies:
             return
@@ -75,7 +75,7 @@ class BaseAgent(ABC):
                 )
             await asyncio.sleep(0.3)
 
-    async def call_gemini(self, user_message: str, timeout_seconds: float = 75.0) -> dict[str, Any]:
+    async def call_gemini(self, user_message: str, timeout_seconds: float = 45.0) -> dict[str, Any]:
         """Call Gemini with this agent's system prompt. Fails with TimeoutError if Gemini takes too long."""
         return await asyncio.wait_for(
             generate_json(

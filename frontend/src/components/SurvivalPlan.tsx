@@ -189,13 +189,13 @@ export default function SurvivalPlan({ result, onReset, sessionId, hsClassificat
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="border border-white/[0.06] p-4"
-            style={{ background: "rgba(15,17,23,0.6)" }}
+            className={`border p-4 rounded-lg ${t.card}`}
+            style={variant === "dark" ? { background: "rgba(15,17,23,0.6)" } : undefined}
           >
-            <div className="text-[9px] font-mono uppercase tracking-widest text-white/20 mb-1">
+            <div className={`text-[9px] font-mono uppercase tracking-widest mb-1 ${t.label}`}>
               What If Tariffs Go Higher?
             </div>
-            <div className="text-[8px] font-mono text-white/25 mb-3" title="Canada Border Services Agency">
+            <div className={`text-[8px] font-mono mb-3 ${t.muted}`} title="Canada Border Services Agency">
               Based on CBSA Customs Tariff 2025
             </div>
             <div className="flex items-center gap-4 mb-3">
@@ -208,14 +208,16 @@ export default function SurvivalPlan({ result, onReset, sessionId, hsClassificat
                 onChange={(e) => setSimulatedRate(Number(e.target.value))}
                 className="flex-1 h-2 rounded-full appearance-none cursor-pointer accent-red-600"
                 style={{
-                  background: `linear-gradient(to right, #dc2626 0%, #dc2626 ${(simulatedRate / 50) * 100}%, rgba(255,255,255,0.08) ${(simulatedRate / 50) * 100}%)`,
+                  background: variant === "light"
+                    ? `linear-gradient(to right, #dc2626 0%, #dc2626 ${(simulatedRate / 50) * 100}%, #e5e7eb ${(simulatedRate / 50) * 100}%)`
+                    : `linear-gradient(to right, #dc2626 0%, #dc2626 ${(simulatedRate / 50) * 100}%, rgba(255,255,255,0.08) ${(simulatedRate / 50) * 100}%)`,
                 }}
               />
-              <span className="text-sm font-semibold tabular-nums text-red-400 min-w-[3rem]">
+              <span className={`text-sm font-semibold tabular-nums min-w-[3rem] ${variant === "light" ? "text-red-600" : "text-red-400"}`}>
                 {simulatedRate}%
               </span>
             </div>
-            <div className="text-[10px] font-mono text-white/30 mb-3">
+            <div className={`text-[10px] font-mono mb-3 ${t.body}`}>
               Simulated exposure at {simulatedRate}%: ${simulatedExposure.toLocaleString()}
             </div>
             <TariffChart
@@ -226,7 +228,7 @@ export default function SurvivalPlan({ result, onReset, sessionId, hsClassificat
             <button
               type="button"
               onClick={() => setSimulatedRate(BASE_TARIFF_RATE)}
-              className="mt-2 text-[9px] font-mono uppercase tracking-wider text-white/40 hover:text-white/60 transition-colors"
+              className={`mt-2 text-[9px] font-mono uppercase tracking-wider transition-colors ${t.muted} ${variant === "light" ? "hover:text-gray-700" : "hover:text-white/60"}`}
             >
               Reset to current rate ({BASE_TARIFF_RATE}%)
             </button>
@@ -236,10 +238,10 @@ export default function SurvivalPlan({ result, onReset, sessionId, hsClassificat
         {/* Priority Actions */}
         {actions.length > 0 && (
           <div>
-            <div className="text-[9px] font-mono uppercase tracking-widest text-white/20 mb-3">
+            <h3 className={`text-[10px] font-mono uppercase tracking-widest mb-4 ${t.label}`}>
               Priority Actions
-            </div>
-            <div className="space-y-2">
+            </h3>
+            <div className="space-y-4">
               {actions.map((action, i) => (
                 (() => {
                   const timelineDays =
@@ -256,6 +258,14 @@ export default function SurvivalPlan({ result, onReset, sessionId, hsClassificat
                     typeof action.estimated_savings === "number"
                       ? action.estimated_savings
                       : null;
+                  const impactLabel =
+                    estimatedSavings != null
+                      ? estimatedSavings >= 50000
+                        ? "HIGH"
+                        : estimatedSavings >= 10000
+                          ? "MEDIUM"
+                          : "LOW"
+                      : null;
 
                   return (
                     <motion.div
@@ -263,47 +273,56 @@ export default function SurvivalPlan({ result, onReset, sessionId, hsClassificat
                       initial={{ opacity: 0, x: -10 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: 0.1 + i * 0.05 }}
-                      className="border border-white/[0.04] p-4 flex items-start justify-between"
-                      style={{ background: "rgba(15,17,23,0.5)" }}
+                      className={`border p-4 rounded-lg flex items-start justify-between gap-4 ${t.card}`}
+                      style={variant === "dark" ? { background: "rgba(15,17,23,0.5)" } : undefined}
                     >
-                      <div className="flex items-start gap-3">
-                        <div className="w-5 h-5 border border-white/[0.08] flex items-center justify-center text-[10px] font-mono text-white/30 shrink-0 mt-0.5">
+                      <div className="flex items-start gap-4 min-w-0">
+                        <div
+                          className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold shrink-0 ${
+                            variant === "light"
+                              ? "bg-gray-100 text-gray-700 border border-gray-200"
+                              : "border border-white/[0.08] text-white/50"
+                          }`}
+                        >
                           {(action.rank as number) || i + 1}
                         </div>
-                        <div>
-                          <div className="text-[12px] font-semibold text-white/65">
+                        <div className="min-w-0">
+                          <div className={`text-[13px] font-semibold ${t.heading}`}>
                             {action.action as string}
                           </div>
-                          <p className="text-[10px] text-white/30 mt-1 leading-relaxed max-w-lg">
+                          <p className={`text-[11px] mt-1.5 leading-relaxed max-w-xl ${t.body}`}>
                             {action.description as string}
                           </p>
-                          <div className="flex gap-4 mt-2">
-                            {timelineDays !== null && (
-                              <span className="text-[9px] font-mono text-white/20">
-                                {timelineDays}d
-                              </span>
-                            )}
-                            {effort && (
-                              <span className="text-[9px] font-mono text-white/20">
-                                Effort: {effort}
-                              </span>
-                            )}
-                            {category && (
-                              <span className="text-[9px] font-mono text-white/15">
-                                {category}
-                              </span>
-                            )}
+                          <div className={`flex flex-wrap gap-x-4 gap-y-0.5 mt-2 text-[10px] font-mono ${t.muted}`}>
+                            {timelineDays !== null && <span>{timelineDays}d</span>}
+                            {effort && <span>Effort: {effort}</span>}
+                            {category && <span>{category}</span>}
                           </div>
                         </div>
                       </div>
-                      {estimatedSavings !== null && (
-                        <div className="text-right shrink-0 ml-4">
-                          <div className="text-sm font-semibold text-green-500/80">
-                            ${estimatedSavings.toLocaleString()}
+                      <div className="flex flex-col items-end gap-1 shrink-0">
+                        {estimatedSavings !== null && (
+                          <div className="text-right">
+                            <div className={`text-sm font-semibold ${variant === "light" ? "text-green-600" : "text-green-500/80"}`}>
+                              ${estimatedSavings.toLocaleString()}
+                            </div>
+                            <div className={`text-[8px] font-mono uppercase ${t.muted}`}>Savings</div>
                           </div>
-                          <div className="text-[8px] font-mono text-white/15 uppercase">Savings</div>
-                        </div>
-                      )}
+                        )}
+                        {impactLabel && (
+                          <span
+                            className={`text-[8px] font-mono uppercase tracking-wider px-2 py-0.5 rounded ${
+                              impactLabel === "HIGH"
+                                ? "bg-green-100 text-green-800 border border-green-200"
+                                : impactLabel === "MEDIUM"
+                                  ? "bg-amber-50 text-amber-800 border border-amber-200"
+                                  : "bg-gray-100 text-gray-600 border border-gray-200"
+                            }`}
+                          >
+                            {impactLabel}
+                          </span>
+                        )}
+                      </div>
                     </motion.div>
                   );
                 })()
@@ -313,29 +332,29 @@ export default function SurvivalPlan({ result, onReset, sessionId, hsClassificat
         )}
 
         {/* Timeline + Risks */}
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {timeline && (
             <div>
-              <div className="text-[9px] font-mono uppercase tracking-widest text-white/20 mb-3">
+              <h3 className={`text-[10px] font-mono uppercase tracking-widest mb-3 ${t.label}`}>
                 Implementation Timeline
-              </div>
-              <div className="space-y-2">
+              </h3>
+              <div className="space-y-3">
                 {(["days_30", "days_60", "days_90"] as const).map((period) => {
                   const label = period.replace("days_", "") + "D";
                   const items = timeline[period] || [];
                   return (
                     <div
                       key={period}
-                      className="border border-white/[0.04] p-3"
-                      style={{ background: "rgba(15,17,23,0.5)" }}
+                      className={`border p-3 rounded-lg ${t.card}`}
+                      style={variant === "dark" ? { background: "rgba(15,17,23,0.5)" } : undefined}
                     >
-                      <div className="text-[9px] font-mono uppercase tracking-wider text-cyan-600 mb-2">
+                      <div className={`text-[9px] font-mono uppercase tracking-wider mb-2 ${variant === "light" ? "text-cyan-600" : "text-cyan-500"}`}>
                         {label}
                       </div>
                       <ul className="space-y-1.5">
                         {items.map((item, i) => (
-                          <li key={i} className="text-[10px] text-white/30 flex items-start gap-1.5">
-                            <span className="text-white/10 mt-0.5 shrink-0">-</span>
+                          <li key={i} className={`text-[11px] flex items-start gap-2 ${t.body}`}>
+                            <span className="shrink-0 mt-0.5 w-1 h-1 rounded-full bg-current opacity-60" aria-hidden />
                             <span>{item}</span>
                           </li>
                         ))}
@@ -349,33 +368,43 @@ export default function SurvivalPlan({ result, onReset, sessionId, hsClassificat
 
           {risks.length > 0 && (
             <div>
-              <div className="text-[9px] font-mono uppercase tracking-widest text-white/20 mb-3">
+              <h3 className={`text-[10px] font-mono uppercase tracking-widest mb-3 ${t.label}`}>
                 Risk Assessment
-              </div>
-              <div className="space-y-2">
-                {risks.map((risk, i) => (
-                  <div
-                    key={i}
-                    className="border border-white/[0.04] p-3"
-                    style={{ background: "rgba(15,17,23,0.5)" }}
-                  >
-                    <div className="flex items-start justify-between mb-1">
-                      <div className="text-[11px] text-white/50">{risk.risk as string}</div>
-                      <span className={`text-[8px] font-mono uppercase tracking-wider px-1.5 py-0.5 border shrink-0 ml-3 ${
-                        (risk.probability as string) === "High"
-                          ? "text-red-400/60 border-red-500/15 bg-red-500/5"
-                          : (risk.probability as string) === "Medium"
-                          ? "text-amber-400/60 border-amber-500/15 bg-amber-500/5"
-                          : "text-green-400/60 border-green-500/15 bg-green-500/5"
-                      }`}>
-                        {risk.probability as string}
-                      </span>
+              </h3>
+              <div className="space-y-3">
+                {risks.map((risk, i) => {
+                  const prob = (risk.probability as string) || "";
+                  const isHigh = prob.toLowerCase() === "high";
+                  const isMedium = prob.toLowerCase() === "medium";
+                  return (
+                    <div
+                      key={i}
+                      className={`border p-3 rounded-lg ${t.card}`}
+                      style={variant === "dark" ? { background: "rgba(15,17,23,0.5)" } : undefined}
+                    >
+                      <div className="flex items-start justify-between gap-3 mb-1.5">
+                        <div className={`text-[12px] font-medium min-w-0 ${t.heading}`}>
+                          {risk.risk as string}
+                        </div>
+                        <span
+                          className={`text-[8px] font-mono uppercase tracking-wider px-2 py-0.5 rounded shrink-0 ${
+                            isHigh
+                              ? "bg-red-50 text-red-700 border border-red-200"
+                              : isMedium
+                                ? "bg-amber-50 text-amber-700 border border-amber-200"
+                                : "bg-green-50 text-green-700 border border-green-200"
+                          }`}
+                        >
+                          {prob || "LOW"}
+                        </span>
+                      </div>
+                      <div className={`text-[10px] leading-relaxed ${t.body}`}>
+                        <span className={t.muted}>Mitigation: </span>
+                        {risk.mitigation as string}
+                      </div>
                     </div>
-                    <div className="text-[9px] font-mono text-white/20">
-                      Mitigation: {risk.mitigation as string}
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           )}
@@ -387,42 +416,40 @@ export default function SurvivalPlan({ result, onReset, sessionId, hsClassificat
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.35 }}
           >
-            <div className="text-[9px] font-mono uppercase tracking-widest text-white/20 mb-3">
+            <h3 className={`text-[10px] font-mono uppercase tracking-widest mb-3 ${t.label}`}>
               Methodology & Evidence
-            </div>
-            <div className="grid grid-cols-2 gap-4">
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* HS Classification Evidence */}
               {hsClassifications.length > 0 && (
-                <div className="border border-white/[0.04] p-4" style={{ background: "rgba(15,17,23,0.5)" }}>
-                  <div className="text-[9px] font-mono uppercase tracking-widest text-cyan-500/50 mb-3">
+                <div className={`border p-4 rounded-lg ${t.card}`} style={variant === "dark" ? { background: "rgba(15,17,23,0.5)" } : undefined}>
+                  <div className={`text-[9px] font-mono uppercase tracking-widest mb-3 ${variant === "light" ? "text-cyan-600" : "text-cyan-500/70"}`}>
                     HS Code Classification (RAG Vector Search)
                   </div>
                   <div className="space-y-3">
                     {hsClassifications.map((cls) => (
                       <div key={cls.input} className="space-y-1">
-                        <div className="flex items-center justify-between">
-                          <span className="text-[11px] text-white/60">{cls.input}</span>
-                          <span className="text-[10px] font-mono text-cyan-400/70">{cls.selectedCode}</span>
+                        <div className="flex items-center justify-between gap-2">
+                          <span className={`text-[11px] truncate ${t.body}`}>{cls.input}</span>
+                          <span className={`text-[10px] font-mono shrink-0 ${variant === "light" ? "text-cyan-600" : "text-cyan-400/70"}`}>{cls.selectedCode}</span>
                         </div>
-                        {/* Similarity bar for top candidate */}
                         <div className="flex items-center gap-2">
-                          <div className="flex-1 h-1 bg-white/[0.04] overflow-hidden">
+                          <div className={`flex-1 h-1.5 rounded overflow-hidden ${variant === "light" ? "bg-gray-200" : "bg-white/[0.04]"}`}>
                             <div
-                              className="h-full"
-                              style={{ width: `${cls.candidates[0]?.similarity * 100}%`, background: "rgba(34,211,238,0.4)" }}
+                              className="h-full rounded bg-cyan-500/60"
+                              style={{ width: `${(cls.candidates[0]?.similarity ?? 0) * 100}%` }}
                             />
                           </div>
-                          <span className="text-[8px] font-mono text-cyan-400/50">{(cls.candidates[0]?.similarity * 100).toFixed(0)}%</span>
+                          <span className={`text-[8px] font-mono ${variant === "light" ? "text-cyan-600" : "text-cyan-400/50"}`}>{((cls.candidates[0]?.similarity ?? 0) * 100).toFixed(0)}%</span>
                         </div>
-                        {/* Top 3 candidates inline */}
-                        <div className="flex gap-2 text-[8px] font-mono text-white/20">
+                        <div className={`flex gap-2 text-[8px] font-mono flex-wrap ${t.muted}`}>
                           {cls.candidates.slice(0, 3).map((c) => (
-                            <span key={c.hsCode} className={c.hsCode === cls.selectedCode ? "text-cyan-400/50" : ""}>
+                            <span key={c.hsCode} className={c.hsCode === cls.selectedCode ? (variant === "light" ? "text-cyan-600" : "text-cyan-400/50") : ""}>
                               {c.hsCode} ({(c.similarity * 100).toFixed(0)}%)
                             </span>
                           ))}
                         </div>
-                        <div className="text-[8px] font-mono text-white/15">
+                        <div className={`text-[8px] font-mono ${t.muted}`}>
                           {cls.source} | MFN {cls.mfnRate}% + Surtax {cls.surtaxRate}% = {cls.effectiveRate}%
                         </div>
                       </div>
@@ -433,25 +460,25 @@ export default function SurvivalPlan({ result, onReset, sessionId, hsClassificat
 
               {/* Reasoning Chain */}
               {reasoningSteps.length > 0 && (
-                <div className="border border-white/[0.04] p-4" style={{ background: "rgba(15,17,23,0.5)" }}>
-                  <div className="text-[9px] font-mono uppercase tracking-widest text-rose-400/50 mb-3">
+                <div className={`border p-4 rounded-lg ${t.card}`} style={variant === "dark" ? { background: "rgba(15,17,23,0.5)" } : undefined}>
+                  <div className={`text-[9px] font-mono uppercase tracking-widest mb-3 ${variant === "light" ? "text-rose-600" : "text-rose-400/50"}`}>
                     Calculation Trace
                   </div>
                   <div className="space-y-3">
                     {reasoningSteps.map((step, i) => (
                       <div key={i} className="space-y-1">
-                        <div className="text-[8px] font-mono uppercase tracking-wider text-white/20">
+                        <div className={`text-[8px] font-mono uppercase tracking-wider ${t.muted}`}>
                           Step {i + 1}
                         </div>
                         <div className="text-[9px] font-mono space-y-0.5">
-                          <div className="text-white/40">{step.input}</div>
-                          <div className="text-cyan-400/50">{step.operation}</div>
-                          <div className="text-green-400/60">{step.result}</div>
+                          <div className={t.body}>{step.input}</div>
+                          <div className={variant === "light" ? "text-cyan-600" : "text-cyan-400/50"}>{step.operation}</div>
+                          <div className={variant === "light" ? "text-green-600" : "text-green-400/60"}>{step.result}</div>
                         </div>
                       </div>
                     ))}
                   </div>
-                  <div className="mt-3 pt-2 border-t border-white/[0.04] text-[8px] font-mono text-white/15">
+                  <div className={`mt-3 pt-2 border-t ${t.divider} text-[8px] font-mono ${t.muted}`}>
                     All calculations derived from CBSA tariff data + business profile inputs. Not financial advice.
                   </div>
                 </div>
