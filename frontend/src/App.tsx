@@ -27,6 +27,7 @@ export default function App() {
   const [tariffRatePct, setTariffRatePct] = useState(25);
   const [isDemoMode, setIsDemoMode] = useState(false);
   const [sessionId, setSessionId] = useState<string | null>(null);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const demoAbort = useRef<(() => void) | null>(null);
   const {
     agents,
@@ -70,19 +71,24 @@ export default function App() {
     setView("analyzing");
     setSelectedAgent(null);
     setIsDemoMode(false);
+    setSubmitError(null);
 
     try {
       const { session_id } = await startAnalysis(description);
       setSessionId(session_id);
       connect(session_id);
     } catch {
-      console.log("Backend unavailable, running demo simulation");
+      if (profile == null) {
+        setSubmitError("Backend is required for custom business. Start the server (see README) or use a demo profile.");
+        setView("input");
+        return;
+      }
+      console.log("Backend unavailable, running demo simulation for selected profile");
       setIsDemoMode(true);
-      const activeProfile = profile ?? selectedProfile;
       demoAbort.current = runDemoSimulation(
         handleWSMessage,
         () => setTimeout(() => setView("results"), 1500),
-        { revenue: activeProfile?.revenue, profile: activeProfile ?? undefined }
+        { revenue: profile.revenue, profile }
       );
     }
   };
@@ -92,6 +98,7 @@ export default function App() {
     demoAbort.current = null;
     setIsDemoMode(false);
     setSessionId(null);
+    setSubmitError(null);
     resetAgents();
     setView("input");
     setSelectedAgent(null);
@@ -125,8 +132,9 @@ export default function App() {
           )}
         </div>
         <div className="flex items-center gap-2 text-[10px] text-gray-500">
-          <span className="px-2 py-0.5 rounded bg-gray-100 text-gray-600">{headerStatus}</span>
-          <span>{new Date().toLocaleDateString("en-US", { month: "2-digit", day: "2-digit", year: "numeric" }).replace(/\//g, "/")}</span>
+          {view !== "input" && (
+            <span className="px-2 py-0.5 rounded bg-gray-100 text-gray-600">{headerStatus}</span>
+          )}
         </div>
       </header>
 
@@ -139,18 +147,23 @@ export default function App() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="absolute inset-0 flex bg-gray-100"
+              className="absolute inset-0 flex"
             >
-              {/* LEFT — Context only (secondary): selected profile + supply chain */}
-              <div className="w-[280px] shrink-0 border-r border-gray-200 flex flex-col min-h-full bg-white/80 px-3 py-4 overflow-y-auto">
+              {/* LEFT — Distinct panel: solid background so it reads on small screens */}
+              <div className="w-[280px] shrink-0 border-r-2 border-gray-200 flex flex-col min-h-full bg-gray-50 px-3 py-4 overflow-y-auto">
                 <AgentIntelligencePanel selectedProfile={selectedProfile} />
                 <SupplyChainFlowTable profile={selectedProfile} />
               </div>
 
-              {/* CENTER — Primary: one clear place for the eye to land */}
-              <div className="flex-1 overflow-y-auto min-w-0">
+              {/* CENTER — Middle band + white card so three panels are obvious */}
+              <div className="flex-1 overflow-y-auto min-w-0 bg-gray-200">
                 <div className="min-h-full flex justify-center py-6 px-6">
-                <div className="w-full max-w-xl bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-5">
+                <div className="w-full max-w-xl bg-white rounded-xl border border-gray-200 shadow-md p-6 space-y-5">
+                  {submitError && (
+                    <div className="rounded-lg bg-amber-50 border border-amber-200 px-3 py-2.5 text-sm text-amber-800">
+                      {submitError}
+                    </div>
+                  )}
                   <div>
                     <h1 className="text-lg font-semibold text-gray-900">
                       Trade Impact Assessment
@@ -171,8 +184,8 @@ export default function App() {
                 </div>
               </div>
 
-              {/* RIGHT — Supporting snapshot (secondary) */}
-              <div className="w-[260px] shrink-0 border-l border-gray-200 flex flex-col min-h-full bg-white/80">
+              {/* RIGHT — Distinct panel: solid background + border */}
+              <div className="w-[260px] shrink-0 border-l-2 border-gray-200 flex flex-col min-h-full bg-gray-50">
                 <IntelligencePreview
                   profile={selectedProfile}
                   tariffRatePct={tariffRatePct}

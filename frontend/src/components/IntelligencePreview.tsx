@@ -129,12 +129,12 @@ export default function IntelligencePreview({
         </div>
 
         <div className={cardClass} style={cardStyle}>
-          <div className={labelClass}>Confidence in this snapshot</div>
-          <div className={`text-base font-semibold mt-0.5 ${isLight ? "text-gray-900" : ""}`} style={{ color: isLight ? undefined : "#3b82f6" }}>
-            {profile ? `${confidenceScore}%` : "—"}
-          </div>
-          <div className={subClass}>
-            How well this profile matches our tariff database; higher means more reliable projections. Run analysis for full confidence and evidence.
+          <div className={labelClass}>Data coverage (preview)</div>
+          <p className={`text-[11px] leading-snug mt-1 ${isLight ? "text-gray-600" : "text-white/50"}`}>
+            This is not a grade. It reflects how much of this profile we can match to CBSA tariff codes. Higher = more inputs mapped; run analysis to see the full evidence and exact HS codes.
+          </p>
+          <div className={`text-base font-semibold mt-2 ${isLight ? "text-gray-900" : ""}`} style={{ color: isLight ? undefined : "#3b82f6" }}>
+            {profile ? `${confidenceScore}%` : "—"} coverage
           </div>
         </div>
       </div>
