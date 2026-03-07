@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import {
   AgentInfo,
   AgentStatus,
@@ -101,6 +101,20 @@ export function useAgentState() {
   const [geopoliticalAlerts, setGeopoliticalAlerts] = useState<GeopoliticalAlert[]>([]);
   const [hsClassifications, setHsClassifications] = useState<HsClassification[]>([]);
   const [reasoningSteps, setReasoningSteps] = useState<ReasoningStep[]>([]);
+  const explicitArchitectureSeenRef = useRef(false);
+  const inferredArchitectureKeysRef = useRef<Set<string>>(new Set());
+
+  const appendArchitectureEvent = useCallback((event: ArchitectureEvent) => {
+    setArchitectureEvents((prev) => [...prev, event]);
+    setChainOfThoughtLog((prev) => [
+      ...prev,
+      {
+        agent: "System",
+        message: `[${event.component.toUpperCase()}] ${event.detail}`,
+        timestamp: event.timestamp,
+      },
+    ]);
+  }, []);
 
   const resetAgents = useCallback(() => {
     setAgents(INITIAL_AGENTS);
@@ -112,6 +126,8 @@ export function useAgentState() {
     setGeopoliticalAlerts([]);
     setHsClassifications([]);
     setReasoningSteps([]);
+    explicitArchitectureSeenRef.current = false;
+    inferredArchitectureKeysRef.current = new Set();
   }, []);
 
   /** Update tariff_impact in finalResult after a live reclassification. */
@@ -186,6 +202,7 @@ export function useAgentState() {
       }
 
       if (msg.type === "architecture_event" && msg.arch_component && msg.arch_step && msg.arch_detail) {
+        explicitArchitectureSeenRef.current = true;
         const event: ArchitectureEvent = {
           component: msg.arch_component,
           step: msg.arch_step,
@@ -197,15 +214,73 @@ export function useAgentState() {
           sponsor: msg.sponsor,
           timestamp: Date.now(),
         };
-        setArchitectureEvents((prev) => [...prev, event]);
-        setChainOfThoughtLog((prev) => [
-          ...prev,
-          {
-            agent: "System",
-            message: `[${event.component.toUpperCase()}] ${event.detail}`,
-            timestamp: event.timestamp,
-          },
-        ]);
+        appendArchitectureEvent(event);
+      } else if (!explicitArchitectureSeenRef.current) {
+        // Fallback for older backend builds that don't emit explicit architecture telemetry.
+        const emitInferred = (
+          component: ArchitectureEvent["component"],
+          step: string,
+          detail: string,
+          status: ArchitectureEvent["status"]
+        ) => {
+          const key = `${component}:${step}:${detail}`;
+          if (inferredArchitectureKeysRef.current.has(key)) return;
+          inferredArchitectureKeysRef.current.add(key);
+          appendArchitectureEvent({
+            component,
+            step,
+            detail,
+            status,
+            sponsor: component === "rag" ? "Gemini + ChromaDB" : "Backboard.io",
+            timestamp: Date.now(),
+          });
+        };
+
+        const lowerMsg = (msg.message || "").toLowerCase();
+        if (msg.agent === "System" && lowerMsg.includes("running rag pipeline")) {
+          emitInferred(
+            "rag",
+            "semantic_retrieval",
+            "RAG stage started: embedding input descriptions and retrieving top HS candidates.",
+            "working"
+          );
+        }
+        if (msg.agent === "System" && lowerMsg.includes("classified") && lowerMsg.includes("hs codes")) {
+          emitInferred(
+            "rag",
+            "classification_complete",
+            msg.message || "RAG classification complete.",
+            "complete"
+          );
+        }
+        if (
+          msg.agent === "System" &&
+          (lowerMsg.includes("initializing") || lowerMsg.includes("running rag + geopolitical") || lowerMsg.includes("running tariff + supplier"))
+        ) {
+          emitInferred(
+            "orchestration",
+            "phase_transition",
+            msg.message || "Pipeline phase transition",
+            "working"
+          );
+        }
+
+        const outputKeyByAgentId: Record<string, string> = {
+          supply_chain: "supply_chain_map",
+          tariff_calculator: "tariff_impact",
+          geopolitical: "geopolitical_context",
+          supplier_scout: "alternative_suppliers",
+          strategy: "survival_plan",
+        };
+        if (msgType === "agent_done" && agentId && outputKeyByAgentId[agentId]) {
+          const outputKey = outputKeyByAgentId[agentId];
+          emitInferred(
+            "backboard",
+            "memory_write",
+            `${msg.agent || agentId} wrote '${outputKey}' to shared memory.`,
+            "complete"
+          );
+        }
       }
 
       // HS classification evidence
@@ -265,7 +340,7 @@ export function useAgentState() {
           break;
       }
     },
-    [updateAgent]
+    [appendArchitectureEvent, updateAgent]
   );
 
   return {
