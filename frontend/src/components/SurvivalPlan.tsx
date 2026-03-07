@@ -109,20 +109,20 @@ export default function SurvivalPlan({ result, onReset, sessionId, hsClassificat
             disabled={exporting}
             className="px-3 py-1.5 text-[10px] font-mono uppercase tracking-wider border border-green-600/50 text-green-700 bg-green-50 transition-all disabled:opacity-50"
           >
-            {exporting ? "Exporting…" : "Export PDF"}
+            {exporting ? "Exporting…" : "Download PDF"}
           </button>
           <button
             onClick={onReset}
             className={`px-3 py-1.5 text-[10px] font-mono uppercase tracking-wider border transition-all ${t.button}`}
           >
-            New Analysis
+            New analysis
           </button>
         </div>
       </div>
 
       <div className="p-6 space-y-6">
-        {/* Executive Summary + Stats */}
-        <div className="grid grid-cols-4 gap-3">
+        {/* Above the fold: Summary + Key numbers */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {summary && (
             <motion.div
               initial={{ opacity: 0, y: 10 }}
@@ -156,27 +156,23 @@ export default function SurvivalPlan({ result, onReset, sessionId, hsClassificat
             </>
           )}
           {summary && (() => {
-            const riskLevel = ((summary.risk_level as string) ?? "").toUpperCase();
-            // Confidence derived from data completeness: base 60 + up to 40 from having actions, timeline, risk assessment
+            const riskLevel = (summary.risk_level as string) ?? "N/A";
             const dataScore = Math.min(40,
-              (actions.length > 0 ? 15 : 0) +
-              (timeline ? 10 : 0) +
-              (risks.length > 0 ? 10 : 0) +
-              (tariffImpact ? 5 : 0)
+              (actions.length > 0 ? 15 : 0) + (timeline ? 10 : 0) + (risks.length > 0 ? 10 : 0) + (tariffImpact ? 5 : 0)
             );
             const confidence = 60 + dataScore;
             return (
               <>
-<StatCard
-                variant={variant}
-                label="Risk Level"
+                <StatCard
+                  variant={variant}
+                  label="Risk Level"
                   value={riskLevel || "N/A"}
                   color="#dc2626"
                   delay={0.2}
                 />
-<StatCard
-                variant={variant}
-                label="Confidence"
+                <StatCard
+                  variant={variant}
+                  label="Confidence"
                   value={`${confidence}%`}
                   color="#2563eb"
                   delay={0.25}

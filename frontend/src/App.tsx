@@ -1,7 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ReactFlowProvider } from "@xyflow/react";
 import { motion, AnimatePresence } from "framer-motion";
-import NeuralGraph from "./components/NeuralGraph";
 import BusinessInput from "./components/BusinessInput";
 import ExecutionSteps from "./components/ExecutionSteps";
 import SurvivalPlan from "./components/SurvivalPlan";
@@ -12,9 +10,10 @@ import ProductSearch from "./components/ProductSearch";
 import AgentIntelligencePanel from "./components/AgentIntelligencePanel";
 import SupplyChainFlowTable from "./components/SupplyChainFlowTable";
 import RoutesMap from "./components/RoutesMap";
+import { ReactFlowProvider } from "@xyflow/react";
+import NeuralGraph from "./components/NeuralGraph";
 import { useAgentState } from "./hooks/useAgentState";
 import { useWebSocket } from "./hooks/useWebSocket";
-import { useTariffRates } from "./hooks/useTariffRates";
 import { startAnalysis } from "./api/client";
 import { runDemoSimulation } from "./api/demo";
 import type { BusinessProfile } from "./data/businessProfiles";
@@ -25,6 +24,7 @@ export default function App() {
   const [view, setView] = useState<View>("input");
   const [selectedAgent, setSelectedAgent] = useState<string | null>(null);
   const [selectedProfile, setSelectedProfile] = useState<BusinessProfile | null>(null);
+  const [tariffRatesLoaded, setTariffRatesLoaded] = useState(false);
   const [tariffRatePct, setTariffRatePct] = useState(25);
   const [isDemoMode, setIsDemoMode] = useState(false);
   const [sessionId, setSessionId] = useState<string | null>(null);
@@ -43,7 +43,6 @@ export default function App() {
     resetAgents,
     updateTariffImpact,
   } = useAgentState();
-  const { getRate: getTariffRate, loaded: tariffRatesLoaded } = useTariffRates();
 
   const onWSMessage = useCallback(
     (msg: Parameters<typeof handleWSMessage>[0]) => {
@@ -70,7 +69,6 @@ export default function App() {
     if (profile) setSelectedProfile(profile);
     resetAgents();
     setView("analyzing");
-    setSelectedAgent(null);
     setIsDemoMode(false);
     setSubmitError(null);
 
@@ -102,19 +100,18 @@ export default function App() {
     setSubmitError(null);
     resetAgents();
     setView("input");
-    setSelectedAgent(null);
   };
 
   const completedAgents = agents.filter((a) => a.status === "done");
 
   const headerStatus = useMemo(() => {
-    if (view === "results") return "INTEL COMPLETE";
+    if (view === "results") return "Done";
     if (view === "analyzing") {
       return pipelineDone
-        ? "PIPELINE STABILIZED"
-        : `${completedAgents.length}/${agents.length} AGENTS ACTIVE`;
+        ? "Building report…"
+        : `Step ${completedAgents.length + 1} of ${agents.length}`;
     }
-    return "STAGING";
+    return "Ready";
   }, [view, pipelineDone, completedAgents.length, agents.length]);
 
   return (
@@ -141,7 +138,7 @@ export default function App() {
 
       <main className="flex-1 min-h-0 overflow-hidden relative">
         <AnimatePresence mode="wait">
-          {/* INPUT VIEW */}
+          {/* INPUT VIEW — single centered column */}
           {view === "input" && (
             <motion.div
               key="input"
