@@ -47,9 +47,12 @@ async def classify(product_description: str) -> dict:
     }
 
 
+CLASSIFY_TIMEOUT_SEC = 30  # per input; avoids pipeline hanging on quota/API issues
+
+
 async def classify_inputs(inputs: list[dict]) -> dict[str, dict]:
     """Classify multiple inputs in parallel, returning a map of input_name -> classification result.
-    Uses description or name for each input. If one input fails, others still get classified.
+    Uses description or name for each input. If one input fails or times out, others still get classified.
     """
     us_inputs = [inp for inp in inputs if inp.get("is_us_sourced")]
     if not us_inputs:
@@ -59,8 +62,16 @@ async def classify_inputs(inputs: list[dict]) -> dict[str, dict]:
         name = inp.get("name", "unknown")
         desc = inp.get("description") or inp.get("name") or "general product"
         try:
-            cls = await classify(desc)
+            cls = await asyncio.wait_for(classify(desc), timeout=CLASSIFY_TIMEOUT_SEC)
             return (name, cls)
+        except asyncio.TimeoutError:
+            return (name, {
+                "hs_code": "999999",
+                "confidence": 0.0,
+                "reasoning": "Classification timed out (API quota or latency); using placeholder.",
+                "tariff_rate": get_rate("999999"),
+                "candidates": [],
+            })
         except Exception:
             return (name, {
                 "hs_code": "999999",

@@ -1,10 +1,13 @@
 from __future__ import annotations
 
 import json
+import logging
 import uuid
 from pathlib import Path
 
 from fastapi import APIRouter, BackgroundTasks, HTTPException
+
+logger = logging.getLogger(__name__)
 
 from agents.orchestrator import Orchestrator
 from api.websocket import make_ws_callback, broadcast
@@ -45,6 +48,7 @@ async def _run_pipeline(session_id: str, business_description: str):
             },
         })
     except Exception as e:
+        logger.exception("Pipeline failed for session %s: %s", session_id, e)
         await broadcast(session_id, {
             "agent": "System",
             "event_type": "pipeline_error",

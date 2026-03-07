@@ -85,7 +85,7 @@ async def lifespan(app: FastAPI):
     except FileNotFoundError:
         print("Warning: tariff_data.csv not found. Vector store not initialized.")
     except Exception as e:
-        print(f"Warning: Could not build vector index: {e}")
+        print(f"Warning: Could not build vector index: {e}. RAG will use text-search fallback at runtime.")
 
     yield
 

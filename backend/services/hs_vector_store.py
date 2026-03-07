@@ -53,32 +53,47 @@ async def build_index(df: pd.DataFrame) -> None:
         )
 
 
+def _text_search_fallback(query: str, top_k: int) -> list[dict]:
+    """Fallback when vector store or embeddings are unavailable (e.g. quota)."""
+    from services.tariff_lookup import search_by_text
+    rows = search_by_text(query, limit=top_k)
+    return [
+        {
+            "hs_code": str(r.get("hs_code", "")),
+            "description": r.get("description", ""),
+            "category": r.get("category", ""),
+            "effective_rate": float(r.get("effective_rate", 0.0)),
+            "score": 0.85 - (i * 0.05),  # slight rank order
+        }
+        for i, r in enumerate(rows)
+    ]
+
+
 async def search(query: str, top_k: int = 5) -> list[dict]:
-    """Semantic search for HS codes matching a product description."""
+    """Semantic search for HS codes; falls back to text search if vector store missing or embeddings fail (e.g. quota)."""
     if _collection is None:
-        raise RuntimeError("Vector store not initialized. Call build_index first.")
-
-    query_embedding = await embed_text(query)
-
-    results = _collection.query(
-        query_embeddings=[query_embedding],
-        n_results=top_k,
-    )
-
-    candidates = []
-    for i in range(len(results["ids"][0])):
-        meta = results["metadatas"][0][i]
-        distance = results["distances"][0][i] if results.get("distances") else 0.0
-        score = 1.0 - distance  # cosine distance to similarity
-        candidates.append({
-            "hs_code": meta["hs_code"],
-            "description": meta["description"],
-            "category": meta["category"],
-            "effective_rate": meta["effective_rate"],
-            "score": score,
-        })
-
-    return candidates
+        return await asyncio.to_thread(_text_search_fallback, query, top_k)
+    try:
+        query_embedding = await embed_text(query)
+        results = _collection.query(
+            query_embeddings=[query_embedding],
+            n_results=top_k,
+        )
+        candidates = []
+        for i in range(len(results["ids"][0])):
+            meta = results["metadatas"][0][i]
+            distance = results["distances"][0][i] if results.get("distances") else 0.0
+            score = 1.0 - distance
+            candidates.append({
+                "hs_code": meta["hs_code"],
+                "description": meta["description"],
+                "category": meta["category"],
+                "effective_rate": meta["effective_rate"],
+                "score": score,
+            })
+        return candidates
+    except Exception:
+        return await asyncio.to_thread(_text_search_fallback, query, top_k)
 
 
 async def get_neighbors(hs_code: str, top_k: int = 10) -> list[dict]:
