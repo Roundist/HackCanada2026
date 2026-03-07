@@ -12,6 +12,8 @@ import AgentTerminalLog from "./components/AgentTerminalLog";
 import IntelligencePreview from "./components/IntelligencePreview";
 import RagTracePanel from "./components/RagTracePanel";
 import ProductSearch from "./components/ProductSearch";
+import AgentIntelligencePanel from "./components/AgentIntelligencePanel";
+import SupplyChainFlowTable from "./components/SupplyChainFlowTable";
 import { useAgentState } from "./hooks/useAgentState";
 import { useWebSocket } from "./hooks/useWebSocket";
 import { useTariffRates } from "./hooks/useTariffRates";
@@ -110,29 +112,34 @@ export default function App() {
     return "STAGING";
   }, [view, pipelineDone, completedAgents.length, agents.length]);
 
+  const isInputView = view === "input";
+  const headerBg = isInputView ? "bg-white border-b border-gray-200" : "border-b border-white/[0.06]";
+  const headerStyle = isInputView ? undefined : { background: "rgba(10,10,10,0.95)" };
+
   return (
-    <div className="h-screen w-screen flex flex-col overflow-hidden grid-bg" style={{ background: "#0a0a0a" }}>
-      <header className="shrink-0 h-11 px-4 flex items-center justify-between border-b border-white/[0.06]" style={{ background: "rgba(10,10,10,0.95)" }}>
+    <div
+      className={`h-screen w-screen flex flex-col overflow-hidden ${isInputView ? "bg-gray-50" : "grid-bg"}`}
+      style={isInputView ? undefined : { background: "#0a0a0a" }}
+    >
+      <header className={`shrink-0 h-12 px-4 flex items-center justify-between ${headerBg}`} style={headerStyle}>
         <div className="flex items-center gap-6">
           <div className="flex items-center gap-2">
-            <div className="w-5 h-5 border flex items-center justify-center" style={{ borderColor: "#ff4d4d" }}>
-              <div className="w-2 h-2" style={{ background: "#ff4d4d" }} />
+            <div className="w-6 h-6 flex items-center justify-center rounded bg-red-600">
+              <span className="text-white font-bold text-sm">T</span>
             </div>
-            <span className="text-xs font-semibold tracking-wider uppercase text-white/80">TariffTriage</span>
-            <span className="text-[9px] font-mono text-white/20 ml-1">v2.0</span>
+            <span className={`text-sm font-bold tracking-wide ${isInputView ? "text-gray-900" : "text-white/80"}`}>TariffTriage</span>
+            <span className={`text-[10px] font-mono ml-1 ${isInputView ? "text-gray-500" : "text-white/20"}`}>v2.0</span>
+            <span className={`text-[10px] font-mono uppercase tracking-wider ml-1 ${isInputView ? "text-gray-400" : "text-white/40"}`}>Bloomberg-Grade Neural Ops</span>
             {isDemoMode && (
               <span className="ml-2 px-1.5 py-0.5 rounded text-[9px] font-mono uppercase bg-amber-500/20 text-amber-400 border border-amber-500/40" title="Pre-recorded demo — start the backend for real agent analysis">
                 Demo
               </span>
             )}
           </div>
-          <div className="h-4 w-px bg-white/10" />
-          <span className="text-[10px] font-mono uppercase tracking-[0.28em] text-white/40">Bloomberg-grade neural ops</span>
         </div>
-
-        <div className="flex items-center gap-3 text-[10px] font-mono text-white/60">
-          <span className="px-2 py-1 border border-white/10 rounded-sm tracking-widest">{headerStatus}</span>
-          <span className="text-white/25">{new Date().toISOString().slice(0, 10)}</span>
+        <div className={`flex items-center gap-3 text-[10px] font-mono ${isInputView ? "text-gray-600" : "text-white/60"}`}>
+          <span className={`px-2 py-1 border rounded-sm tracking-widest ${isInputView ? "border-gray-200 text-gray-600" : "border-white/10"}`}>{headerStatus}</span>
+          <span className={isInputView ? "text-gray-400" : "text-white/25"}>{new Date().toLocaleDateString("en-US", { month: "2-digit", day: "2-digit", year: "numeric" }).replace(/\//g, "/")}</span>
         </div>
       </header>
 
@@ -145,41 +152,23 @@ export default function App() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="min-h-full flex"
+              className="min-h-full flex bg-gray-50"
             >
-              {/* LEFT panel — Chain of Thought terminal + Supply Chain Map */}
-              <div className="w-[400px] shrink-0 border-r border-white/[0.06] flex flex-col min-h-full" style={{ background: "rgba(10,10,10,0.8)" }}>
-                <div className="px-4 py-3 border-b border-white/[0.06] shrink-0">
-                  <div className="text-[10px] font-mono uppercase tracking-widest text-white/25">Agent Intelligence Engine</div>
-                </div>
-                <div className="flex-1 flex flex-col min-h-[340px]" style={{ minHeight: 340 }}>
-                  <AgentTerminalLog
-                    log={chainOfThoughtLog}
-                    isRunning={false}
-                    isComplete={false}
-                  />
-                </div>
-                <div className="border-t border-white/[0.06] p-4 flex-shrink-0 flex flex-col">
-                  <SupplyChainMap
-                    profile={selectedProfile}
-                    highlightedCommodity={selectedProfile?.routes?.[0]?.commodity}
-                    tariffRatePct={tariffRatePct}
-                    getRate={tariffRatesLoaded ? getTariffRate : undefined}
-                  />
-                  <AgentPipelineStatus />
-                </div>
+              {/* LEFT — Agent Intelligence Engine + Supply Chain Flow (light theme) */}
+              <div className="w-[380px] shrink-0 border-r border-gray-200 flex flex-col min-h-full bg-white px-4 py-4 overflow-y-auto">
+                <AgentIntelligencePanel />
+                <SupplyChainFlowTable profile={selectedProfile} />
               </div>
 
-              {/* CENTER — Business Input */}
-              <div className="flex-1 flex items-start justify-center p-8 min-w-0">
+              {/* CENTER — Trade Impact Assessment (light theme) */}
+              <div className="flex-1 flex items-start justify-center p-8 min-w-0 bg-gray-50">
                 <div className="w-full max-w-2xl space-y-6 py-4">
                   <div className="space-y-2 text-center">
-                    <h2 className="text-xl font-semibold text-white/80 tracking-tight">
+                    <h2 className="text-xl font-bold text-gray-900 tracking-tight">
                       Trade Impact Assessment
                     </h2>
-                    <p className="text-xs text-white/30 leading-relaxed max-w-md mx-auto">
-                      Describe your Canadian business, supply chain dependencies, and import sources.
-                      Our AI agents will analyze tariff exposure, geopolitical risk, and survival strategy.
+                    <p className="text-sm text-gray-600 leading-relaxed max-w-md mx-auto">
+                      Analyze tariff exposure, geopolitical risk, and survival strategy for Canadian businesses with US supply chain dependencies.
                     </p>
                   </div>
                   <BusinessInput
@@ -187,19 +176,21 @@ export default function App() {
                     onSelectProfile={setSelectedProfile}
                     selectedProfile={selectedProfile}
                     isRunning={false}
+                    variant="light"
                   />
-                  <ProductSearch />
+                  <ProductSearch variant="light" />
                 </div>
               </div>
 
-              {/* RIGHT — Intelligence Preview */}
-              <div className="w-[300px] shrink-0 border-l border-white/[0.06] flex flex-col min-h-full" style={{ background: "rgba(10,10,10,0.8)" }}>
+              {/* RIGHT — Intelligence Preview (light theme) */}
+              <div className="w-[300px] shrink-0 border-l border-gray-200 flex flex-col min-h-full bg-white">
                 <IntelligencePreview
                   profile={selectedProfile}
                   tariffRatePct={tariffRatePct}
                   onTariffRateChange={setTariffRatePct}
                   analysisComplete={false}
                   tariffRatesFromCbsa={tariffRatesLoaded}
+                  variant="light"
                 />
               </div>
             </motion.div>

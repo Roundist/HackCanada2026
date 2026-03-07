@@ -62,3 +62,18 @@ def get_all_rates() -> list[dict]:
     """Return all tariff rows as list of dicts (for bulk API)."""
     _ensure_loaded()
     return _df.to_dict(orient="records")
+
+
+def search_by_text(query: str, limit: int = 15) -> list[dict]:
+    """Text search: rows where query appears in description or category (case-insensitive).
+    Ensures common terms like 'wood' or 'lumber' return obvious matches even if vector search ranks them lower.
+    """
+    _ensure_loaded()
+    q = query.strip().lower()
+    if len(q) < 2:
+        return []
+    desc_match = _df["description"].fillna("").str.lower().str.contains(q, regex=False)
+    cat_match = _df["category"].fillna("").str.lower().str.contains(q, regex=False)
+    mask = desc_match | cat_match
+    rows = _df[mask].head(limit).to_dict(orient="records")
+    return rows
