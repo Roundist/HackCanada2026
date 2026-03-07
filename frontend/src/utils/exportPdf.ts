@@ -58,18 +58,17 @@ export function downloadSurvivalPlanPdf(
   };
 
   const sectionHeading = (title: string) => {
-    checkPage(16);
-    // Accent bar
+    checkPage(18);
+    y += 2;
     doc.setFillColor(...navy);
-    doc.rect(mL, y, 3, 6, "F");
+    doc.rect(mL, y, 3, 7, "F");
     doc.setFont("helvetica", "bold");
     doc.setFontSize(11);
     doc.setTextColor(...navy);
-    doc.text(title.toUpperCase(), mL + 6, y + 5);
-    y += 12;
-    // Divider line
+    doc.text(title.toUpperCase(), mL + 6, y + 5.5);
+    y += 14;
     doc.setDrawColor(...lightGray);
-    doc.line(mL, y - 3, pageW - mR, y - 3);
+    doc.line(mL, y - 4, pageW - mR, y - 4);
   };
 
   const bodyText = (text: string, fontSize = 9.5, color = darkGray): number => {
@@ -77,13 +76,13 @@ export function downloadSurvivalPlanPdf(
     doc.setFontSize(fontSize);
     doc.setTextColor(...color);
     const lines: string[] = doc.splitTextToSize(text, contentW);
-    const lineH = fontSize * 0.42;
+    const lineH = fontSize * 0.4;
     for (const line of lines) {
       checkPage(lineH + 1);
-      doc.text(line, mL, y);
+      doc.text(line, mL, y + lineH * 0.85);
       y += lineH;
     }
-    y += 1.5;
+    y += 2;
     return lines.length;
   };
 
@@ -213,57 +212,54 @@ export function downloadSurvivalPlanPdf(
       const effort = typeof a.implementation_effort === "string" ? a.implementation_effort : "";
       const days = typeof a.timeline_days === "number" ? a.timeline_days : null;
 
-      checkPage(20);
+      const tags: string[] = [];
+      if (days !== null) tags.push(`${days} days`);
+      if (effort) tags.push(`Effort: ${effort}`);
+      const descLines = desc ? doc.splitTextToSize(desc, contentW - 4).length : 0;
+      const descH = descLines * (8.5 * 0.4) + 2;
+      const blockH = 8 + descH + (tags.length > 0 ? 5 : 0) + 6;
+      checkPage(blockH + 2);
 
-      // Row background for alternating rows
       if (i % 2 === 0) {
         doc.setFillColor(248, 250, 252);
-        doc.rect(mL, y - 2, contentW, desc ? 18 : 10, "F");
+        doc.rect(mL, y - 1, contentW, blockH + 1, "F");
       }
 
-      // Rank circle
+      const circleX = mL + 5;
+      const circleY = y + 3.5;
       doc.setFillColor(...navy);
-      doc.circle(mL + 4, y + 2, 3.5, "F");
+      doc.circle(circleX, circleY, 3.5, "F");
       doc.setFont("helvetica", "bold");
       doc.setFontSize(8);
       doc.setTextColor(...white);
-      doc.text(String(rank), mL + 4, y + 3, { align: "center" });
+      doc.text(String(rank), circleX, circleY + 1.2, { align: "center" });
 
-      // Action name
       doc.setFont("helvetica", "bold");
       doc.setFontSize(10);
       doc.setTextColor(...navy);
-      doc.text(actionName, mL + 11, y + 3);
+      doc.text(actionName, mL + 12, y + 3.5);
 
-      // Savings badge on right
       if (savings !== null) {
-        const savingsText = `Save $${savings.toLocaleString()}`;
         doc.setFont("helvetica", "bold");
         doc.setFontSize(9);
         doc.setTextColor(...green);
-        doc.text(savingsText, pageW - mR, y + 3, { align: "right" });
+        doc.text(`Save $${savings.toLocaleString()}`, pageW - mR, y + 3.5, { align: "right" });
       }
 
-      y += 7;
+      y += 8;
 
-      // Description
       if (desc) {
         bodyText(desc, 8.5, midGray);
       }
 
-      // Meta tags
-      const tags: string[] = [];
-      if (days !== null) tags.push(`${days} days`);
-      if (effort) tags.push(`Effort: ${effort}`);
       if (tags.length > 0) {
         doc.setFont("helvetica", "normal");
         doc.setFontSize(7);
         doc.setTextColor(...midGray);
-        doc.text(tags.join("   |   "), mL + 11, y);
-        y += 4;
+        doc.text(tags.join("   |   "), mL + 12, y);
+        y += 5;
       }
-
-      y += 3;
+      y += 4;
     }
     y += 4;
   }
@@ -318,66 +314,64 @@ export function downloadSurvivalPlanPdf(
   // ============================================================
   // RISK ASSESSMENT
   // ============================================================
+  const riskColW = 52;
+  const probColW = 24;
+  const mitigColW = contentW - riskColW - probColW - 4;
+
   if (risks.length > 0) {
     sectionHeading("Risk Assessment");
 
-    // Table header
-    checkPage(10);
+    checkPage(12);
     doc.setFillColor(240, 242, 245);
-    doc.rect(mL, y - 2, contentW, 7, "F");
+    doc.rect(mL, y - 2, contentW, 8, "F");
     doc.setFont("helvetica", "bold");
     doc.setFontSize(7);
     doc.setTextColor(...midGray);
-    doc.text("RISK", mL + 2, y + 2);
-    doc.text("PROBABILITY", mL + 90, y + 2);
-    doc.text("MITIGATION", mL + 115, y + 2);
-    y += 9;
+    doc.text("RISK", mL + 2, y + 3);
+    doc.text("PROBABILITY", mL + riskColW + 2, y + 3);
+    doc.text("MITIGATION", mL + riskColW + probColW + 4, y + 3);
+    y += 10;
 
     for (const r of risks) {
       const riskName = String(r.risk ?? "");
       const prob = String(r.probability ?? "");
       const mitigation = String(r.mitigation ?? "");
 
-      // Estimate height needed
-      const mitigationLines: string[] = doc.splitTextToSize(mitigation, contentW - 115);
-      const riskLines: string[] = doc.splitTextToSize(riskName, 85);
-      const rowH = Math.max(riskLines.length, mitigationLines.length) * 4 + 4;
+      const riskLines: string[] = doc.splitTextToSize(riskName, riskColW - 2);
+      const mitigationLines: string[] = doc.splitTextToSize(mitigation, mitigColW - 2);
+      const rowH = 8 + 4 * Math.max(riskLines.length, mitigationLines.length, 1);
       checkPage(rowH);
 
-      // Divider
       doc.setDrawColor(...lightGray);
       doc.line(mL, y - 1, pageW - mR, y - 1);
 
-      // Risk name
       doc.setFont("helvetica", "normal");
-      doc.setFontSize(8.5);
+      doc.setFontSize(8);
       doc.setTextColor(...darkGray);
-      let ry = y + 2;
+      let ry = y + 3;
       for (const line of riskLines) {
         doc.text(line, mL + 2, ry);
         ry += 4;
       }
 
-      // Probability badge
       const probColor = prob === "High" ? red : prob === "Medium" ? amber : green;
       doc.setFont("helvetica", "bold");
       doc.setFontSize(7.5);
       doc.setTextColor(...probColor);
-      doc.text(prob.toUpperCase(), mL + 90, y + 2);
+      doc.text(prob.toUpperCase(), mL + riskColW + 2, y + 3);
 
-      // Mitigation
       doc.setFont("helvetica", "normal");
       doc.setFontSize(8);
       doc.setTextColor(...midGray);
-      let my = y + 2;
+      let my = y + 3;
       for (const line of mitigationLines) {
-        doc.text(line, mL + 115, my);
+        doc.text(line, mL + riskColW + probColW + 4, my);
         my += 4;
       }
 
       y += rowH;
     }
-    y += 4;
+    y += 6;
   }
 
   // ============================================================
