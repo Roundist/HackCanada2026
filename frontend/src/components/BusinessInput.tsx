@@ -52,39 +52,40 @@ export default function BusinessInput({ onSubmit, isRunning }: BusinessInputProp
   };
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-5 text-white">
       {showDemos && !isRunning && (
         <div className="space-y-2">
-          <div className="text-[9px] font-mono uppercase tracking-widest text-white/20">
-            Demo Profiles -- Select to Analyze
+          <div className="text-[9px] font-mono uppercase tracking-[0.28em] text-white/35">
+            Demo Profiles
           </div>
           <div className="space-y-2">
             {DEMO_PROFILES.map((profile) => (
               <button
                 key={profile.name}
                 onClick={() => handleDemo(profile.description)}
-                className="w-full text-left border border-white/[0.05] hover:border-white/[0.12] transition-colors p-3"
-                style={{ background: "rgba(15,17,23,0.6)" }}
+                className="w-full text-left border border-white/10 bg-white/5 hover:border-white/25 transition-colors px-3 py-3"
               >
                 <div className="flex items-center justify-between mb-1.5">
-                  <div className="flex items-center gap-3">
-                    <span className="text-[12px] font-semibold text-white/70">{profile.name}</span>
-                    <span className="text-[9px] font-mono uppercase tracking-wider text-white/25">{profile.industry}</span>
+                  <div className="flex flex-col">
+                    <span className="text-[13px] font-semibold text-white">{profile.name}</span>
+                    <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/45">{profile.industry}</span>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <span className="text-[9px] font-mono text-white/20">{profile.revenue}</span>
-                    <span className="text-[9px] font-mono text-white/20">{profile.imports}</span>
-                    <span className={`text-[8px] font-mono uppercase tracking-wider px-1.5 py-0.5 border ${
-                      profile.risk === "HIGH"
-                        ? "text-red-400/70 border-red-500/20 bg-red-500/5"
-                        : "text-amber-400/70 border-amber-500/20 bg-amber-500/5"
-                    }`}>
+                  <div className="flex flex-col items-end gap-1 text-[10px] font-mono text-white/55">
+                    <span>{profile.revenue}</span>
+                    <span>{profile.imports}</span>
+                    <span
+                      className={`px-2 py-0.5 border tracking-[0.2em] ${
+                        profile.risk === "HIGH"
+                          ? "text-red-400/80 border-red-400/30 bg-red-500/10"
+                          : "text-amber-400/80 border-amber-400/30 bg-amber-500/10"
+                      }`}
+                    >
                       {profile.risk}
                     </span>
                   </div>
                 </div>
-                <div className="text-[10px] text-white/25 leading-relaxed line-clamp-2">
-                  {profile.description.slice(0, 140)}...
+                <div className="text-[10px] text-white/50 leading-relaxed line-clamp-3">
+                  {profile.description}
                 </div>
               </button>
             ))}
@@ -95,36 +96,34 @@ export default function BusinessInput({ onSubmit, isRunning }: BusinessInputProp
       {!isRunning && (
         <div className="space-y-2">
           {showDemos && (
-            <div className="text-[9px] font-mono uppercase tracking-widest text-white/20">
-              Or Enter Business Profile
+            <div className="text-[9px] font-mono uppercase tracking-[0.28em] text-white/35">
+              Or Custom Brief
             </div>
           )}
-          <div>
+          <div className="border border-white/12 bg-black/40">
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Describe your Canadian business... Include supply chain details, import sources, industry, revenue, margins. (Min 50 characters)"
-              className="w-full h-28 p-3 border border-white/[0.06] text-[12px] text-white/70 placeholder-white/15 resize-none focus:outline-none focus:border-white/[0.15] transition-colors font-mono"
-              style={{ background: "rgba(15,17,23,0.6)" }}
+              placeholder="Example: Ontario furniture maker with 65% US hardwood dependence, steel hinges from Ohio, margins 18-22%, 45 staff, seeking Canadian alternatives for lumber and hardware."
+              className="w-full h-36 p-4 text-[12px] text-white/75 placeholder-white/25 resize-none focus:outline-none bg-transparent font-mono"
             />
-            <div className="flex items-center justify-between mt-2">
-              <span className="text-[9px] font-mono text-white/15">
-                {description.length} chars / 50 min
-              </span>
+            <div className="flex items-center justify-between px-4 py-3 border-t border-white/10">
+              <span className="text-[9px] font-mono text-white/40">{description.length} chars / 50 min</span>
               <button
                 onClick={handleSubmit}
                 disabled={description.trim().length < 50}
-                className="px-5 py-2 text-[11px] font-semibold uppercase tracking-wider border transition-all disabled:opacity-20 disabled:cursor-not-allowed"
-                style={{
-                  borderColor: description.trim().length >= 50 ? "rgba(220,38,38,0.5)" : "rgba(255,255,255,0.05)",
-                  background: description.trim().length >= 50 ? "rgba(220,38,38,0.08)" : "transparent",
-                  color: description.trim().length >= 50 ? "#dc2626" : "rgba(255,255,255,0.2)",
-                }}
+                className="px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.22em] border border-cyan-400/60 text-cyan-300 hover:bg-cyan-400/10 disabled:opacity-20 disabled:cursor-not-allowed"
               >
                 Run Analysis
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {isRunning && (
+        <div className="text-[10px] font-mono text-white/45 uppercase tracking-[0.28em]">
+          Panel minimized while neural graph runs.
         </div>
       )}
     </div>

@@ -6,7 +6,7 @@ export default {
       colors: {
         dark: {
           950: "#06070a",
-          900: "#0a0b10",
+          900: "#0a0e17",
           800: "#0f1117",
           700: "#14161e",
           600: "#1a1d27",
@@ -21,7 +21,7 @@ export default {
         },
       },
       fontFamily: {
-        sans: ['"Inter"', "system-ui", "sans-serif"],
+        sans: ['"DM Sans"', "sans-serif"],
         mono: ['"JetBrains Mono"', "monospace"],
       },
     },

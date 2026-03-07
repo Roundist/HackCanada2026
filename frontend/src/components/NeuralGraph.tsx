@@ -11,7 +11,6 @@ import {
 import "@xyflow/react/dist/style.css";
 import { motion, AnimatePresence } from "framer-motion";
 import AgentNodeComponent from "./AgentNode";
-import CenterNodeComponent from "./CenterNode";
 import type { AgentInfo } from "../types";
 
 interface NeuralGraphProps {
@@ -22,7 +21,6 @@ interface NeuralGraphProps {
 
 const nodeTypes: NodeTypes = {
   agent: AgentNodeComponent as unknown as NodeTypes["agent"],
-  center: CenterNodeComponent as unknown as NodeTypes["center"],
 };
 
 export default function NeuralGraph({ agents, onSelectAgent, selectedAgent }: NeuralGraphProps) {
@@ -35,25 +33,12 @@ export default function NeuralGraph({ agents, onSelectAgent, selectedAgent }: Ne
 
   const nodes: Node[] = useMemo(() => {
     const agentMap = Object.fromEntries(agents.map((a) => [a.id, a]));
-    const anyRunning = agents.some((a) => a.status === "running");
-    const allDone = agents.every((a) => a.status === "done");
 
     return [
       {
-        id: "business_center",
-        type: "center",
-        position: { x: 280, y: 220 },
-        data: {
-          label: "Business Profile",
-          isActive: anyRunning,
-          isDone: allDone,
-        },
-        draggable: false,
-      },
-      {
         id: "supply_chain",
         type: "agent",
-        position: { x: 280, y: 0 },
+        position: { x: 360, y: 40 },
         data: {
           ...agentMap["supply_chain"],
           label: agentMap["supply_chain"].name,
@@ -65,7 +50,7 @@ export default function NeuralGraph({ agents, onSelectAgent, selectedAgent }: Ne
       {
         id: "tariff_calculator",
         type: "agent",
-        position: { x: 20, y: 140 },
+        position: { x: 120, y: 220 },
         data: {
           ...agentMap["tariff_calculator"],
           label: agentMap["tariff_calculator"].name,
@@ -77,7 +62,7 @@ export default function NeuralGraph({ agents, onSelectAgent, selectedAgent }: Ne
       {
         id: "geopolitical",
         type: "agent",
-        position: { x: 540, y: 140 },
+        position: { x: 600, y: 220 },
         data: {
           ...agentMap["geopolitical"],
           label: agentMap["geopolitical"].name,
@@ -89,7 +74,7 @@ export default function NeuralGraph({ agents, onSelectAgent, selectedAgent }: Ne
       {
         id: "supplier_scout",
         type: "agent",
-        position: { x: 80, y: 400 },
+        position: { x: 200, y: 440 },
         data: {
           ...agentMap["supplier_scout"],
           label: agentMap["supplier_scout"].name,
@@ -101,7 +86,7 @@ export default function NeuralGraph({ agents, onSelectAgent, selectedAgent }: Ne
       {
         id: "strategy",
         type: "agent",
-        position: { x: 480, y: 400 },
+        position: { x: 520, y: 440 },
         data: {
           ...agentMap["strategy"],
           label: agentMap["strategy"].name,
@@ -115,57 +100,48 @@ export default function NeuralGraph({ agents, onSelectAgent, selectedAgent }: Ne
 
   const edges: Edge[] = useMemo(() => {
     const agentMap = Object.fromEntries(agents.map((a) => [a.id, a]));
+    const ids = ["supply_chain", "tariff_calculator", "geopolitical", "supplier_scout", "strategy"];
 
-    const makeEdge = (source: string, target: string, isFromCenter = false): Edge => {
-      let isFlowing = false;
-      let isDone = false;
-      let edgeColor = "rgba(255,255,255,0.05)";
-
-      if (isFromCenter) {
-        const targetAgent = agentMap[target];
-        isFlowing = targetAgent?.status === "running";
-        isDone = targetAgent?.status === "done";
-        edgeColor = isFlowing ? targetAgent.color : isDone ? `${targetAgent.color}55` : "rgba(255,255,255,0.05)";
-      } else {
-        const sourceAgent = agentMap[source];
-        const targetAgent = agentMap[target];
-        isFlowing = sourceAgent?.status === "done" && targetAgent?.status === "running";
-        isDone = sourceAgent?.status === "done" && targetAgent?.status === "done";
-        edgeColor = isFlowing ? sourceAgent.color : isDone ? `${sourceAgent.color}44` : "rgba(255,255,255,0.05)";
+    const pairs: [string, string][] = [];
+    for (let i = 0; i < ids.length; i++) {
+      for (let j = i + 1; j < ids.length; j++) {
+        pairs.push([ids[i], ids[j]]);
       }
+    }
+
+    const buildEdge = (source: string, target: string): Edge => {
+      const sourceAgent = agentMap[source];
+      const targetAgent = agentMap[target];
+      const active = sourceAgent?.status === "running" || targetAgent?.status === "running";
+      const done = sourceAgent?.status === "done" && targetAgent?.status === "done";
+      const color = active
+        ? (sourceAgent?.status === "running" ? sourceAgent?.color : targetAgent?.color) || "#38bdf8"
+        : done
+          ? `${sourceAgent?.color || "#10b981"}55`
+          : "rgba(255,255,255,0.18)";
 
       return {
         id: `${source}-${target}`,
         source,
         target,
-        animated: isFlowing,
+        animated: active,
+        className: active ? "flowing" : "",
         style: {
-          stroke: edgeColor,
-          strokeWidth: isFlowing ? 2 : 1,
-          transition: "stroke 0.6s, stroke-width 0.6s",
+          stroke: color,
+          strokeWidth: active ? 2 : 1,
+          strokeDasharray: active ? "" : "6 10",
+          opacity: done ? 0.7 : 0.55,
         },
         markerEnd: {
           type: MarkerType.ArrowClosed,
-          color: edgeColor,
-          width: 12,
-          height: 12,
+          color,
+          width: 10,
+          height: 10,
         },
       };
     };
 
-    return [
-      makeEdge("business_center", "supply_chain", true),
-      makeEdge("business_center", "tariff_calculator", true),
-      makeEdge("business_center", "geopolitical", true),
-      makeEdge("business_center", "supplier_scout", true),
-      makeEdge("business_center", "strategy", true),
-      makeEdge("supply_chain", "tariff_calculator"),
-      makeEdge("supply_chain", "geopolitical"),
-      makeEdge("tariff_calculator", "supplier_scout"),
-      makeEdge("tariff_calculator", "strategy"),
-      makeEdge("geopolitical", "strategy"),
-      makeEdge("supplier_scout", "strategy"),
-    ];
+    return pairs.map(([s, t]) => buildEdge(s, t));
   }, [agents]);
 
   const selectedAgentInfo = agents.find((a) => a.id === selectedAgent);
@@ -177,7 +153,7 @@ export default function NeuralGraph({ agents, onSelectAgent, selectedAgent }: Ne
         edges={edges}
         nodeTypes={nodeTypes}
         fitView
-        fitViewOptions={{ padding: 0.25 }}
+        fitViewOptions={{ padding: 0.35 }}
         proOptions={{ hideAttribution: true }}
         panOnDrag={false}
         zoomOnScroll={false}
@@ -188,7 +164,7 @@ export default function NeuralGraph({ agents, onSelectAgent, selectedAgent }: Ne
         nodesConnectable={false}
         elementsSelectable={false}
       >
-        <Background variant={BackgroundVariant.Dots} gap={30} size={0.5} color="rgba(255,255,255,0.03)" />
+        <Background variant={BackgroundVariant.Lines} gap={60} size={0.5} color="rgba(255,255,255,0.04)" />
       </ReactFlow>
 
       <AnimatePresence>

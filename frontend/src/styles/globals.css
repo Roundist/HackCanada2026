@@ -1,6 +1,17 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+  --bg: #0a0e17;
+  --bg-2: #0d111c;
+  --panel: rgba(13, 17, 28, 0.9);
+  --line: rgba(255, 255, 255, 0.08);
+  --text: #d8dde8;
+  --muted: #7f8497;
+}
 
 * {
   margin: 0;
@@ -9,18 +20,37 @@
 }
 
 body {
-  font-family: "Inter", system-ui, sans-serif;
-  background: #06070a;
-  color: #c8ccd4;
+  font-family: "DM Sans", sans-serif;
+  background: var(--bg);
+  color: var(--text);
   overflow: hidden;
+  letter-spacing: 0.01em;
 }
 
-/* Grid background pattern */
+.app-skin {
+  position: relative;
+  isolation: isolate;
+  background: radial-gradient(circle at 20% 20%, rgba(20, 111, 192, 0.04), transparent 30%),
+    radial-gradient(circle at 80% 30%, rgba(110, 29, 170, 0.05), transparent 25%),
+    var(--bg);
+}
+
+.app-skin::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 160 160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.08'/%3E%3C/svg%3E");
+  mix-blend-mode: soft-light;
+  opacity: 0.4;
+  pointer-events: none;
+  z-index: -1;
+}
+
 .grid-bg {
   background-image:
-    linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
-  background-size: 40px 40px;
+    linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+  background-size: 48px 48px;
 }
 
 /* ReactFlow overrides */
@@ -34,39 +64,32 @@ body {
 
 /* Edge pulse animation */
 @keyframes edgePulse {
-  0%, 100% { stroke-opacity: 0.2; }
-  50% { stroke-opacity: 0.8; }
+  0%, 100% { stroke-opacity: 0.25; }
+  50% { stroke-opacity: 0.9; }
 }
-.react-flow__edge.animated path {
-  animation: edgePulse 1.8s ease-in-out infinite;
+.react-flow__edge.flowing path {
+  stroke-dasharray: 6 10;
+  animation: edgePulse 1.6s ease-in-out infinite;
 }
 
 /* Node pulse */
 @keyframes nodePulse {
-  0%, 100% { opacity: 0.4; }
+  0%, 100% { opacity: 0.45; }
   50% { opacity: 1; }
 }
 .pulse-ring {
-  animation: nodePulse 2s ease-in-out infinite;
+  animation: nodePulse 2.2s ease-in-out infinite;
 }
 
 /* Scrollbar */
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #22252f; border-radius: 2px; }
-
-/* Data flow dots on edges */
-@keyframes flowDot {
-  0% { offset-distance: 0%; opacity: 0; }
-  10% { opacity: 1; }
-  90% { opacity: 1; }
-  100% { offset-distance: 100%; opacity: 0; }
-}
+::-webkit-scrollbar-thumb { background: #1f2431; border-radius: 2px; }
 
 /* Typing dots */
 @keyframes blink {
-  0%, 100% { opacity: 0.15; }
-  50% { opacity: 0.8; }
+  0%, 100% { opacity: 0.18; }
+  50% { opacity: 0.85; }
 }
 .typing-dot { animation: blink 1.4s ease-in-out infinite; }
 .typing-dot:nth-child(2) { animation-delay: 0.2s; }
@@ -81,19 +104,9 @@ body {
   animation: scanline 2s ease-in-out infinite;
 }
 
-/* Supply chain flow arrow */
-@keyframes flowArrow {
-  0% { transform: translateX(-4px); opacity: 0.3; }
-  50% { transform: translateX(4px); opacity: 1; }
-  100% { transform: translateX(-4px); opacity: 0.3; }
-}
-.flow-arrow {
-  animation: flowArrow 1.5s ease-in-out infinite;
-}
-
 /* Status indicator blink */
 @keyframes statusBlink {
-  0%, 100% { opacity: 0.3; }
+  0%, 100% { opacity: 0.35; }
   50% { opacity: 1; }
 }
 .status-blink {

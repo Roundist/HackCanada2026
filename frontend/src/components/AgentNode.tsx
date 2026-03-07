@@ -24,105 +24,91 @@ const STATUS_LABEL: Record<AgentStatus, string> = {
 };
 
 function AgentNodeComponent({ id, data }: NodeProps & { data: AgentNodeData }) {
-  const { label, color, status, messages, isSelected, onSelect } = data;
+  const { label, color, status, messages, isSelected, onSelect, icon } = data;
 
   const isActive = status === "running";
   const isDone = status === "done";
   const isError = status === "error";
+  const latest = messages.slice(-2);
+
+  const ringColor = isDone ? "#10b981" : color;
 
   return (
     <>
       <Handle type="target" position={Position.Top} className="!bg-transparent !border-0 !w-2 !h-2" />
       <Handle type="target" position={Position.Left} className="!bg-transparent !border-0 !w-2 !h-2" />
       <Handle type="target" position={Position.Right} className="!bg-transparent !border-0 !w-2 !h-2" />
-      <div
-        onClick={() => onSelect(id)}
-        className="relative cursor-pointer select-none"
-      >
+      <div onClick={() => onSelect(id)} className="relative cursor-pointer select-none">
         {isActive && (
           <div
-            className="absolute -inset-1.5 pulse-ring"
-            style={{ border: `1px solid ${color}55` }}
+            className="absolute -inset-3 rounded-full pulse-ring"
+            style={{ border: `1px solid ${color}40`, boxShadow: `0 0 0 12px ${color}06` }}
           />
         )}
 
-        <div
-          className="relative px-4 py-3 transition-all duration-300"
-          style={{
-            background: isActive
-              ? `${color}08`
-              : isDone
-              ? `${color}05`
-              : "rgba(15,17,23,0.9)",
-            border: `1px solid ${
-              isSelected
-                ? `${color}88`
-                : isActive
-                ? `${color}44`
+        <div className="relative flex flex-col items-center gap-2">
+          <div
+            className="relative w-24 h-24 rounded-full flex items-center justify-center"
+            style={{
+              background: "rgba(12,16,26,0.95)",
+              border: `1px solid ${isSelected ? `${color}90` : `${color}35`}`,
+              boxShadow: isActive
+                ? `0 10px 40px ${color}25`
                 : isDone
-                ? `${color}22`
-                : isError
-                ? "#ef444433"
-                : "rgba(255,255,255,0.05)"
-            }`,
-            minWidth: 180,
-          }}
-        >
-          <div className="flex items-center gap-2.5 mb-1.5">
+                  ? `0 0 0 1px ${ringColor}55`
+                  : undefined,
+            }}
+          >
             <div
-              className={`w-2 h-2 rounded-full shrink-0 ${isActive ? "status-blink" : ""}`}
+              className="absolute inset-1 rounded-full"
               style={{
-                background: isActive ? color : isDone ? "#16a34a" : isError ? "#ef4444" : "rgba(255,255,255,0.12)",
+                border: isDone
+                  ? `2px solid ${ringColor}90`
+                  : isActive
+                    ? `2px dashed ${color}`
+                    : `1px dashed rgba(255,255,255,0.08)`,
+                opacity: isActive ? 0.9 : 0.5,
               }}
             />
-            <div className="text-[11px] font-semibold text-white/70">{label}</div>
-          </div>
-
-          <div className="flex items-center gap-2 ml-[18px]">
-            <span className="text-[8px] font-mono uppercase tracking-widest" style={{
-              color: isActive ? color : isDone ? "#16a34a" : "rgba(255,255,255,0.2)",
-            }}>
-              {STATUS_LABEL[status]}
+            <span className="text-[18px] font-mono" style={{ color }}>
+              {icon}
             </span>
-            {isDone && messages.length > 0 && (
-              <span className="text-[8px] font-mono text-white/15">
-                {messages.length} outputs
-              </span>
-            )}
           </div>
-
-          <AnimatePresence>
-            {isActive && messages.length > 0 && (
-              <motion.div
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: "auto", opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                className="mt-2 pt-2 border-t overflow-hidden ml-[18px]"
-                style={{ borderColor: `${color}15` }}
-              >
-                {messages.slice(-2).map((m, i) => (
-                  <motion.div
-                    key={i}
-                    initial={{ x: -6, opacity: 0 }}
-                    animate={{ x: 0, opacity: 1 }}
-                    className="text-[9px] font-mono text-white/30 leading-relaxed flex items-start gap-1 mb-0.5"
-                  >
-                    <span style={{ color }} className="shrink-0">{">"}</span>
-                    <span className="truncate">{m}</span>
-                  </motion.div>
-                ))}
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {isDone && (
-            <div className="absolute top-2 right-2">
-              <div className="w-3.5 h-3.5 border flex items-center justify-center" style={{ borderColor: "#16a34a44", background: "#16a34a11" }}>
-                <span className="text-[8px] text-green-500">&#10003;</span>
-              </div>
+          <div className="text-center">
+            <div className="text-[11px] font-semibold text-white/80 tracking-tight">{label}</div>
+            <div
+              className="text-[9px] font-mono uppercase tracking-[0.22em]"
+              style={{ color: isActive ? color : isDone ? "#10b981" : "rgba(255,255,255,0.35)" }}
+            >
+              {STATUS_LABEL[status]}
             </div>
-          )}
+          </div>
         </div>
+
+        <AnimatePresence>
+          {(isActive || isSelected) && latest.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 8 }}
+              className="mt-3 border border-white/12 bg-black/60 backdrop-blur-sm px-3 py-2 w-56"
+            >
+              {latest.map((m, i) => (
+                <div key={i} className="flex items-start gap-2 text-[9px] font-mono text-white/65 leading-relaxed">
+                  <span style={{ color }} className="mt-0.5">◆</span>
+                  <span className="truncate">{m}</span>
+                </div>
+              ))}
+              {isActive && (
+                <div className="flex gap-1 mt-2">
+                  <div className="typing-dot w-1 h-1 rounded-full" style={{ background: color }} />
+                  <div className="typing-dot w-1 h-1 rounded-full" style={{ background: color }} />
+                  <div className="typing-dot w-1 h-1 rounded-full" style={{ background: color }} />
+                </div>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
       <Handle type="source" position={Position.Bottom} className="!bg-transparent !border-0 !w-2 !h-2" />
       <Handle type="source" position={Position.Left} className="!bg-transparent !border-0 !w-2 !h-2" />
