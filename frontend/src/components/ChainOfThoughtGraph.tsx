@@ -63,8 +63,7 @@ export default function ChainOfThoughtGraph() {
       <svg
         viewBox={`0 0 ${W} ${H}`}
         className="relative w-full block"
-        style={{ minHeight: 360 }}
-        style={{ fontFamily: "'IBM Plex Mono', 'Courier New', monospace" }}
+        style={{ minHeight: 360, fontFamily: "'IBM Plex Mono', 'Courier New', monospace" }}
       >
         <defs>
           <filter id="nodeGlowRed" x="-50%" y="-50%" width="200%" height="200%">
@@ -125,8 +124,8 @@ export default function ChainOfThoughtGraph() {
 
         {/* Nodes: hexagons */}
         {NODES.map((node) => {
-          const isActive = node.active === true;
-          const isPulse = node.pulse === true;
+          const isActive = "active" in node && node.active === true;
+          const isPulse = "pulse" in node && node.pulse === true;
           const path = hexPath(node.cx, node.cy, node.r);
           const stroke = isActive ? "rgba(255,51,51,0.9)" : isPulse ? "rgba(245,158,11,0.8)" : "rgba(255,255,255,0.6)";
           const fill = isActive ? "#ff3333" : isPulse ? "rgba(245,158,11,0.15)" : "transparent";

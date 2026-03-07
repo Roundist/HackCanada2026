@@ -27,7 +27,6 @@ export default function SurvivalPlan({ result, onReset, sessionId }: SurvivalPla
     () => Math.round(totalExposureBase * (simulatedRate / BASE_TARIFF_RATE)),
     [totalExposureBase, simulatedRate]
   );
-
   const handleExportPdf = async () => {
     setExporting(true);
     try {
@@ -54,24 +53,19 @@ export default function SurvivalPlan({ result, onReset, sessionId }: SurvivalPla
   };
 
   return (
-    <div className="max-w-6xl mx-auto">
-      {/* Top bar */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.06]" style={{ background: "rgba(8,9,13,0.6)" }}>
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-green-600" />
-            <span className="text-[10px] font-mono uppercase tracking-widest text-white/25">
-              Analysis Complete
-            </span>
+    <div className="relative max-w-6xl mx-auto py-6 px-2 sm:px-4">
+      <div className="flex items-center justify-between px-4 py-3 border border-white/10 bg-black/40 backdrop-blur sticky top-0 z-10">
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 text-[10px] font-mono uppercase tracking-[0.24em] text-white/60">
+            <span className="w-2 h-2 rounded-full bg-green-400" />
+            Analysis Complete
           </div>
-          <div className="h-4 w-px bg-white/[0.06]" />
-          <h2 className="text-sm font-semibold text-white/70">
-            Operational Dossier
-          </h2>
-          {summary && (
-            <span className="text-[10px] font-mono text-white/25">
-              {summary.business_name as string}
-            </span>
+          <div className="h-4 w-px bg-white/12" />
+          <div className="text-sm text-white/80 font-semibold">Operational Dossier</div>
+          {summary && typeof summary.business_name === "string" && summary.business_name.length > 0 && (
+            <div className="text-[10px] font-mono text-white/40 uppercase tracking-[0.2em]">
+              {summary.business_name}
+            </div>
           )}
         </div>
         <div className="flex items-center gap-2">
@@ -109,7 +103,6 @@ export default function SurvivalPlan({ result, onReset, sessionId }: SurvivalPla
               <p className="text-[11px] text-white/35 leading-relaxed">{summary.key_finding as string}</p>
             </motion.div>
           )}
-
           {tariffImpact && (
             <>
               <StatCard
@@ -216,53 +209,53 @@ export default function SurvivalPlan({ result, onReset, sessionId }: SurvivalPla
                       : null;
 
                   return (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.1 + i * 0.05 }}
-                  className="border border-white/[0.04] p-4 flex items-start justify-between"
-                  style={{ background: "rgba(15,17,23,0.5)" }}
-                >
-                  <div className="flex items-start gap-3">
-                    <div className="w-5 h-5 border border-white/[0.08] flex items-center justify-center text-[10px] font-mono text-white/30 shrink-0 mt-0.5">
-                      {(action.rank as number) || i + 1}
-                    </div>
-                    <div>
-                      <div className="text-[12px] font-semibold text-white/65">
-                        {action.action as string}
+                    <motion.div
+                      key={i}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.1 + i * 0.05 }}
+                      className="border border-white/[0.04] p-4 flex items-start justify-between"
+                      style={{ background: "rgba(15,17,23,0.5)" }}
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className="w-5 h-5 border border-white/[0.08] flex items-center justify-center text-[10px] font-mono text-white/30 shrink-0 mt-0.5">
+                          {(action.rank as number) || i + 1}
+                        </div>
+                        <div>
+                          <div className="text-[12px] font-semibold text-white/65">
+                            {action.action as string}
+                          </div>
+                          <p className="text-[10px] text-white/30 mt-1 leading-relaxed max-w-lg">
+                            {action.description as string}
+                          </p>
+                          <div className="flex gap-4 mt-2">
+                            {timelineDays !== null && (
+                              <span className="text-[9px] font-mono text-white/20">
+                                {timelineDays}d
+                              </span>
+                            )}
+                            {effort && (
+                              <span className="text-[9px] font-mono text-white/20">
+                                Effort: {effort}
+                              </span>
+                            )}
+                            {category && (
+                              <span className="text-[9px] font-mono text-white/15">
+                                {category}
+                              </span>
+                            )}
+                          </div>
+                        </div>
                       </div>
-                      <p className="text-[10px] text-white/30 mt-1 leading-relaxed max-w-lg">
-                        {action.description as string}
-                      </p>
-                      <div className="flex gap-4 mt-2">
-                        {timelineDays !== null && (
-                          <span className="text-[9px] font-mono text-white/20">
-                            {timelineDays}d
-                          </span>
-                        )}
-                        {effort && (
-                          <span className="text-[9px] font-mono text-white/20">
-                            Effort: {effort}
-                          </span>
-                        )}
-                        {category && (
-                          <span className="text-[9px] font-mono text-white/15">
-                            {category}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                  {estimatedSavings !== null && (
-                    <div className="text-right shrink-0 ml-4">
-                      <div className="text-sm font-semibold text-green-500/80">
-                        ${estimatedSavings.toLocaleString()}
-                      </div>
-                      <div className="text-[8px] font-mono text-white/15 uppercase">Savings</div>
-                    </div>
-                  )}
-                </motion.div>
+                      {estimatedSavings !== null && (
+                        <div className="text-right shrink-0 ml-4">
+                          <div className="text-sm font-semibold text-green-500/80">
+                            ${estimatedSavings.toLocaleString()}
+                          </div>
+                          <div className="text-[8px] font-mono text-white/15 uppercase">Savings</div>
+                        </div>
+                      )}
+                    </motion.div>
                   );
                 })()
               ))}

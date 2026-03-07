@@ -6,21 +6,19 @@ interface ExecutionStepsProps {
 }
 
 const STEPS = [
-  { key: "supply_chain", label: "Parsing business profile", agentId: "supply_chain" },
-  { key: "tariff_match", label: "Matching HS tariff codes", agentId: "tariff_calculator" },
-  { key: "policy", label: "Checking trade policy changes", agentId: "geopolitical" },
-  { key: "suppliers", label: "Searching supplier alternatives", agentId: "supplier_scout" },
-  { key: "strategy", label: "Generating survival strategy", agentId: "strategy" },
+  { key: "supply_chain", label: "Parse business profile", agentId: "supply_chain" },
+  { key: "tariff_match", label: "HS code + tariff map", agentId: "tariff_calculator" },
+  { key: "policy", label: "Geopolitical scenario", agentId: "geopolitical" },
+  { key: "suppliers", label: "Supplier alternatives", agentId: "supplier_scout" },
+  { key: "strategy", label: "Strategy synthesis", agentId: "strategy" },
 ];
 
 export default function ExecutionSteps({ agents }: ExecutionStepsProps) {
   const agentMap = Object.fromEntries(agents.map((a) => [a.id, a]));
 
   return (
-    <div className="px-4 py-3 flex items-center gap-1">
-      <div className="text-[9px] font-mono uppercase tracking-widest text-white/20 mr-3 shrink-0">
-        Pipeline
-      </div>
+    <div className="py-3 flex items-center gap-2 overflow-x-auto">
+      <div className="text-[9px] font-mono uppercase tracking-[0.26em] text-white/40 px-2">Pipeline</div>
       {STEPS.map((step, i) => {
         const agent = agentMap[step.agentId];
         const isRunning = agent?.status === "running";
@@ -46,9 +44,7 @@ export default function ExecutionSteps({ agents }: ExecutionStepsProps) {
                 {stepLabel}
               </span>
             </div>
-            {i < STEPS.length - 1 && (
-              <div className="w-4 h-px" style={{ background: isDone ? `${agent.color}33` : "rgba(255,255,255,0.04)" }} />
-            )}
+            {i < STEPS.length - 1 && <div className="w-5 h-px bg-white/10" />}
           </div>
         );
       })}

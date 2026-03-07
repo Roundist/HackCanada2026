@@ -84,7 +84,6 @@ export default function BusinessInput({ onSubmit, onSelectProfile, selectedProfi
               ← Change profile
             </button>
           )}
-          {/* Clearer hierarchy: custom profile section stands out */}
           <div className="border border-white/[0.1] rounded-lg p-4" style={{ background: "rgba(15,17,23,0.7)" }}>
             <div className="text-[10px] font-mono uppercase tracking-widest text-white/35 mb-2">
               Or enter your own business profile
@@ -119,6 +118,12 @@ export default function BusinessInput({ onSubmit, onSelectProfile, selectedProfi
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {isRunning && (
+        <div className="text-[10px] font-mono text-white/45 uppercase tracking-[0.28em]">
+          Panel minimized while neural graph runs.
         </div>
       )}
     </div>

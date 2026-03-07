@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ReactFlowProvider } from "@xyflow/react";
 import { motion, AnimatePresence } from "framer-motion";
 import NeuralGraph from "./components/NeuralGraph";
@@ -97,9 +97,18 @@ export default function App() {
 
   const completedAgents = agents.filter((a) => a.status === "done");
 
+  const headerStatus = useMemo(() => {
+    if (view === "results") return "INTEL COMPLETE";
+    if (view === "analyzing") {
+      return pipelineDone
+        ? "PIPELINE STABILIZED"
+        : `${completedAgents.length}/${agents.length} AGENTS ACTIVE`;
+    }
+    return "STAGING";
+  }, [view, pipelineDone, completedAgents.length, agents.length]);
+
   return (
     <div className="h-screen w-screen flex flex-col overflow-hidden grid-bg" style={{ background: "#0a0a0a" }}>
-      {/* Top Bar — Cyberpunk theme */}
       <header className="shrink-0 h-11 px-4 flex items-center justify-between border-b border-white/[0.06]" style={{ background: "rgba(10,10,10,0.95)" }}>
         <div className="flex items-center gap-6">
           <div className="flex items-center gap-2">
@@ -114,28 +123,16 @@ export default function App() {
               </span>
             )}
           </div>
-          <div className="h-4 w-px bg-white/[0.06]" />
-          <span className="text-[10px] font-mono uppercase tracking-widest text-white/25">
-            AI Trade Intelligence Platform
-          </span>
+          <div className="h-4 w-px bg-white/10" />
+          <span className="text-[10px] font-mono uppercase tracking-[0.28em] text-white/40">Bloomberg-grade neural ops</span>
         </div>
 
-        <div className="flex items-center gap-4">
-          {view === "analyzing" && (
-            <div className="flex items-center gap-2">
-              <div className={`w-1.5 h-1.5 rounded-full ${pipelineDone ? "bg-accent-green" : "bg-accent-red status-blink"}`} />
-              <span className="text-[10px] font-mono text-white/30">
-                {pipelineDone ? "ANALYSIS COMPLETE" : `${completedAgents.length}/${agents.length} AGENTS`}
-              </span>
-            </div>
-          )}
-          <span className="text-[10px] font-mono text-white/15">
-            {new Date().toISOString().slice(0, 10)}
-          </span>
+        <div className="flex items-center gap-3 text-[10px] font-mono text-white/60">
+          <span className="px-2 py-1 border border-white/10 rounded-sm tracking-widest">{headerStatus}</span>
+          <span className="text-white/25">{new Date().toISOString().slice(0, 10)}</span>
         </div>
       </header>
 
-      {/* Main Content — scrollable so all content is visible */}
       <main className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden">
         <AnimatePresence mode="wait">
           {/* INPUT VIEW */}
@@ -191,7 +188,7 @@ export default function App() {
                 </div>
               </div>
 
-              {/* RIGHT — Intelligence Preview (slider + alt suppliers + reactive metrics) */}
+              {/* RIGHT — Intelligence Preview */}
               <div className="w-[300px] shrink-0 border-l border-white/[0.06] flex flex-col min-h-full" style={{ background: "rgba(10,10,10,0.8)" }}>
                 <IntelligencePreview
                   profile={selectedProfile}
@@ -239,7 +236,7 @@ export default function App() {
                   />
                 </div>
                 <div className="flex-1 min-h-0 overflow-y-auto flex flex-col border-t border-white/[0.06]">
-                  <FindingsPanel agents={agents} pipelineDone={pipelineDone} geopoliticalAlerts={geopoliticalAlerts} />
+                  <FindingsPanel agents={agents} pipelineDone={pipelineDone} geopoliticalAlerts={geopoliticalAlerts} systemEvents={systemEvents} />
                 </div>
                 <RagTracePanel agents={agents} systemEvents={systemEvents} />
               </div>
