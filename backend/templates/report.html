@@ -1,137 +1,297 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Trade War Survival Plan — {{ plan.executive_summary.business_name }}</title>
-<style>
-  @page { size: A4; margin: 2cm; }
-  body { font-family: 'Helvetica Neue', Arial, sans-serif; color: #1a1a2e; font-size: 11pt; line-height: 1.5; }
-  h1 { color: #0f3460; font-size: 22pt; border-bottom: 3px solid #e94560; padding-bottom: 8px; margin-top: 0; }
-  h2 { color: #0f3460; font-size: 14pt; margin-top: 24px; border-bottom: 1px solid #ddd; padding-bottom: 4px; }
-  h3 { color: #16213e; font-size: 12pt; margin-top: 16px; }
-  .header { text-align: center; margin-bottom: 24px; }
-  .header .subtitle { color: #666; font-size: 10pt; }
-  .summary-box { background: #f0f4ff; border-left: 4px solid #e94560; padding: 12px 16px; margin: 16px 0; }
-  .summary-box .big-number { font-size: 28pt; font-weight: bold; color: #e94560; }
-  .summary-box .label { font-size: 9pt; color: #666; text-transform: uppercase; }
-  .risk-badge { display: inline-block; padding: 2px 10px; border-radius: 4px; color: #fff; font-size: 9pt; font-weight: bold; text-transform: uppercase; }
-  .risk-high, .risk-critical { background: #e94560; }
-  .risk-medium, .risk-elevated { background: #f59e0b; }
-  .risk-low, .risk-stable { background: #10b981; }
-  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 10pt; }
-  th { background: #0f3460; color: #fff; padding: 6px 8px; text-align: left; }
-  td { padding: 6px 8px; border-bottom: 1px solid #eee; }
-  tr:nth-child(even) { background: #f8f9fa; }
-  .action-card { background: #fff; border: 1px solid #ddd; border-radius: 6px; padding: 12px; margin: 8px 0; page-break-inside: avoid; }
-  .action-rank { display: inline-block; background: #0f3460; color: #fff; width: 24px; height: 24px; border-radius: 50%; text-align: center; line-height: 24px; font-size: 10pt; font-weight: bold; margin-right: 8px; }
-  .timeline-section { display: flex; gap: 16px; margin: 12px 0; }
-  .timeline-col { flex: 1; background: #f8f9fa; border-radius: 6px; padding: 12px; }
-  .timeline-col h4 { margin: 0 0 8px 0; color: #0f3460; font-size: 11pt; }
-  .timeline-col ul { margin: 0; padding-left: 16px; font-size: 10pt; }
-  .footer { text-align: center; color: #999; font-size: 8pt; margin-top: 32px; border-top: 1px solid #ddd; padding-top: 8px; }
-</style>
+  <meta charset="UTF-8" />
+  <title>Trade War Survival Plan — {{ (plan.executive_summary or {}).get('business_name', 'Report') }}</title>
+  <style>
+    @page {
+      size: A4;
+      margin: 2cm;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      color: #1a1a2e;
+      font-size: 11pt;
+      line-height: 1.45;
+      margin: 0;
+      padding: 0;
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px solid #0f3460;
+    }
+    .header h1 {
+      color: #0f3460;
+      font-size: 22pt;
+      margin: 0 0 0.25rem 0;
+      font-weight: 700;
+    }
+    .header .subtitle {
+      color: #555;
+      font-size: 10pt;
+    }
+    .summary-box {
+      background: #f0f4f8;
+      border-left: 4px solid #dc2626;
+      padding: 1rem 1.25rem;
+      margin: 1rem 0;
+      page-break-inside: avoid;
+    }
+    .summary-box .label {
+      font-size: 9pt;
+      color: #555;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .summary-box .big-number {
+      font-size: 24pt;
+      font-weight: bold;
+      color: #0f3460;
+      margin: 0.15rem 0 0 0;
+    }
+    .risk-badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 4px;
+      color: #fff;
+      font-size: 9pt;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+    .risk-high, .risk-critical { background: #dc2626; }
+    .risk-medium, .risk-elevated { background: #d97706; }
+    .risk-low, .risk-stable { background: #059669; }
+    h2 {
+      color: #0f3460;
+      font-size: 14pt;
+      margin: 1.5rem 0 0.75rem 0;
+      padding-bottom: 4px;
+      border-bottom: 1px solid #e5e7eb;
+      page-break-after: avoid;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 0.5rem 0 1rem 0;
+      font-size: 9.5pt;
+      page-break-inside: avoid;
+      table-layout: fixed;
+      word-wrap: break-word;
+    }
+    th {
+      background: #0f3460;
+      color: #fff;
+      padding: 6px 8px;
+      text-align: left;
+      font-weight: 600;
+    }
+    td {
+      padding: 6px 8px;
+      border-bottom: 1px solid #e5e7eb;
+      vertical-align: top;
+    }
+    tr:nth-child(even) { background: #f8fafc; }
+    .action-card {
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 6px;
+      padding: 12px 14px;
+      margin: 8px 0;
+      page-break-inside: avoid;
+    }
+    .action-rank {
+      display: inline-block;
+      background: #0f3460;
+      color: #fff;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      text-align: center;
+      line-height: 24px;
+      font-size: 10pt;
+      font-weight: bold;
+      margin-right: 10px;
+      vertical-align: middle;
+    }
+    .action-title { font-weight: 600; color: #0f3460; }
+    .action-savings { color: #059669; font-weight: 600; float: right; }
+    .action-meta { font-size: 9pt; color: #6b7280; margin-top: 6px; }
+    .timeline-grid {
+      display: table;
+      width: 100%;
+      margin: 0.5rem 0 1rem 0;
+    }
+    .timeline-col {
+      display: table-cell;
+      width: 33.33%;
+      background: #f8fafc;
+      border: 1px solid #e5e7eb;
+      border-radius: 6px;
+      padding: 12px;
+      vertical-align: top;
+      page-break-inside: avoid;
+    }
+    .timeline-col h4 { margin: 0 0 8px 0; color: #0f3460; font-size: 11pt; }
+    .timeline-col ul { margin: 0; padding-left: 18px; font-size: 10pt; }
+    .timeline-col li { margin: 4px 0; }
+    .footer {
+      text-align: center;
+      color: #6b7280;
+      font-size: 8pt;
+      margin-top: 2rem;
+      padding-top: 10px;
+      border-top: 1px solid #e5e7eb;
+    }
+    .disclaimer { font-size: 8pt; color: #6b7280; font-style: italic; margin-top: 1rem; }
+  </style>
 </head>
 <body>
 
 <div class="header">
   <h1>Trade War Survival Plan</h1>
-  <div class="subtitle">{{ plan.executive_summary.business_name }} | Generated {{ generated_date }}</div>
+  <div class="subtitle">{{ (plan.executive_summary or {}).get('business_name', 'Business Analysis') }} | Generated {{ generated_date }}</div>
 </div>
 
+{% set summary = plan.executive_summary or {} %}
+{% if summary %}
 <div class="summary-box">
-  <div style="display: flex; justify-content: space-between; align-items: center;">
-    <div>
+  <div style="display: table; width: 100%;">
+    <div style="display: table-cell; width: 60%;">
       <div class="label">Total Tariff Exposure</div>
-      <div class="big-number">${{ "{:,.0f}".format(plan.executive_summary.total_tariff_exposure) }}</div>
+      <div class="big-number">${{ "{:,.0f}".format(summary.get('total_tariff_exposure') or 0) }}</div>
     </div>
-    <div style="text-align: right;">
+    <div style="display: table-cell; width: 40%; text-align: right; vertical-align: middle;">
       <div class="label">Risk Level</div>
-      <span class="risk-badge risk-{{ plan.executive_summary.risk_level }}">{{ plan.executive_summary.risk_level }}</span>
+      <span class="risk-badge risk-{{ (summary.get('risk_level') or 'high')|lower }}">{{ (summary.get('risk_level') or 'N/A')|upper }}</span>
     </div>
   </div>
-  <p style="margin: 8px 0 0 0;"><strong>{{ plan.executive_summary.headline }}</strong></p>
-  <p style="margin: 4px 0 0 0; color: #555;">{{ plan.executive_summary.key_finding }}</p>
+  {% if summary.get('headline') %}
+  <p style="margin: 12px 0 4px 0; font-weight: 600;">{{ summary.headline }}</p>
+  {% endif %}
+  {% if summary.get('key_finding') %}
+  <p style="margin: 0; color: #555;">{{ summary.key_finding }}</p>
+  {% endif %}
 </div>
+{% endif %}
 
-{% if tariff_impact and tariff_impact.input_impacts %}
+{% if tariff_impact and tariff_impact.get('input_impacts') %}
 <h2>Tariff Impact by Input</h2>
 <table>
-  <tr><th>Input</th><th>HS Code</th><th>Tariff Rate</th><th>Annual Spend</th><th>Annual Tariff Cost</th><th>% of Exposure</th></tr>
+  <tr>
+    <th style="width: 22%;">Input</th>
+    <th style="width: 12%;">HS Code</th>
+    <th style="width: 10%;">Rate</th>
+    <th style="width: 14%;">Annual Spend</th>
+    <th style="width: 14%;">Tariff Cost</th>
+    <th style="width: 10%;">% Exposure</th>
+  </tr>
   {% for item in tariff_impact.input_impacts %}
   <tr>
-    <td>{{ item.input_name }}</td>
-    <td>{{ item.hs_code }}</td>
-    <td>{{ item.current_tariff_rate }}%</td>
-    <td>${{ "{:,.0f}".format(item.annual_spend) }}</td>
-    <td>${{ "{:,.0f}".format(item.annual_tariff_cost) }}</td>
-    <td>{{ "%.1f"|format(item.pct_of_total_exposure) }}%</td>
+    <td>{{ item.get('input_name', '—') }}</td>
+    <td>{{ item.get('hs_code', '—') }}</td>
+    <td>{{ item.get('current_tariff_rate', 0) }}%</td>
+    <td>${{ "{:,.0f}".format(item.get('annual_spend') or 0) }}</td>
+    <td>${{ "{:,.0f}".format(item.get('annual_tariff_cost') or 0) }}</td>
+    <td>{{ "%.1f"|format(item.get('pct_of_total_exposure') or 0) }}%</td>
   </tr>
   {% endfor %}
 </table>
 {% endif %}
 
 <h2>Priority Actions</h2>
-{% for action in plan.priority_actions %}
+{% for action in (plan.priority_actions or []) %}
 <div class="action-card">
-  <span class="action-rank">{{ action.rank }}</span>
-  <strong>{{ action.action }}</strong>
-  <span style="float: right; color: #10b981; font-weight: bold;">Save ${{ "{:,.0f}".format(action.estimated_savings) }}</span>
+  <span class="action-rank">{{ action.get('rank', loop.index) }}</span>
+  <span class="action-title">{{ action.get('action', 'Action') }}</span>
+  {% if action.get('estimated_savings') is not none %}
+  <span class="action-savings">Save ${{ "{:,.0f}".format(action.estimated_savings) }}</span>
+  {% endif %}
+  {% if action.get('description') %}
   <p style="margin: 8px 0 0 0; font-size: 10pt; color: #555;">{{ action.description }}</p>
-  <div style="margin-top: 6px; font-size: 9pt; color: #888;">
-    Effort: {{ action.implementation_effort }} | Timeline: {{ action.timeline_days }} days | Category: {{ action.category }}
+  {% endif %}
+  <div class="action-meta">
+    {% if action.get('implementation_effort') %}Effort: {{ action.implementation_effort }}{% endif %}
+    {% if action.get('timeline_days') is not none %} | Timeline: {{ action.timeline_days }} days{% endif %}
+    {% if action.get('category') %} | {{ action.category }}{% endif %}
   </div>
 </div>
 {% endfor %}
 
-<h2>Pricing Strategy</h2>
-<p><strong>Recommendation:</strong> {{ plan.pricing_strategy.recommendation }}</p>
-<p>{{ plan.pricing_strategy.explanation }}</p>
-{% if plan.pricing_strategy.suggested_price_increases %}
-<table>
-  <tr><th>Product</th><th>Price Increase</th><th>Rationale</th></tr>
-  {% for inc in plan.pricing_strategy.suggested_price_increases %}
-  <tr><td>{{ inc.product }}</td><td>{{ inc.increase_pct }}%</td><td>{{ inc.rationale }}</td></tr>
-  {% endfor %}
-</table>
-{% endif %}
-
-<h2>30/60/90 Day Timeline</h2>
-<div class="timeline-section">
+{% set timeline = plan.timeline or {} %}
+{% if timeline.get('days_30') or timeline.get('days_60') or timeline.get('days_90') %}
+<h2>30 / 60 / 90 Day Timeline</h2>
+<div class="timeline-grid">
   <div class="timeline-col">
     <h4>30 Days</h4>
-    <ul>{% for item in plan.timeline.days_30 %}<li>{{ item }}</li>{% endfor %}</ul>
+    <ul>{% for item in (timeline.days_30 or []) %}<li>{{ item }}</li>{% endfor %}</ul>
   </div>
   <div class="timeline-col">
     <h4>60 Days</h4>
-    <ul>{% for item in plan.timeline.days_60 %}<li>{{ item }}</li>{% endfor %}</ul>
+    <ul>{% for item in (timeline.days_60 or []) %}<li>{{ item }}</li>{% endfor %}</ul>
   </div>
   <div class="timeline-col">
     <h4>90 Days</h4>
-    <ul>{% for item in plan.timeline.days_90 %}<li>{{ item }}</li>{% endfor %}</ul>
+    <ul>{% for item in (timeline.days_90 or []) %}<li>{{ item }}</li>{% endfor %}</ul>
   </div>
 </div>
-
-<h2>Market Diversification</h2>
-<ul>
-  {% for rec in plan.market_diversification.recommendations %}<li>{{ rec }}</li>{% endfor %}
-</ul>
-{% if plan.market_diversification.government_programs %}
-<h3>Government Programs</h3>
-<ul>
-  {% for prog in plan.market_diversification.government_programs %}<li>{{ prog }}</li>{% endfor %}
-</ul>
 {% endif %}
 
-<h2>Risks</h2>
+{% if plan.pricing_strategy and (plan.pricing_strategy.get('recommendation') or plan.pricing_strategy.get('explanation')) %}
+<h2>Pricing Strategy</h2>
+{% if plan.pricing_strategy.get('recommendation') %}
+<p><strong>Recommendation:</strong> {{ plan.pricing_strategy.recommendation }}</p>
+{% endif %}
+{% if plan.pricing_strategy.get('explanation') %}
+<p>{{ plan.pricing_strategy.explanation }}</p>
+{% endif %}
+{% if plan.pricing_strategy.get('suggested_price_increases') %}
 <table>
-  <tr><th>Risk</th><th>Probability</th><th>Mitigation</th></tr>
-  {% for risk in plan.risks %}
-  <tr><td>{{ risk.risk }}</td><td>{{ risk.probability }}</td><td>{{ risk.mitigation }}</td></tr>
+  <tr><th>Product</th><th>Price Increase</th><th>Rationale</th></tr>
+  {% for inc in plan.pricing_strategy.suggested_price_increases %}
+  <tr>
+    <td>{{ inc.get('product', '—') }}</td>
+    <td>{{ inc.get('increase_pct', '—') }}%</td>
+    <td>{{ inc.get('rationale', '—') }}</td>
+  </tr>
   {% endfor %}
 </table>
+{% endif %}
+{% endif %}
+
+{% if plan.market_diversification and (plan.market_diversification.get('recommendations') or plan.market_diversification.get('government_programs')) %}
+<h2>Market Diversification</h2>
+{% if plan.market_diversification.get('recommendations') %}
+<ul>{% for rec in plan.market_diversification.recommendations %}<li>{{ rec }}</li>{% endfor %}</ul>
+{% endif %}
+{% if plan.market_diversification.get('government_programs') %}
+<h3 style="font-size: 12pt; margin-top: 12px;">Government Programs</h3>
+<ul>{% for prog in plan.market_diversification.government_programs %}<li>{{ prog }}</li>{% endfor %}</ul>
+{% endif %}
+{% endif %}
+
+{% if plan.risks %}
+<h2>Risks</h2>
+<table>
+  <tr><th style="width: 28%;">Risk</th><th style="width: 14%;">Probability</th><th style="width: 58%;">Mitigation</th></tr>
+  {% for risk in plan.risks %}
+  <tr>
+    <td>{{ risk.get('risk', '—') }}</td>
+    <td>{{ risk.get('probability', '—') }}</td>
+    <td>{{ risk.get('mitigation', '—') }}</td>
+  </tr>
+  {% endfor %}
+</table>
+{% endif %}
+
+<div class="disclaimer">
+  This report was generated by TariffTriage and is for informational purposes only. It does not constitute legal, financial, or trade compliance advice. Consult qualified professionals before making decisions. Data derived from CBSA tariff sources where applicable.
+</div>
 
 <div class="footer">
-  TariffTriage — AI-Powered Trade War Survival Platform for Canadian Businesses
+  TariffTriage — AI Trade Intelligence Platform for Canadian Businesses
 </div>
 
 </body>
