@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { downloadSurvivalPlanPdf } from "../utils/exportPdf";
 import TariffChart from "./TariffChart";
 import HsCorrection from "./HsCorrection";
+import RoutesMap from "./RoutesMap";
 import type { HsClassification, ReasoningStep } from "../types";
 
 interface SurvivalPlanProps {
@@ -184,6 +185,19 @@ export default function SurvivalPlan({ result, onReset, sessionId, hsClassificat
             );
           })()}
         </div>
+
+        {/* Trade routes map — internal (blue), US tariffed (red), foreign (green); additive, no analysis removed */}
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.12 }}
+          className="w-full max-w-2xl"
+        >
+          <h3 className={`text-[10px] font-mono uppercase tracking-widest mb-3 ${t.label}`}>
+            Trade routes
+          </h3>
+          <RoutesMap size="large" variant={variant} />
+        </motion.div>
 
         {/* Tariff Simulator + Chart (PRD: What If Tariffs Go Higher?) */}
         {inputs.length > 0 && (

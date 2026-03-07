@@ -11,6 +11,7 @@ import RagClassificationLive from "./components/RagClassificationLive";
 import ProductSearch from "./components/ProductSearch";
 import AgentIntelligencePanel from "./components/AgentIntelligencePanel";
 import SupplyChainFlowTable from "./components/SupplyChainFlowTable";
+import RoutesMap from "./components/RoutesMap";
 import { useAgentState } from "./hooks/useAgentState";
 import { useWebSocket } from "./hooks/useWebSocket";
 import { useTariffRates } from "./hooks/useTariffRates";
@@ -152,6 +153,9 @@ export default function App() {
               {/* LEFT — Distinct panel: solid background so it reads on small screens */}
               <div className="w-[280px] shrink-0 border-r-2 border-gray-200 flex flex-col min-h-full bg-gray-50 px-3 py-4 overflow-y-auto">
                 <AgentIntelligencePanel selectedProfile={selectedProfile} />
+                <div className="mt-3 flex-shrink-0 overflow-hidden min-h-0">
+                  <RoutesMap size="compact" variant="light" className="w-full" />
+                </div>
                 <SupplyChainFlowTable profile={selectedProfile} />
               </div>
 
