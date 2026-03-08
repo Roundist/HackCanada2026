@@ -514,3 +514,170 @@ body {
   font-family: "JetBrains Mono", monospace;
   color: rgba(255, 255, 255, 0.28);
 }
+
+/* ========== Harbor View (Neural Logistics Command Center) ========== */
+.harbor-view-root {
+  --harbor-sky-a: rgba(6, 8, 14, 0.98);
+  --harbor-sky-b: rgba(10, 14, 24, 0.99);
+  --harbor-sky-c: rgba(8, 12, 22, 1);
+  --harbor-water-a: rgba(15, 35, 55, 0.85);
+  --harbor-water-b: rgba(25, 55, 85, 0.88);
+}
+
+.harbor-view-bg {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, var(--harbor-sky-a) 0%, var(--harbor-sky-b) 50%, var(--harbor-sky-c) 100%);
+  transition: background 1.2s ease-in-out;
+  z-index: 0;
+}
+
+/* Storm state background */
+.harbor-storm .harbor-view-bg {
+  background: linear-gradient(180deg,
+    rgba(12, 8, 10, 0.99) 0%,
+    rgba(18, 12, 16, 0.99) 35%,
+    rgba(14, 10, 14, 1) 100%
+  );
+}
+
+.harbor-storm-noise {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  opacity: 0.06;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 256px 256px;
+  pointer-events: none;
+  animation: stormFlicker 3s ease-in-out infinite;
+}
+
+@keyframes stormFlicker {
+  0%, 100% { opacity: 0.05; }
+  30% { opacity: 0.08; }
+  70% { opacity: 0.04; }
+}
+
+/* Storm lightning flash */
+.harbor-storm::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(160, 180, 220, 0.03);
+  z-index: 1;
+  pointer-events: none;
+  animation: stormLightning 8s ease-in-out infinite;
+}
+
+@keyframes stormLightning {
+  0%, 92%, 96%, 100% { opacity: 0; }
+  93% { opacity: 1; }
+  94% { opacity: 0; }
+  95% { opacity: 0.7; }
+}
+
+/* Water surface */
+.harbor-view-water {
+  position: absolute;
+  left: -5%;
+  right: -5%;
+  bottom: 0;
+  height: 48%;
+  background: linear-gradient(
+    160deg,
+    var(--harbor-water-a) 0%,
+    var(--harbor-water-b) 50%,
+    var(--harbor-water-a) 100%
+  );
+  clip-path: polygon(0 30%, 100% 22%, 100% 100%, 0 100%);
+  z-index: 2;
+  transition: background 1.2s ease-in-out;
+}
+
+.harbor-storm .harbor-view-water {
+  background: linear-gradient(
+    160deg,
+    rgba(18, 25, 38, 0.92) 0%,
+    rgba(22, 30, 45, 0.95) 50%,
+    rgba(15, 22, 35, 0.93) 100%
+  );
+}
+
+/* Wave lines overlay */
+.harbor-wave-lines {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 45%;
+  z-index: 3;
+  pointer-events: none;
+}
+
+/* SVG scene layer */
+.harbor-view-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 4;
+}
+
+/* Particles */
+.harbor-view-particles {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.harbor-view-particle {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(100, 180, 255, 0.5);
+  box-shadow: 0 0 6px rgba(100, 180, 255, 0.4);
+  animation: harborViewParticle 6s linear infinite;
+}
+
+.harbor-storm .harbor-view-particle {
+  background: rgba(180, 140, 100, 0.3);
+  box-shadow: 0 0 4px rgba(180, 140, 100, 0.2);
+}
+
+@keyframes harborViewParticle {
+  0% { transform: translate(0, 0) scale(1); opacity: 0.08; }
+  20% { opacity: 0.2; }
+  50% { transform: translate(15px, -20px) scale(1.1); opacity: 0.15; }
+  80% { opacity: 0.1; }
+  100% { transform: translate(-8px, -40px) scale(0.85); opacity: 0.03; }
+}
+
+/* Title overlay */
+.harbor-view-title {
+  position: absolute;
+  top: 12px;
+  left: 16px;
+  z-index: 10;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+/* Risk badge */
+.harbor-view-risk-badge {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 12px;
+  border: 1px solid rgba(100, 180, 255, 0.2);
+  border-radius: 8px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  font-family: "JetBrains Mono", monospace;
+  transition: border-color 0.8s, background 0.8s;
+}
