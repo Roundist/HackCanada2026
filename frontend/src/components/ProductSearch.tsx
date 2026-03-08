@@ -76,10 +76,10 @@ export default function ProductSearch({ variant = "dark" }: ProductSearchProps) 
   const containerStyle = isLight
     ? {
         backgroundImage:
-          "linear-gradient(rgba(245,245,245,0.84), rgba(245,245,245,0.84)), url('/images/newspaper.jpg'), url('/images/newspaper.jpg')",
-        backgroundRepeat: "no-repeat, no-repeat, no-repeat",
-        backgroundSize: "100% 100%, 100% 50%, 100% 50%",
-        backgroundPosition: "0 0, center top, center bottom",
+          "linear-gradient(rgba(245,245,245,0.80), rgba(245,245,245,0.80)), url('/images/newspaper.jpg'), url('/images/newspaper.jpg'), url('/images/newspaper.jpg')",
+        backgroundRepeat: "no-repeat, repeat, repeat, repeat",
+        backgroundSize: "100% 100%, min(200px, 26vw) auto, min(260px, 32vw) auto, min(160px, 20vw) auto",
+        backgroundPosition: "0 0, 0 0, 48px 36px, 12px 88px",
       }
     : { background: "rgba(15,17,23,0.7)" };
   const headerBorder = isLight ? "border-b border-gray-200" : "border-b border-white/[0.06]";

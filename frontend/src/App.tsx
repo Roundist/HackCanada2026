@@ -161,24 +161,25 @@ export default function App() {
               </div>
 
               {/* CENTER — Middle band + white card so three panels are obvious */}
-              <div className="relative flex-1 overflow-y-auto min-w-0 bg-gray-200">
-                <div
-                  aria-hidden
-                  className="absolute inset-0 bg-[url('/images/newspaper.jpg')] bg-repeat opacity-35 [background-size:280px_auto] [background-position:top_left]"
-                />
-                <div
-                  aria-hidden
-                  className="absolute inset-0 bg-gradient-to-b from-gray-100/85 via-gray-200/80 to-gray-100/88"
-                />
+              <div
+                className="relative flex-1 overflow-y-auto min-w-0 min-h-full bg-gray-200"
+                style={{
+                  backgroundImage:
+                    "linear-gradient(to bottom, rgba(241,245,249,0.82), rgba(226,232,240,0.78), rgba(241,245,249,0.82)), url('/images/newspaper.jpg'), url('/images/newspaper.jpg'), url('/images/newspaper.jpg')",
+                  backgroundRepeat: "no-repeat, repeat, repeat, repeat",
+                  backgroundSize: "100% 100%, min(220px, 28vw) auto, min(280px, 35vw) auto, min(180px, 22vw) auto",
+                  backgroundPosition: "0 0, 0 0, 87px 42px, 31px 98px",
+                }}
+              >
                 <div className="relative min-h-full flex justify-center py-6 px-6">
                 <div
                   className="relative w-full max-w-xl rounded-xl border border-gray-200 shadow-md p-6 space-y-5 overflow-hidden"
                   style={{
                     backgroundImage:
-                      "linear-gradient(rgba(255,255,255,0.90), rgba(255,255,255,0.90)), url('/images/newspaper.jpg'), url('/images/newspaper.jpg')",
-                    backgroundRepeat: "no-repeat, no-repeat, no-repeat",
-                    backgroundSize: "100% 100%, 100% 50%, 100% 50%",
-                    backgroundPosition: "0 0, center top, center bottom",
+                      "linear-gradient(rgba(255,255,255,0.86), rgba(255,255,255,0.86)), url('/images/newspaper.jpg'), url('/images/newspaper.jpg'), url('/images/newspaper.jpg')",
+                    backgroundRepeat: "no-repeat, repeat, repeat, repeat",
+                    backgroundSize: "100% 100%, min(200px, 26vw) auto, min(260px, 32vw) auto, min(160px, 20vw) auto",
+                    backgroundPosition: "0 0, 0 0, 52px 38px, 18px 72px",
                   }}
                 >
                   {submitError && (
