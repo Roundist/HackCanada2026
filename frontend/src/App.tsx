@@ -172,16 +172,7 @@ export default function App() {
                 }}
               >
                 <div className="relative min-h-full flex justify-center py-6 px-6">
-                <div
-                  className="relative w-full max-w-xl rounded-xl border border-gray-200 shadow-md p-6 space-y-5 overflow-hidden"
-                  style={{
-                    backgroundImage:
-                      "linear-gradient(rgba(255,255,255,0.86), rgba(255,255,255,0.86)), url('/images/newspaper.jpg'), url('/images/newspaper.jpg'), url('/images/newspaper.jpg')",
-                    backgroundRepeat: "no-repeat, repeat, repeat, repeat",
-                    backgroundSize: "100% 100%, min(200px, 26vw) auto, min(260px, 32vw) auto, min(160px, 20vw) auto",
-                    backgroundPosition: "0 0, 0 0, 52px 38px, 18px 72px",
-                  }}
-                >
+                <div className="relative w-full max-w-xl rounded-xl border border-gray-200 shadow-md p-6 space-y-5 overflow-hidden bg-white">
                   {submitError && (
                     <div className="rounded-lg bg-amber-50 border border-amber-200 px-3 py-2.5 text-sm text-amber-800">
                       {submitError}

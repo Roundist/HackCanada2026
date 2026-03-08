@@ -74,13 +74,7 @@ export default function ProductSearch({ variant = "dark" }: ProductSearchProps) 
     ? "border border-gray-200 rounded-lg overflow-hidden shadow-sm"
     : "border border-white/[0.08] rounded-lg overflow-hidden";
   const containerStyle = isLight
-    ? {
-        backgroundImage:
-          "linear-gradient(rgba(245,245,245,0.80), rgba(245,245,245,0.80)), url('/images/newspaper.jpg'), url('/images/newspaper.jpg'), url('/images/newspaper.jpg')",
-        backgroundRepeat: "no-repeat, repeat, repeat, repeat",
-        backgroundSize: "100% 100%, min(200px, 26vw) auto, min(260px, 32vw) auto, min(160px, 20vw) auto",
-        backgroundPosition: "0 0, 0 0, 48px 36px, 12px 88px",
-      }
+    ? { background: "#f5f5f5" }
     : { background: "rgba(15,17,23,0.7)" };
   const headerBorder = isLight ? "border-b border-gray-200" : "border-b border-white/[0.06]";
   const titleClass = isLight ? "text-[9px] font-mono uppercase tracking-widest text-gray-500 mb-1" : "text-[9px] font-mono uppercase tracking-widest text-white/25 mb-1";
