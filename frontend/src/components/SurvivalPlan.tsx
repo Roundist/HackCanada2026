@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, type ReactNode } from "react";
 import { motion } from "framer-motion";
 import { FileText, TrendingDown, ShieldAlert, Target, Coins, SlidersHorizontal, Clock3, CalendarRange, Flag, Boxes, ShieldCheck, AlertTriangle, Factory, Truck, FileCheck, BadgeDollarSign, Cpu, Battery, FlaskConical, Globe2 } from "lucide-react";
 import { downloadSurvivalPlanPdf } from "../utils/exportPdf";
@@ -19,6 +19,8 @@ interface SurvivalPlanProps {
   onTariffImpactUpdate?: (updated: Record<string, unknown>) => void;
   /** When set, trade routes map shows this profile's supply chain routes. */
   profile?: BusinessProfile | null;
+  /** Optional content rendered directly below the Analysis Complete bar. */
+  snapshot?: ReactNode;
 }
 
 const BASE_TARIFF_RATE = 25;
@@ -99,7 +101,7 @@ const dark = {
   button: "border-white/[0.06] text-white/30 hover:text-white/60",
 };
 
-export default function SurvivalPlan({ result, onReset, sessionId, hsClassifications = [], reasoningSteps = [], variant = "dark", onTariffImpactUpdate, profile = null }: SurvivalPlanProps) {
+export default function SurvivalPlan({ result, onReset, sessionId, hsClassifications = [], reasoningSteps = [], variant = "dark", onTariffImpactUpdate, profile = null, snapshot }: SurvivalPlanProps) {
   const t = variant === "light" ? light : dark;
   const [exporting, setExporting] = useState(false);
   const [simulatedRate, setSimulatedRate] = useState(BASE_TARIFF_RATE);
@@ -202,6 +204,7 @@ export default function SurvivalPlan({ result, onReset, sessionId, hsClassificat
           </button>
         </div>
       </div>
+      {snapshot}
 
       <div className="p-6 space-y-6">
         {/* Above the fold: Executive Summary wide row, then KPI cards row */}

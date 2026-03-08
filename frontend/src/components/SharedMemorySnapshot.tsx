@@ -74,17 +74,17 @@ export default function SharedMemorySnapshot({ data }: SharedMemorySnapshotProps
 
   return (
     <div className="border border-violet-200 bg-violet-50 rounded-lg p-4 mb-4">
-      <div className="flex items-center justify-between gap-3 mb-3">
-        <div>
-          <div className="text-[9px] font-mono uppercase tracking-widest text-violet-700">
+      <div className="mb-3">
+        <div className="relative flex items-center justify-center">
+          <div className="text-[17px] font-mono uppercase tracking-widest text-violet-700 text-center">
             Backboard Shared Memory Snapshot
           </div>
-          <div className="text-[11px] text-violet-900/80 mt-0.5">
-            Captured at pipeline completion before final report rendering.
+          <div className="absolute right-0 text-[9px] font-mono text-violet-700 border border-violet-200 bg-white px-2 py-1 rounded">
+            {keysPresent.length}/5 keys
           </div>
         </div>
-        <div className="text-[9px] font-mono text-violet-700 border border-violet-200 bg-white px-2 py-1 rounded">
-          {keysPresent.length}/5 keys
+        <div className="text-[13px] text-violet-900/80 mt-0.5 text-center">
+          Captured at pipeline completion before final report rendering.
         </div>
       </div>
 
