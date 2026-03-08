@@ -514,7 +514,7 @@ export default function SurvivalPlan({ result, onReset, sessionId, hsClassificat
         )}
 
         {/* Timeline + Risks */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
           {timeline && (
             <div>
               <h3 className={`text-[12px] font-bold font-mono uppercase tracking-[0.18em] mb-3 ${t.label}`}>
@@ -580,7 +580,7 @@ export default function SurvivalPlan({ result, onReset, sessionId, hsClassificat
           )}
 
           {risks.length > 0 && (
-            <div className="flex flex-col justify-center h-full">
+            <div>
               <h3 className={`text-[12px] font-bold font-mono uppercase tracking-[0.18em] mb-3 ${t.label}`}>
                 Risk Assessment
               </h3>
