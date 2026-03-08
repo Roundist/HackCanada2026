@@ -116,7 +116,7 @@ export default function ChainOfThoughtGraph() {
               markerEnd={marker}
               style={{
                 filter: "url(#edgeGlow)",
-                animation: "chainEdgeDash 1.2s linear infinite",
+                animation: "chainEdgeDash 3s linear infinite",
               }}
             />
           );
