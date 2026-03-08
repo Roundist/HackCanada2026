@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
-import { FileText, TrendingDown, ShieldAlert, Target, Coins } from "lucide-react";
+import { FileText, TrendingDown, ShieldAlert, Target, Coins, SlidersHorizontal, Clock3, CalendarRange, Flag, Boxes, ShieldCheck, AlertTriangle, Factory, Truck, FileCheck, BadgeDollarSign } from "lucide-react";
 import { downloadSurvivalPlanPdf } from "../utils/exportPdf";
 import TariffChart from "./TariffChart";
 import HsCorrection from "./HsCorrection";
@@ -203,8 +203,8 @@ export default function SurvivalPlan({ result, onReset, sessionId, hsClassificat
           transition={{ delay: 0.12 }}
           className="w-full"
         >
-          <h3 className={`text-[10px] font-mono uppercase tracking-widest mb-3 ${t.label}`}>
-            Trade routes
+          <h3 className={`text-[12px] font-bold font-mono uppercase tracking-[0.18em] mb-3 ${t.label}`}>
+            Trade Routes
           </h3>
           <RoutesMap size="large" variant={variant} />
         </motion.div>
@@ -218,10 +218,11 @@ export default function SurvivalPlan({ result, onReset, sessionId, hsClassificat
             className={`border p-4 rounded-lg ${t.card}`}
             style={variant === "dark" ? { background: "rgba(15,17,23,0.6)" } : undefined}
           >
-            <div className={`text-[9px] font-mono uppercase tracking-widest mb-1 ${t.label}`}>
+            <div className={`flex items-center gap-2 text-[12px] font-bold font-mono uppercase tracking-[0.18em] mb-1 ${t.label}`}>
+              <SlidersHorizontal size={14} strokeWidth={1.75} className={`shrink-0 ${variant === "light" ? "text-gray-400" : "text-white/25"}`} />
               What If Tariffs Go Higher?
             </div>
-            <div className={`text-[8px] font-mono mb-3 ${t.muted}`} title="Canada Border Services Agency">
+            <div className={`text-[11px] font-mono mb-3 ${t.muted}`} title="Canada Border Services Agency">
               Based on CBSA Customs Tariff 2025
             </div>
             <div className="flex items-center gap-4 mb-3">
@@ -255,7 +256,7 @@ export default function SurvivalPlan({ result, onReset, sessionId, hsClassificat
             <button
               type="button"
               onClick={() => setSimulatedRate(BASE_TARIFF_RATE)}
-              className={`mt-2 text-[9px] font-mono uppercase tracking-wider transition-colors ${t.muted} ${variant === "light" ? "hover:text-gray-700" : "hover:text-white/60"}`}
+              className={`mt-2 text-[11px] font-mono uppercase tracking-wider transition-colors ${t.muted} ${variant === "light" ? "hover:text-gray-700" : "hover:text-white/60"}`}
             >
               Reset to current rate ({BASE_TARIFF_RATE}%)
             </button>
@@ -286,10 +287,10 @@ export default function SurvivalPlan({ result, onReset, sessionId, hsClassificat
         {/* Priority Actions */}
         {actions.length > 0 && (
           <div>
-            <h3 className={`text-[10px] font-mono uppercase tracking-widest mb-4 ${t.label}`}>
+            <h3 className={`text-[12px] font-bold font-mono uppercase tracking-[0.18em] mb-4 ${t.label}`}>
               Priority Actions
             </h3>
-            <div className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {actions.map((action, i) => (
                 (() => {
                   const timelineDays =
@@ -315,13 +316,23 @@ export default function SurvivalPlan({ result, onReset, sessionId, hsClassificat
                           : "LOW"
                       : null;
 
+                  const catLower = category.toLowerCase();
+                  const actionLower = (action.action as string || "").toLowerCase();
+                  const ActionIcon =
+                    catLower.includes("supplier") || actionLower.includes("supplier") ? Factory
+                    : catLower.includes("government") || catLower.includes("regulat") || actionLower.includes("government") ? FileCheck
+                    : catLower.includes("pric") || actionLower.includes("pric") ? BadgeDollarSign
+                    : Truck;
+
+                  const isLastOdd = actions.length % 2 !== 0 && i === actions.length - 1;
+
                   return (
                     <motion.div
                       key={i}
                       initial={{ opacity: 0, x: -10 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: 0.1 + i * 0.05 }}
-                      className={`border p-4 rounded-lg flex items-start justify-between gap-4 ${t.card}`}
+                      className={`border p-4 rounded-lg flex items-start justify-between gap-4 ${t.card} ${isLastOdd ? "sm:col-span-2" : ""}`}
                       style={variant === "dark" ? { background: "rgba(15,17,23,0.5)" } : undefined}
                     >
                       <div className="flex items-start gap-4 min-w-0">
@@ -335,7 +346,8 @@ export default function SurvivalPlan({ result, onReset, sessionId, hsClassificat
                           {(action.rank as number) || i + 1}
                         </div>
                         <div className="min-w-0">
-                          <div className={`text-[13px] font-semibold ${t.heading}`}>
+                          <div className={`flex items-center gap-1.5 text-[13px] font-semibold ${t.heading}`}>
+                            <ActionIcon size={13} strokeWidth={1.75} className={`shrink-0 ${variant === "light" ? "text-gray-400" : "text-white/20"}`} />
                             {action.action as string}
                           </div>
                           <p className={`text-[11px] mt-1.5 leading-relaxed max-w-xl ${t.body}`}>
@@ -383,20 +395,22 @@ export default function SurvivalPlan({ result, onReset, sessionId, hsClassificat
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {timeline && (
             <div>
-              <h3 className={`text-[10px] font-mono uppercase tracking-widest mb-3 ${t.label}`}>
+              <h3 className={`text-[12px] font-bold font-mono uppercase tracking-[0.18em] mb-3 ${t.label}`}>
                 Implementation Timeline
               </h3>
               <div className="space-y-3">
                 {(["days_30", "days_60", "days_90"] as const).map((period) => {
                   const label = period.replace("days_", "") + "D";
                   const items = timeline[period] || [];
+                  const PeriodIcon = period === "days_30" ? Clock3 : period === "days_60" ? CalendarRange : Flag;
                   return (
                     <div
                       key={period}
                       className={`border p-3 rounded-lg ${t.card}`}
                       style={variant === "dark" ? { background: "rgba(15,17,23,0.5)" } : undefined}
                     >
-                      <div className={`text-[9px] font-mono uppercase tracking-wider mb-2 ${variant === "light" ? "text-cyan-600" : "text-cyan-500"}`}>
+                      <div className={`flex items-center gap-1.5 text-[12px] font-bold font-mono uppercase tracking-wider mb-2 ${variant === "light" ? "text-cyan-600" : "text-cyan-500"}`}>
+                        <PeriodIcon size={13} strokeWidth={1.75} className="shrink-0 opacity-70" />
                         {label}
                       </div>
                       <ul className="space-y-1.5">
@@ -415,8 +429,8 @@ export default function SurvivalPlan({ result, onReset, sessionId, hsClassificat
           )}
 
           {risks.length > 0 && (
-            <div>
-              <h3 className={`text-[10px] font-mono uppercase tracking-widest mb-3 ${t.label}`}>
+            <div className="flex flex-col justify-center h-full">
+              <h3 className={`text-[12px] font-bold font-mono uppercase tracking-[0.18em] mb-3 ${t.label}`}>
                 Risk Assessment
               </h3>
               <div className="space-y-3">
@@ -424,6 +438,11 @@ export default function SurvivalPlan({ result, onReset, sessionId, hsClassificat
                   const prob = (risk.probability as string) || "";
                   const isHigh = prob.toLowerCase() === "high";
                   const isMedium = prob.toLowerCase() === "medium";
+                  const riskText = (risk.risk as string || "").toLowerCase();
+                  const RiskIcon =
+                    riskText.includes("supplier") || riskText.includes("capacity") ? Boxes
+                    : riskText.includes("quality") ? ShieldCheck
+                    : AlertTriangle;
                   return (
                     <div
                       key={i}
@@ -431,7 +450,8 @@ export default function SurvivalPlan({ result, onReset, sessionId, hsClassificat
                       style={variant === "dark" ? { background: "rgba(15,17,23,0.5)" } : undefined}
                     >
                       <div className="flex items-start justify-between gap-3 mb-1.5">
-                        <div className={`text-[12px] font-medium min-w-0 ${t.heading}`}>
+                        <div className={`flex items-center gap-1.5 text-[12px] font-medium min-w-0 ${t.heading}`}>
+                          <RiskIcon size={13} strokeWidth={1.75} className={`shrink-0 ${variant === "light" ? "text-gray-400" : "text-white/20"}`} />
                           {risk.risk as string}
                         </div>
                         <span
@@ -464,7 +484,7 @@ export default function SurvivalPlan({ result, onReset, sessionId, hsClassificat
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.35 }}
           >
-            <h3 className={`text-[10px] font-mono uppercase tracking-widest mb-3 ${t.label}`}>
+            <h3 className={`text-[12px] font-bold font-mono uppercase tracking-[0.18em] mb-3 ${t.label}`}>
               Methodology & Evidence
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
