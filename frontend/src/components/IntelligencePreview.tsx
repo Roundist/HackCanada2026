@@ -33,7 +33,7 @@ export default function IntelligencePreview({
   const { marginErosionPct, confidenceScore } = useMemo(
     () =>
       profile
-        ? computeStressTestMetrics(tariffRatePct, profile.baseMarginErosionPct)
+        ? computeStressTestMetrics(tariffRatePct, profile)
         : { marginErosionPct: 0, confidenceScore: 0 },
     [profile, tariffRatePct]
   );
@@ -149,7 +149,7 @@ export default function IntelligencePreview({
                 />
               </div>
               <p className={`text-[10px] mt-1.5 ${isLight ? "text-gray-500" : "text-white/40"}`}>
-                Estimated from data completeness and retrieval quality; not a certainty score.
+                Estimated from scenario richness, source concentration, and retrieval quality; not a certainty score.
               </p>
             </>
           ) : (
