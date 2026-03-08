@@ -1,8 +1,6 @@
 import { useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { ChainOfThoughtEntry } from "../types";
-import TradeIntelligenceMap from "./TradeIntelligenceMap";
-
 interface AgentTerminalLogProps {
   log: ChainOfThoughtEntry[];
   isRunning: boolean;
@@ -45,7 +43,11 @@ export default function AgentTerminalLog({ log, isRunning, isComplete }: AgentTe
         className={`flex-1 min-h-0 overflow-y-auto overflow-x-hidden font-mono text-[10px] leading-relaxed bg-gray-50 border-b border-gray-200 ${log.length > 0 ? "p-3 space-y-0.5" : ""}`}
         style={{ WebkitOverflowScrolling: "touch" }}
       >
-        {showGraph && <TradeIntelligenceMap />}
+        {showGraph && (
+          <div className="flex items-center justify-center h-full text-[9px] font-mono text-gray-400 tracking-widest uppercase p-4">
+            Waiting for analysis to start...
+          </div>
+        )}
         <AnimatePresence initial={false}>
           {log.map((entry, i) => (
             <motion.div

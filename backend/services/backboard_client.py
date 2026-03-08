@@ -97,7 +97,7 @@ async def init_backboard() -> bool:
         existing = next((a for a in assistants if a.name == "TariffTriage Orchestrator"), None)
 
         if existing:
-            _assistant_id = existing.assistant_id
+            _assistant_id = str(existing.assistant_id)
             logger.info("Backboard: reusing assistant %s", _assistant_id)
         else:
             assistant = await _backboard_client.create_assistant(
@@ -105,7 +105,7 @@ async def init_backboard() -> bool:
                 description="Multi-agent trade war survival platform — shared memory orchestrator",
                 system_prompt="You coordinate 5 specialized AI agents analyzing tariff impacts for Canadian businesses.",
             )
-            _assistant_id = assistant.assistant_id
+            _assistant_id = str(assistant.assistant_id)
             logger.info("Backboard: created assistant %s", _assistant_id)
 
         return True
@@ -129,8 +129,9 @@ async def create_session_thread() -> str | None:
         return None
     try:
         thread = await _backboard_client.create_thread(_assistant_id)
-        logger.info("Backboard: created thread %s", thread.thread_id)
-        return thread.thread_id
+        thread_id = str(thread.thread_id)
+        logger.info("Backboard: created thread %s", thread_id)
+        return thread_id
     except Exception as e:
         logger.warning("Backboard: failed to create thread: %s", e)
         return None

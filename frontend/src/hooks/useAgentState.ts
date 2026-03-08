@@ -330,6 +330,12 @@ export function useAgentState() {
           }
           break;
         case "agent_error":
+          if (msg.message) {
+            setChainOfThoughtLog((prev) => [
+              ...prev,
+              { agent: msg.agent ?? "System", message: msg.message!, timestamp: Date.now() },
+            ]);
+          }
           if (agentId) {
             updateAgent(agentId, { status: "error" });
           }
