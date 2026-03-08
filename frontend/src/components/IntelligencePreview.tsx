@@ -34,7 +34,7 @@ export default function IntelligencePreview({
     () =>
       profile
         ? computeStressTestMetrics(tariffRatePct, profile.baseMarginErosionPct)
-        : { marginErosionPct: 0, confidenceScore: 100 },
+        : { marginErosionPct: 0, confidenceScore: 0 },
     [profile, tariffRatePct]
   );
 
@@ -130,7 +130,7 @@ export default function IntelligencePreview({
 
         <div className={cardClass} style={cardStyle}>
           <div className={`flex items-center justify-between gap-2 ${labelClass}`}>
-            <span>Data coverage</span>
+            <span>Estimated confidence</span>
             {profile && (
               <span className={`text-sm font-semibold tabular-nums ${isLight ? "text-gray-900" : ""}`} style={{ color: isLight ? undefined : "#3b82f6" }}>
                 {confidenceScore}%
@@ -149,7 +149,7 @@ export default function IntelligencePreview({
                 />
               </div>
               <p className={`text-[10px] mt-1.5 ${isLight ? "text-gray-500" : "text-white/40"}`}>
-                Profile inputs matched to CBSA codes. Run analysis for full evidence.
+                Estimated from data completeness and retrieval quality; not a certainty score.
               </p>
             </>
           ) : (

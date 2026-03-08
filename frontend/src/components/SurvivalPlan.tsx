@@ -204,7 +204,7 @@ export default function SurvivalPlan({ result, onReset, sessionId, hsClassificat
                 const dataScore = Math.min(40,
                   (actions.length > 0 ? 15 : 0) + (timeline ? 10 : 0) + (risks.length > 0 ? 10 : 0) + (tariffImpact ? 5 : 0)
                 );
-                const confidence = 60 + dataScore;
+                const confidence = Math.min(92, 60 + dataScore);
                 return (
                   <>
                     <StatCard
@@ -217,7 +217,7 @@ export default function SurvivalPlan({ result, onReset, sessionId, hsClassificat
                     />
                     <StatCard
                       variant={variant}
-                      label="Confidence"
+                      label="Est. Confidence"
                       value={`${confidence}%`}
                       color="#2563eb"
                       delay={0.25}
