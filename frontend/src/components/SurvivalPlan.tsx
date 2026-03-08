@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
-import { FileText, TrendingDown, ShieldAlert, Target, Coins, SlidersHorizontal, Clock3, CalendarRange, Flag, Boxes, ShieldCheck, AlertTriangle, Factory, Truck, FileCheck, BadgeDollarSign } from "lucide-react";
+import { FileText, TrendingDown, ShieldAlert, Target, Coins, SlidersHorizontal, Clock3, CalendarRange, Flag, Boxes, ShieldCheck, AlertTriangle, Factory, Truck, FileCheck, BadgeDollarSign, Cpu, Battery, FlaskConical, Globe2 } from "lucide-react";
 import { downloadSurvivalPlanPdf } from "../utils/exportPdf";
 import TariffChart from "./TariffChart";
 import HsCorrection from "./HsCorrection";
@@ -23,6 +23,51 @@ const TIMELINE_PREVIEW_ITEMS = 2;
 const RISK_PREVIEW_CHARS = 160;
 
 type TariffChartInput = { name: string; tariff_cost: number };
+type ActionVisual = {
+  icon: React.ElementType;
+  accent: string;
+  softBg: string;
+};
+
+const ACTION_VISUAL_FALLBACKS: ActionVisual[] = [
+  { icon: Factory, accent: "#0891b2", softBg: "#ecfeff" },
+  { icon: BadgeDollarSign, accent: "#16a34a", softBg: "#ecfdf5" },
+  { icon: FileCheck, accent: "#7c3aed", softBg: "#f5f3ff" },
+  { icon: AlertTriangle, accent: "#ea580c", softBg: "#fff7ed" },
+];
+
+function getActionVisual(actionText: string, category: string, index: number): ActionVisual {
+  const text = `${actionText} ${category}`.toLowerCase();
+
+  if (text.includes("pcb") || text.includes("semiconductor") || text.includes("component") || text.includes("electronics")) {
+    return { icon: Cpu, accent: "#2563eb", softBg: "#eff6ff" };
+  }
+  if (text.includes("battery") || text.includes("energy")) {
+    return { icon: Battery, accent: "#10b981", softBg: "#ecfdf5" };
+  }
+  if (text.includes("plastic") || text.includes("housing") || text.includes("packaging")) {
+    return { icon: Boxes, accent: "#7c3aed", softBg: "#f5f3ff" };
+  }
+  if (text.includes("chemical") || text.includes("finish") || text.includes("coating")) {
+    return { icon: FlaskConical, accent: "#0d9488", softBg: "#f0fdfa" };
+  }
+  if (text.includes("monitor") || text.includes("cusma") || text.includes("regulat") || text.includes("government")) {
+    return { icon: FileCheck, accent: "#f59e0b", softBg: "#fffbeb" };
+  }
+  if (text.includes("global") || text.includes("import") || text.includes("export") || text.includes("market")) {
+    return { icon: Globe2, accent: "#06b6d4", softBg: "#ecfeff" };
+  }
+  if (text.includes("cost") || text.includes("price") || text.includes("saving") || text.includes("margin")) {
+    return { icon: BadgeDollarSign, accent: "#16a34a", softBg: "#ecfdf5" };
+  }
+  if (text.includes("supplier") || text.includes("source") || text.includes("local")) {
+    return { icon: Factory, accent: "#0284c7", softBg: "#f0f9ff" };
+  }
+  if (text.includes("shipping") || text.includes("transit") || text.includes("logistics")) {
+    return { icon: Truck, accent: "#dc2626", softBg: "#fef2f2" };
+  }
+  return ACTION_VISUAL_FALLBACKS[index % ACTION_VISUAL_FALLBACKS.length];
+}
 
 const light = {
   container: "bg-gray-50",
@@ -356,13 +401,8 @@ export default function SurvivalPlan({ result, onReset, sessionId, hsClassificat
                           : "LOW"
                       : null;
 
-                  const catLower = category.toLowerCase();
-                  const actionLower = (action.action as string || "").toLowerCase();
-                  const ActionIcon =
-                    catLower.includes("supplier") || actionLower.includes("supplier") ? Factory
-                    : catLower.includes("government") || catLower.includes("regulat") || actionLower.includes("government") ? FileCheck
-                    : catLower.includes("pric") || actionLower.includes("pric") ? BadgeDollarSign
-                    : Truck;
+                  const actionLabel = String(action.action || "");
+                  const { icon: ActionIcon, accent, softBg } = getActionVisual(actionLabel, category, i);
 
                   const isLastOdd = actions.length % 2 !== 0 && i === actions.length - 1;
 
@@ -372,12 +412,16 @@ export default function SurvivalPlan({ result, onReset, sessionId, hsClassificat
                       initial={{ opacity: 0, x: -10 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: 0.1 + i * 0.05 }}
-                      className={`border p-4 rounded-lg flex items-start justify-between gap-4 ${t.card} ${isLastOdd ? "sm:col-span-2" : ""}`}
+                      className={`relative overflow-hidden border p-4 rounded-xl flex items-start justify-between gap-4 ${t.card} ${isLastOdd ? "sm:col-span-2" : ""}`}
                       style={variant === "dark" ? { background: "rgba(15,17,23,0.5)" } : undefined}
                     >
+                      <div
+                        className="absolute inset-x-0 top-0 h-1"
+                        style={{ background: `linear-gradient(90deg, ${accent}30, ${accent}, ${accent}30)` }}
+                      />
                       <div className="flex items-start gap-4 min-w-0">
                         <div
-                          className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold shrink-0 ${
+                          className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-semibold shrink-0 ${
                             variant === "light"
                               ? "bg-gray-100 text-gray-700 border border-gray-200"
                               : "border border-white/[0.08] text-white/50"
@@ -387,23 +431,55 @@ export default function SurvivalPlan({ result, onReset, sessionId, hsClassificat
                         </div>
                         <div className="min-w-0">
                           <div className={`flex items-center gap-1.5 text-[13px] font-semibold ${t.heading}`}>
-                            <ActionIcon size={13} strokeWidth={1.75} className={`shrink-0 ${variant === "light" ? "text-gray-400" : "text-white/20"}`} />
-                            {action.action as string}
+                            <span
+                              className="h-5 w-5 rounded-md flex items-center justify-center border shrink-0"
+                              style={{
+                                borderColor: `${accent}55`,
+                                background: softBg,
+                                color: accent,
+                              }}
+                            >
+                              <ActionIcon size={12} strokeWidth={1.9} />
+                            </span>
+                            {actionLabel}
                           </div>
                           <p className={`text-[11px] mt-1.5 leading-relaxed max-w-xl ${t.body}`}>
                             {action.description as string}
                           </p>
-                          <div className={`flex flex-wrap gap-x-4 gap-y-0.5 mt-2 text-[10px] font-mono ${t.muted}`}>
-                            {timelineDays !== null && <span>{timelineDays}d</span>}
-                            {effort && <span>Effort: {effort}</span>}
-                            {category && <span>{category}</span>}
+                          <div className="flex flex-wrap gap-1.5 mt-2">
+                            {timelineDays !== null && (
+                              <span className={`text-[9px] font-mono uppercase tracking-wider px-2 py-0.5 rounded border ${
+                                variant === "light" ? "border-gray-200 bg-gray-50 text-gray-600" : "border-white/10 bg-white/[0.02] text-white/45"
+                              }`}>
+                                {timelineDays}d
+                              </span>
+                            )}
+                            {effort && (
+                              <span className={`text-[9px] font-mono uppercase tracking-wider px-2 py-0.5 rounded border ${
+                                variant === "light" ? "border-gray-200 bg-gray-50 text-gray-600" : "border-white/10 bg-white/[0.02] text-white/45"
+                              }`}>
+                                Effort {effort}
+                              </span>
+                            )}
+                            {category && (
+                              <span
+                                className={`text-[9px] font-mono uppercase tracking-wider px-2 py-0.5 rounded border max-w-full truncate ${
+                                  variant === "light" ? "border-gray-200 bg-gray-50 text-gray-600" : "border-white/10 bg-white/[0.02] text-white/45"
+                                }`}
+                                title={category}
+                              >
+                                {category}
+                              </span>
+                            )}
                           </div>
                         </div>
                       </div>
-                      <div className="flex flex-col items-end gap-1 shrink-0">
+                      <div className="flex flex-col items-end gap-1.5 shrink-0">
                         {estimatedSavings !== null && (
-                          <div className="text-right">
-                            <div className={`text-sm font-semibold ${variant === "light" ? "text-green-600" : "text-green-500/80"}`}>
+                          <div className={`text-right rounded-lg px-2 py-1 border ${
+                            variant === "light" ? "border-emerald-200 bg-emerald-50/80" : "border-emerald-400/20 bg-emerald-400/5"
+                          }`}>
+                            <div className={`text-sm font-semibold ${variant === "light" ? "text-green-700" : "text-green-500/80"}`}>
                               ${estimatedSavings.toLocaleString()}
                             </div>
                             <div className={`text-[8px] font-mono uppercase ${t.muted}`}>Savings</div>
