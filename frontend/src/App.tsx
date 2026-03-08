@@ -153,7 +153,7 @@ export default function App() {
               <div className="w-[280px] shrink-0 border-r-2 border-gray-200 flex flex-col min-h-full bg-gray-50 px-3 py-4 overflow-y-auto">
                 <AgentIntelligencePanel selectedProfile={selectedProfile} />
                 <div className="mt-3 flex-shrink-0 overflow-hidden min-h-0">
-                  <RoutesMap size="compact" variant="light" className="w-full" />
+                  <RoutesMap size="compact" variant="light" className="w-full" profile={selectedProfile} />
                 </div>
                 <SupplyChainFlowTable profile={selectedProfile} />
               </div>
@@ -176,14 +176,14 @@ export default function App() {
                       {submitError}
                     </div>
                   )}
-                  <div>
-                    <h1 className="text-lg font-semibold text-gray-900">
+                  <div className="text-center">
+                    <h1 className="text-3xl font-semibold text-gray-900">
                       War-Room Briefing Intake
                     </h1>
                     <p className="text-sm text-gray-500 mt-0.5">
                       Build a high-fidelity business brief, then deploy five specialist agents to map exposure, classify HS codes, and generate a tactical response plan.
                     </p>
-                    <div className="mt-2 flex flex-wrap gap-1.5">
+                    <div className="mt-2 flex flex-wrap gap-1.5 justify-center">
                       <span className="text-[9px] font-mono uppercase tracking-wider px-2 py-0.5 rounded-full border border-cyan-200 bg-cyan-50 text-cyan-700">
                         5-agent orchestration
                       </span>
@@ -195,6 +195,7 @@ export default function App() {
                       </span>
                     </div>
                   </div>
+                  <ProductSearch variant="light" />
                   <BusinessInput
                     onSubmit={handleSubmit}
                     onSelectProfile={setSelectedProfile}
@@ -202,7 +203,6 @@ export default function App() {
                     isRunning={false}
                     variant="light"
                   />
-                  <ProductSearch variant="light" />
                 </div>
                 </div>
               </div>
@@ -287,7 +287,7 @@ export default function App() {
               <div className="max-w-6xl mx-auto px-2 sm:px-4 pt-4">
                 <SharedMemorySnapshot data={finalResult} />
               </div>
-              <SurvivalPlan result={finalResult} onReset={handleReset} sessionId={sessionId} hsClassifications={hsClassifications} reasoningSteps={reasoningSteps} variant="light" onTariffImpactUpdate={updateTariffImpact} />
+              <SurvivalPlan result={finalResult} onReset={handleReset} sessionId={sessionId} hsClassifications={hsClassifications} reasoningSteps={reasoningSteps} variant="light" onTariffImpactUpdate={updateTariffImpact} profile={selectedProfile} />
             </motion.div>
           )}
         </AnimatePresence>

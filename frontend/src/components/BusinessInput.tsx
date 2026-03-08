@@ -2,9 +2,7 @@ import { useMemo, useState } from "react";
 import {
   ArrowRight,
   CheckCircle2,
-  DatabaseZap,
   Radar,
-  ScanSearch,
   ShieldAlert,
   Sparkles,
 } from "lucide-react";
@@ -66,29 +64,6 @@ const REQUIRED_FIELDS: Array<keyof FormData> = [
   "importSources",
   "usImportPct",
   "keyProducts",
-];
-
-const MISSION_SIGNALS = [
-  {
-    icon: Radar,
-    title: "Supply Chain Mapping",
-    detail: "Extract key inputs, origins, and bottlenecks",
-  },
-  {
-    icon: ScanSearch,
-    title: "HS + Tariff Classification",
-    detail: "Match to CBSA code candidates with confidence",
-  },
-  {
-    icon: DatabaseZap,
-    title: "Exposure Simulation",
-    detail: "Quantify tariff cost and margin impact",
-  },
-  {
-    icon: ShieldAlert,
-    title: "Strategy Output",
-    detail: "Generate actions, timeline, and risk mitigation",
-  },
 ];
 
 const CONTEXT_PROMPTS = [
@@ -219,11 +194,6 @@ export default function BusinessInput({
     setForm((prev) => ({ ...prev, [field]: value }));
 
   const composed = composeDescription(form);
-  const requiredFilled = useMemo(
-    () => REQUIRED_FIELDS.filter((field) => form[field].trim().length > 0).length,
-    [form]
-  );
-  const readinessPct = Math.round((requiredFilled / REQUIRED_FIELDS.length) * 100);
   const canRun = composed.length >= 50 && form.industry !== "";
 
   const handleSubmit = () => {
@@ -253,91 +223,6 @@ export default function BusinessInput({
     <div className="space-y-4">
       {!isRunning && (
         <>
-          <div
-            className={`rounded-xl border overflow-hidden ${
-              isLight ? "border-gray-200 bg-white" : "border-white/10 bg-black/30"
-            }`}
-          >
-            <div
-              className={`px-3 py-2 border-b ${
-                isLight
-                  ? "border-gray-200 bg-[linear-gradient(110deg,#ecfeff,#f8fafc_48%,#fff7ed)]"
-                  : "border-white/10 bg-[linear-gradient(110deg,rgba(6,28,36,0.9),rgba(15,23,42,0.8),rgba(42,18,10,0.75))]"
-              }`}
-            >
-              <div
-                className={`text-[9px] font-mono uppercase tracking-widest ${
-                  isLight ? "text-cyan-700" : "text-cyan-300/80"
-                }`}
-              >
-                Mission Intake
-              </div>
-              <div
-                className={`text-sm font-semibold mt-0.5 ${
-                  isLight ? "text-gray-900" : "text-white/85"
-                }`}
-              >
-                Brief the War Room before launch
-              </div>
-              <div
-                className={`text-[11px] mt-1 ${
-                  isLight ? "text-gray-600" : "text-white/50"
-                }`}
-              >
-                Stronger context in this form means sharper tariff classification, cleaner risk scoring, and higher-quality strategy output.
-              </div>
-            </div>
-
-            <div className="p-3 space-y-3">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                {MISSION_SIGNALS.map((signal) => (
-                  <div
-                    key={signal.title}
-                    className={`rounded-lg border px-2.5 py-2 ${
-                      isLight ? "border-gray-200 bg-gray-50/85" : "border-white/10 bg-white/[0.02]"
-                    }`}
-                  >
-                    <div className="flex items-center gap-1.5">
-                      <signal.icon
-                        size={12}
-                        className={isLight ? "text-cyan-600" : "text-cyan-300"}
-                      />
-                      <span
-                        className={`text-[10px] font-semibold uppercase tracking-wider ${
-                          isLight ? "text-gray-800" : "text-white/75"
-                        }`}
-                      >
-                        {signal.title}
-                      </span>
-                    </div>
-                    <p
-                      className={`text-[10px] mt-1 leading-snug ${
-                        isLight ? "text-gray-500" : "text-white/40"
-                      }`}
-                    >
-                      {signal.detail}
-                    </p>
-                  </div>
-                ))}
-              </div>
-
-              <div className="rounded-lg border border-dashed border-cyan-300/60 bg-cyan-50/60 px-3 py-2">
-                <div className="flex items-center justify-between gap-3">
-                  <div className="text-[10px] font-mono uppercase tracking-wider text-cyan-800">
-                    Brief readiness
-                  </div>
-                  <div className="text-[11px] font-semibold text-cyan-900">{readinessPct}%</div>
-                </div>
-                <div className="mt-1.5 h-1.5 rounded-full bg-cyan-100 overflow-hidden">
-                  <div
-                    className="h-full rounded-full bg-cyan-500 transition-all duration-500"
-                    style={{ width: `${Math.max(8, readinessPct)}%` }}
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-
           <div className={`flex gap-2 border-b pb-2 ${isLight ? "border-gray-200" : "border-white/10"}`}>
             <button
               type="button"

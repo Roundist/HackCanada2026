@@ -6,6 +6,7 @@ import TariffChart from "./TariffChart";
 import HsCorrection from "./HsCorrection";
 import RoutesMap from "./RoutesMap";
 import type { HsClassification, ReasoningStep } from "../types";
+import type { BusinessProfile } from "../data/businessProfiles";
 
 interface SurvivalPlanProps {
   result: Record<string, unknown>;
@@ -16,6 +17,8 @@ interface SurvivalPlanProps {
   reasoningSteps?: ReasoningStep[];
   variant?: "dark" | "light";
   onTariffImpactUpdate?: (updated: Record<string, unknown>) => void;
+  /** When set, trade routes map shows this profile's supply chain routes. */
+  profile?: BusinessProfile | null;
 }
 
 const BASE_TARIFF_RATE = 25;
@@ -96,7 +99,7 @@ const dark = {
   button: "border-white/[0.06] text-white/30 hover:text-white/60",
 };
 
-export default function SurvivalPlan({ result, onReset, sessionId, hsClassifications = [], reasoningSteps = [], variant = "dark", onTariffImpactUpdate }: SurvivalPlanProps) {
+export default function SurvivalPlan({ result, onReset, sessionId, hsClassifications = [], reasoningSteps = [], variant = "dark", onTariffImpactUpdate, profile = null }: SurvivalPlanProps) {
   const t = variant === "light" ? light : dark;
   const [exporting, setExporting] = useState(false);
   const [simulatedRate, setSimulatedRate] = useState(BASE_TARIFF_RATE);
@@ -285,7 +288,7 @@ export default function SurvivalPlan({ result, onReset, sessionId, hsClassificat
           <h3 className={`text-[12px] font-bold font-mono uppercase tracking-[0.18em] mb-3 ${t.label}`}>
             Trade Routes
           </h3>
-          <RoutesMap size="large" variant={variant} />
+          <RoutesMap size="large" variant={variant} profile={profile} />
         </motion.div>
 
         {/* Tariff Simulator + Chart (PRD: What If Tariffs Go Higher?) */}
