@@ -1,6 +1,6 @@
 interface PipelineStage {
   label: string;
-  active: boolean;
+  status: "done" | "active" | "queued";
 }
 
 interface Props {
@@ -8,9 +8,9 @@ interface Props {
 }
 
 const PipelineBar = ({ stages: PIPELINE_STAGES }: Props) => {
-  let activeIndex = -1;
-  PIPELINE_STAGES.forEach((s, i) => { if (s.active) activeIndex = i; });
-  const progress = ((activeIndex + 1) / PIPELINE_STAGES.length) * 100;
+  const doneCount = PIPELINE_STAGES.filter((s) => s.status === "done").length;
+  const hasActive = PIPELINE_STAGES.some((s) => s.status === "active");
+  const progress = ((doneCount + (hasActive ? 0.5 : 0)) / PIPELINE_STAGES.length) * 100;
 
   return (
     <div className="absolute bottom-0 left-0 right-0 px-6 pb-4 pt-3 bg-card/80 backdrop-blur-sm border-t border-border">
@@ -24,18 +24,36 @@ const PipelineBar = ({ stages: PIPELINE_STAGES }: Props) => {
               key={i}
               className="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-body whitespace-nowrap shrink-0"
               style={{
-                background: stage.active
-                  ? 'hsla(var(--neural-blue) / 0.1)'
-                  : 'transparent',
-                border: `1px solid ${stage.active ? 'hsla(var(--neural-blue) / 0.3)' : 'hsl(var(--border))'}`,
-                color: stage.active ? 'hsl(var(--neural-blue))' : 'hsl(var(--muted-foreground))',
+                background:
+                  stage.status === "done"
+                    ? "rgba(22, 163, 74, 0.1)"
+                    : stage.status === "active"
+                    ? "hsla(var(--neural-blue) / 0.1)"
+                    : "transparent",
+                border:
+                  stage.status === "done"
+                    ? "1px solid rgba(22, 163, 74, 0.28)"
+                    : stage.status === "active"
+                    ? "1px solid hsla(var(--neural-blue) / 0.3)"
+                    : "1px solid hsl(var(--border))",
+                color:
+                  stage.status === "done"
+                    ? "#15803d"
+                    : stage.status === "active"
+                    ? "hsl(var(--neural-blue))"
+                    : "hsl(var(--muted-foreground))",
               }}
             >
               <span
                 className="w-1.5 h-1.5 rounded-full"
                 style={{
-                  background: stage.active ? 'hsl(var(--neural-blue))' : 'hsl(var(--muted-foreground))',
-                  opacity: stage.active ? 1 : 0.4,
+                  background:
+                    stage.status === "done"
+                      ? "#16a34a"
+                      : stage.status === "active"
+                      ? "hsl(var(--neural-blue))"
+                      : "hsl(var(--muted-foreground))",
+                  opacity: stage.status === "queued" ? 0.4 : 1,
                 }}
               />
               {stage.label}

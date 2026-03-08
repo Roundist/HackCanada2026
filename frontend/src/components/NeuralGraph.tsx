@@ -114,9 +114,15 @@ export default function NeuralGraph({ agents }: NeuralGraphProps) {
     const agentMap = Object.fromEntries(agents.map(a => [a.id, a]));
     return order.map(id => {
       const a = agentMap[id];
+      const status: "done" | "active" | "queued" =
+        a?.status === 'done'
+          ? 'done'
+          : a?.status === 'running'
+          ? 'active'
+          : 'queued';
       return {
         label: a?.name ?? id,
-        active: a?.status === 'running' || a?.status === 'done',
+        status,
       };
     });
   }, [agents]);

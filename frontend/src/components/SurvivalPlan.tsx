@@ -19,6 +19,8 @@ interface SurvivalPlanProps {
 }
 
 const BASE_TARIFF_RATE = 25;
+const TIMELINE_PREVIEW_ITEMS = 2;
+const RISK_PREVIEW_CHARS = 160;
 
 type TariffChartInput = { name: string; tariff_cost: number };
 
@@ -53,6 +55,8 @@ export default function SurvivalPlan({ result, onReset, sessionId, hsClassificat
   const t = variant === "light" ? light : dark;
   const [exporting, setExporting] = useState(false);
   const [simulatedRate, setSimulatedRate] = useState(BASE_TARIFF_RATE);
+  const [expandedTimeline, setExpandedTimeline] = useState<Record<string, boolean>>({});
+  const [expandedRisks, setExpandedRisks] = useState<Record<number, boolean>>({});
   const plan = (result.survival_plan || result) as Record<string, unknown>;
   const summary = plan.executive_summary as Record<string, unknown> | undefined;
   const actions = (plan.priority_actions || []) as Record<string, unknown>[];
@@ -438,6 +442,8 @@ export default function SurvivalPlan({ result, onReset, sessionId, hsClassificat
                 {(["days_30", "days_60", "days_90"] as const).map((period) => {
                   const label = period.replace("days_", "") + "D";
                   const items = timeline[period] || [];
+                  const isExpanded = expandedTimeline[period] === true;
+                  const visibleItems = isExpanded ? items : items.slice(0, TIMELINE_PREVIEW_ITEMS);
                   const PeriodIcon = period === "days_30" ? Clock3 : period === "days_60" ? CalendarRange : Flag;
                   return (
                     <div
@@ -445,18 +451,45 @@ export default function SurvivalPlan({ result, onReset, sessionId, hsClassificat
                       className={`border p-3 rounded-lg ${t.card}`}
                       style={variant === "dark" ? { background: "rgba(15,17,23,0.5)" } : undefined}
                     >
-                      <div className={`flex items-center gap-1.5 text-[12px] font-bold font-mono uppercase tracking-wider mb-2 ${variant === "light" ? "text-cyan-600" : "text-cyan-500"}`}>
-                        <PeriodIcon size={13} strokeWidth={1.75} className="shrink-0 opacity-70" />
-                        {label}
+                      <div className="flex items-center justify-between gap-2 mb-2">
+                        <div className={`flex items-center gap-1.5 text-[12px] font-bold font-mono uppercase tracking-wider ${variant === "light" ? "text-cyan-600" : "text-cyan-500"}`}>
+                          <PeriodIcon size={13} strokeWidth={1.75} className="shrink-0 opacity-70" />
+                          {label}
+                        </div>
+                        <span className={`text-[8px] font-mono uppercase tracking-wider px-2 py-0.5 rounded border ${
+                          variant === "light"
+                            ? "text-gray-600 border-gray-200 bg-gray-50"
+                            : "text-white/45 border-white/10 bg-white/[0.02]"
+                        }`}>
+                          {items.length} items
+                        </span>
                       </div>
                       <ul className="space-y-1.5">
-                        {items.map((item, i) => (
+                        {visibleItems.map((item, i) => (
                           <li key={i} className={`text-[11px] flex items-start gap-2 ${t.body}`}>
                             <span className="shrink-0 mt-0.5 w-1 h-1 rounded-full bg-current opacity-60" aria-hidden />
                             <span>{item}</span>
                           </li>
                         ))}
                       </ul>
+                      {items.length > TIMELINE_PREVIEW_ITEMS && (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setExpandedTimeline((prev) => ({
+                              ...prev,
+                              [period]: !isExpanded,
+                            }))
+                          }
+                          className={`mt-2 text-[10px] font-mono uppercase tracking-wider ${
+                            variant === "light"
+                              ? "text-cyan-700 hover:text-cyan-800"
+                              : "text-cyan-400/70 hover:text-cyan-300"
+                          }`}
+                        >
+                          {isExpanded ? "Show less" : `Show ${items.length - TIMELINE_PREVIEW_ITEMS} more`}
+                        </button>
+                      )}
                     </div>
                   );
                 })}
@@ -502,10 +535,40 @@ export default function SurvivalPlan({ result, onReset, sessionId, hsClassificat
                           {prob || "LOW"}
                         </span>
                       </div>
-                      <div className={`text-[10px] leading-relaxed ${t.body}`}>
-                        <span className={t.muted}>Mitigation: </span>
-                        {risk.mitigation as string}
-                      </div>
+                      {(() => {
+                        const mitigation = String(risk.mitigation || "");
+                        const isExpanded = expandedRisks[i] === true;
+                        const isLong = mitigation.length > RISK_PREVIEW_CHARS;
+                        const visibleText = isExpanded || !isLong
+                          ? mitigation
+                          : `${mitigation.slice(0, RISK_PREVIEW_CHARS).trimEnd()}…`;
+                        return (
+                          <>
+                            <div className={`text-[10px] leading-relaxed ${t.body}`}>
+                              <span className={t.muted}>Mitigation: </span>
+                              {visibleText}
+                            </div>
+                            {isLong && (
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setExpandedRisks((prev) => ({
+                                    ...prev,
+                                    [i]: !isExpanded,
+                                  }))
+                                }
+                                className={`mt-1.5 text-[10px] font-mono uppercase tracking-wider ${
+                                  variant === "light"
+                                    ? "text-gray-500 hover:text-gray-700"
+                                    : "text-white/40 hover:text-white/70"
+                                }`}
+                              >
+                                {isExpanded ? "Show less" : "Show details"}
+                              </button>
+                            )}
+                          </>
+                        );
+                      })()}
                     </div>
                   );
                 })}
