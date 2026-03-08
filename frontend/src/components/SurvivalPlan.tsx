@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
+import { FileText, TrendingDown, ShieldAlert, Target, Coins } from "lucide-react";
 import { downloadSurvivalPlanPdf } from "../utils/exportPdf";
 import TariffChart from "./TariffChart";
 import HsCorrection from "./HsCorrection";
@@ -121,65 +122,78 @@ export default function SurvivalPlan({ result, onReset, sessionId, hsClassificat
       </div>
 
       <div className="p-6 space-y-6">
-        {/* Above the fold: Summary + Key numbers */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Above the fold: Executive Summary wide row, then KPI cards row */}
+        <div className="space-y-4">
+          {/* Executive Summary — full-width centered dominant card */}
           {summary && (
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className={`col-span-2 border p-4 ${t.card}`}
+              className={`border p-4 text-center ${t.card}`}
               style={variant === "dark" ? { background: "rgba(15,17,23,0.6)" } : undefined}
             >
-              <div className={`text-[9px] font-mono uppercase tracking-widest mb-2 ${t.label}`}>Executive Summary</div>
+              <div className={`flex items-center justify-center gap-2 text-[11px] font-mono uppercase tracking-widest mb-2 ${t.label}`}>
+                <FileText size={19} strokeWidth={1.75} className="text-gray-500 shrink-0" />
+                Executive Summary
+              </div>
               <h3 className={`text-sm font-semibold mb-2 ${t.heading}`}>
                 {summary.headline as string}
               </h3>
               <p className={`text-[11px] leading-relaxed ${t.body}`}>{summary.key_finding as string}</p>
             </motion.div>
           )}
-          {tariffImpact && (
-            <>
-              <StatCard
-                variant={variant}
-                label="Total Exposure"
-                value={`$${((tariffImpact.total_tariff_exposure as number) || 0).toLocaleString()}`}
-                color="#dc2626"
-                delay={0.1}
-              />
-              <StatCard
-                variant={variant}
-                label="Margin Erosion"
-                value={`${((tariffImpact.total_margin_erosion_pct as number) || 0).toFixed(1)}%`}
-                color="#d97706"
-                delay={0.15}
-              />
-            </>
+          {/* KPI cards — four equal cards in one row */}
+          {(tariffImpact || summary) && (
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              {tariffImpact && (
+                <>
+                  <StatCard
+                    variant={variant}
+                    label="Total Exposure"
+                    value={`$${((tariffImpact.total_tariff_exposure as number) || 0).toLocaleString()}`}
+                    color="#dc2626"
+                    delay={0.1}
+                    icon={Coins}
+                  />
+                  <StatCard
+                    variant={variant}
+                    label="Margin Erosion"
+                    value={`${((tariffImpact.total_margin_erosion_pct as number) || 0).toFixed(1)}%`}
+                    color="#d97706"
+                    delay={0.15}
+                    icon={TrendingDown}
+                  />
+                </>
+              )}
+              {summary && (() => {
+                const riskLevel = (summary.risk_level as string) ?? "N/A";
+                const dataScore = Math.min(40,
+                  (actions.length > 0 ? 15 : 0) + (timeline ? 10 : 0) + (risks.length > 0 ? 10 : 0) + (tariffImpact ? 5 : 0)
+                );
+                const confidence = 60 + dataScore;
+                return (
+                  <>
+                    <StatCard
+                      variant={variant}
+                      label="Risk Level"
+                      value={riskLevel || "N/A"}
+                      color="#dc2626"
+                      delay={0.2}
+                      icon={ShieldAlert}
+                    />
+                    <StatCard
+                      variant={variant}
+                      label="Confidence"
+                      value={`${confidence}%`}
+                      color="#2563eb"
+                      delay={0.25}
+                      icon={Target}
+                    />
+                  </>
+                );
+              })()}
+            </div>
           )}
-          {summary && (() => {
-            const riskLevel = (summary.risk_level as string) ?? "N/A";
-            const dataScore = Math.min(40,
-              (actions.length > 0 ? 15 : 0) + (timeline ? 10 : 0) + (risks.length > 0 ? 10 : 0) + (tariffImpact ? 5 : 0)
-            );
-            const confidence = 60 + dataScore;
-            return (
-              <>
-                <StatCard
-                  variant={variant}
-                  label="Risk Level"
-                  value={riskLevel || "N/A"}
-                  color="#dc2626"
-                  delay={0.2}
-                />
-                <StatCard
-                  variant={variant}
-                  label="Confidence"
-                  value={`${confidence}%`}
-                  color="#2563eb"
-                  delay={0.25}
-                />
-              </>
-            );
-          })()}
         </div>
 
         {/* Trade routes map — internal (blue), US tariffed (red), foreign (green); additive, no analysis removed */}
@@ -525,7 +539,7 @@ export default function SurvivalPlan({ result, onReset, sessionId, hsClassificat
   );
 }
 
-function StatCard({ label, value, color, delay, variant = "dark" }: { label: string; value: string; color: string; delay: number; variant?: "dark" | "light" }) {
+function StatCard({ label, value, color, delay, variant = "dark", icon: Icon }: { label: string; value: string; color: string; delay: number; variant?: "dark" | "light"; icon?: React.ElementType }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
@@ -534,8 +548,11 @@ function StatCard({ label, value, color, delay, variant = "dark" }: { label: str
       className={`border p-4 ${variant === "light" ? "border-gray-200 bg-gray-50" : "border-white/[0.04]"}`}
       style={variant === "dark" ? { background: `${color}04` } : undefined}
     >
-      <div className={`text-[9px] font-mono uppercase tracking-wider ${variant === "light" ? "text-gray-500" : "text-white/20"}`}>{label}</div>
-      <div className="text-xl font-semibold mt-1.5" style={{ color }}>{value}</div>
+      <div className={`flex items-center justify-center gap-2 text-[11px] font-mono uppercase tracking-wider ${variant === "light" ? "text-gray-500" : "text-white/20"}`}>
+        {Icon && <Icon size={18} strokeWidth={1.75} className="text-gray-500 shrink-0" />}
+        {label}
+      </div>
+      <div className="text-xl font-semibold mt-1.5 text-center" style={{ color }}>{value}</div>
     </motion.div>
   );
 }
