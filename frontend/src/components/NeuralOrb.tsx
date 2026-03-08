@@ -51,11 +51,20 @@ const NeuralOrb = ({ node, mouseOffset }: Props) => {
   const orbRef = useRef<HTMLDivElement>(null);
   const { color, glowColor, scale, status, label, findings } = node;
   const isActive = status === 'ACTIVE';
+  const isDone = status === 'DONE';
+  const isError = status === 'ERROR';
   const baseSize = 110;
   const size = baseSize * scale;
 
   const hsl = `hsl(${color.h}, ${color.s}%, ${color.l}%)`;
   const glowHsl = `hsl(${glowColor.h}, ${glowColor.s}%, ${glowColor.l}%)`;
+  const statusColor = isError
+    ? '#dc2626'
+    : isDone
+    ? '#16a34a'
+    : isActive
+    ? hsl
+    : 'hsl(var(--muted-foreground))';
 
   // Parallax offset based on depth (scale)
   const parallaxStrength = scale * 8;
@@ -115,7 +124,7 @@ const NeuralOrb = ({ node, mouseOffset }: Props) => {
         style={{
           width: size * 1.15,
           height: size * 1.15,
-          border: `1.5px solid hsla(${color.h}, ${color.s}%, ${color.l}%, ${isActive ? 0.4 : 0.2})`,
+          border: `1.5px solid hsla(${color.h}, ${color.s}%, ${color.l}%, ${isActive || isDone ? 0.4 : 0.2})`,
         }}
       />
 
@@ -130,10 +139,12 @@ const NeuralOrb = ({ node, mouseOffset }: Props) => {
             radial-gradient(ellipse at 65% 70%, hsla(${color.h}, ${color.s}%, ${Math.max(color.l - 20, 10)}%, 0.25), transparent 60%),
             radial-gradient(circle at 50% 50%, hsla(${color.h}, ${color.s}%, ${color.l}%, ${isActive ? 0.15 : 0.07}), transparent 70%)
           `,
-          border: `1.5px solid hsla(${color.h}, ${color.s}%, ${color.l}%, ${isActive ? 0.4 : 0.2})`,
+          border: `1.5px solid hsla(${color.h}, ${color.s}%, ${color.l}%, ${isActive || isDone ? 0.4 : 0.2})`,
           backdropFilter: 'blur(12px)',
           boxShadow: isActive
             ? `0 0 50px hsla(${glowColor.h}, ${glowColor.s}%, ${glowColor.l}%, 0.25), 0 0 20px hsla(${glowColor.h}, ${glowColor.s}%, ${glowColor.l}%, 0.15), inset 0 1px 2px hsla(0, 0%, 100%, 0.2)`
+            : isDone
+            ? `0 0 32px hsla(142, 76%, 36%, 0.22), 0 0 12px hsla(142, 76%, 36%, 0.14), inset 0 1px 2px hsla(0, 0%, 100%, 0.14)`
             : `0 0 25px hsla(${color.h}, ${color.s}%, ${color.l}%, 0.1), inset 0 1px 2px hsla(0, 0%, 100%, 0.12)`,
         }}
       >
@@ -167,7 +178,7 @@ const NeuralOrb = ({ node, mouseOffset }: Props) => {
       <div className="mt-3 text-center" style={{ minWidth: 140 }}>
         <span
           className="text-[10px] font-display tracking-[0.2em] uppercase block"
-          style={{ color: isActive ? hsl : 'hsl(var(--muted-foreground))' }}
+          style={{ color: statusColor }}
         >
           {status}
         </span>
@@ -184,7 +195,7 @@ const NeuralOrb = ({ node, mouseOffset }: Props) => {
         </span>
         <span
           className="text-[10px] font-display tracking-[0.15em] uppercase block"
-          style={{ color: isActive ? hsl : 'hsl(var(--muted-foreground))' }}
+          style={{ color: statusColor }}
         >
           {status}
         </span>

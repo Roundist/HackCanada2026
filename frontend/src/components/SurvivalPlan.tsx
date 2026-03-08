@@ -20,6 +20,8 @@ interface SurvivalPlanProps {
 
 const BASE_TARIFF_RATE = 25;
 
+type TariffChartInput = { name: string; tariff_cost: number };
+
 const light = {
   container: "bg-gray-50",
   bar: "bg-white border-gray-200 text-gray-700",
@@ -57,7 +59,35 @@ export default function SurvivalPlan({ result, onReset, sessionId, hsClassificat
   const timeline = plan.timeline as Record<string, string[]> | undefined;
   const risks = (plan.risks || []) as Record<string, unknown>[];
   const tariffImpact = result.tariff_impact as Record<string, unknown> | undefined;
-  const inputs = (tariffImpact?.inputs as Array<{ name: string; tariff_cost: number }>) ?? [];
+  const chartInputs = useMemo<TariffChartInput[]>(() => {
+    if (!tariffImpact) return [];
+
+    const directInputs = Array.isArray(tariffImpact.inputs)
+      ? (tariffImpact.inputs as Array<{ name?: unknown; tariff_cost?: unknown }>)
+      : [];
+    const normalizedDirect = directInputs
+      .map((item) => ({
+        name: typeof item.name === "string" ? item.name : "",
+        tariff_cost: typeof item.tariff_cost === "number" ? item.tariff_cost : 0,
+      }))
+      .filter((item) => item.name.length > 0);
+    if (normalizedDirect.length > 0) return normalizedDirect;
+
+    const inputImpacts = Array.isArray(tariffImpact.input_impacts)
+      ? (tariffImpact.input_impacts as Array<{ input_name?: unknown; annual_tariff_cost?: unknown; tariff_cost?: unknown }>)
+      : [];
+    return inputImpacts
+      .map((item) => ({
+        name: typeof item.input_name === "string" ? item.input_name : "",
+        tariff_cost:
+          typeof item.annual_tariff_cost === "number"
+            ? item.annual_tariff_cost
+            : typeof item.tariff_cost === "number"
+            ? item.tariff_cost
+            : 0,
+      }))
+      .filter((item) => item.name.length > 0);
+  }, [tariffImpact]);
   const totalExposureBase = (tariffImpact?.total_tariff_exposure as number) ?? 0;
   const simulatedExposure = useMemo(
     () => Math.round(totalExposureBase * (simulatedRate / BASE_TARIFF_RATE)),
@@ -210,7 +240,7 @@ export default function SurvivalPlan({ result, onReset, sessionId, hsClassificat
         </motion.div>
 
         {/* Tariff Simulator + Chart (PRD: What If Tariffs Go Higher?) */}
-        {inputs.length > 0 && (
+        {tariffImpact && (
           <motion.div
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
@@ -247,12 +277,18 @@ export default function SurvivalPlan({ result, onReset, sessionId, hsClassificat
             <div className={`text-sm font-semibold tabular-nums mb-3 ${variant === "light" ? "text-gray-900" : "text-white"}`}>
               Simulated exposure at {simulatedRate}%: ${simulatedExposure.toLocaleString()}
             </div>
-            <TariffChart
-              inputs={inputs}
-              simulatedRate={simulatedRate}
-              baseRate={BASE_TARIFF_RATE}
-              variant={variant}
-            />
+            {chartInputs.length > 0 ? (
+              <TariffChart
+                inputs={chartInputs}
+                simulatedRate={simulatedRate}
+                baseRate={BASE_TARIFF_RATE}
+                variant={variant}
+              />
+            ) : (
+              <div className={`text-[11px] font-mono ${t.muted}`}>
+                Per-input tariff breakdown is unavailable for this run.
+              </div>
+            )}
             <button
               type="button"
               onClick={() => setSimulatedRate(BASE_TARIFF_RATE)}

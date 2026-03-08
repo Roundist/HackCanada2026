@@ -95,7 +95,14 @@ export default function NeuralGraph({ agents }: NeuralGraphProps) {
       .map(a => ({
         id: a.id,
         label: a.name,
-        status: a.status === 'running' ? 'ACTIVE' : 'STANDBY',
+        status:
+          a.status === 'running'
+            ? 'ACTIVE'
+            : a.status === 'done'
+            ? 'DONE'
+            : a.status === 'error'
+            ? 'ERROR'
+            : 'STANDBY',
         findings: a.messages.slice(-3),
         ...AGENT_NODE_CONFIG[a.id],
       }));
