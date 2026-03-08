@@ -114,12 +114,32 @@ export function getAltSuppliersForProfile(profileId: string): AltSupplier[] {
 /** Compute stress-test metrics from tariff rate (0–50) and base erosion at 25% */
 export function computeStressTestMetrics(
   tariffRatePct: number,
-  baseMarginErosionAt25: number
+  profile: Pick<BusinessProfile, "baseMarginErosionPct" | "routes" | "altSuppliers" | "imports" | "risk" | "industry">
 ): { marginErosionPct: number; confidenceScore: number } {
+  const baseMarginErosionAt25 = profile.baseMarginErosionPct;
   const factor = tariffRatePct / 25;
   const marginErosionPct = Math.min(35, Math.round((baseMarginErosionAt25 * factor) * 10) / 10);
-  // Confidence is an estimate, never absolute certainty.
-  const rawConfidence = 96 - tariffRatePct * 1.6;
+
+  // Confidence is scenario-sensitive and never absolute certainty.
+  const usPctMatch = profile.imports.match(/(\d+)\s*%/);
+  const usImportPct = usPctMatch ? Number(usPctMatch[1]) : 50;
+
+  const routeCoverageBoost = Math.min(12, profile.routes.length * 3);
+  const supplierCoverageBoost = Math.min(10, profile.altSuppliers.length * 3);
+  const tariffPenalty = tariffRatePct * 0.35;
+  const concentrationPenalty = Math.max(0, (usImportPct - 35) * 0.25);
+  const riskPenalty = profile.risk === "HIGH" ? 6 : profile.risk === "MEDIUM" ? 3 : 1;
+  const industryPenalty =
+    profile.industry.toLowerCase().includes("technology") ? 2 : 0;
+
+  const rawConfidence =
+    58 +
+    routeCoverageBoost +
+    supplierCoverageBoost -
+    tariffPenalty -
+    concentrationPenalty -
+    riskPenalty -
+    industryPenalty;
   const confidenceScore = Math.max(35, Math.min(92, Math.round(rawConfidence)));
   return { marginErosionPct, confidenceScore };
 }
