@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -9,6 +11,16 @@
   --line: rgba(0, 0, 0, 0.08);
   --text: #111827;
   --muted: #6b7280;
+
+  /* synapse-grid neural vars */
+  --foreground: 220 25% 10%;
+  --card: 0 0% 100%;
+  --border: 220 15% 90%;
+  --muted-foreground: 220 10% 50%;
+  --neural-blue: 205 85% 55%;
+  --neural-blue-glow: 205 90% 65%;
+  --neural-grid: 220 15% 90%;
+  --neural-bg: 220 20% 97%;
 }
 
 * {

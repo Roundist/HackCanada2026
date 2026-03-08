@@ -1,18 +1,10 @@
-import { useCallback, useMemo } from "react";
-import {
-  ReactFlow,
-  Background,
-  BackgroundVariant,
-  type Node,
-  type Edge,
-  type NodeTypes,
-  MarkerType,
-} from "@xyflow/react";
-import "@xyflow/react/dist/style.css";
-import { motion, AnimatePresence } from "framer-motion";
-import AgentNodeComponent from "./AgentNode";
-import { getAgentActivity } from "../hooks/useAgentState";
-import type { AgentInfo } from "../types";
+import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
+import NeuralOrb from './NeuralOrb';
+import NeuralPathways from './NeuralPathways';
+import NeuralGrid from './NeuralGrid';
+import NeuralPipelineBar from './NeuralPipelineBar';
+import type { NeuralNode, NeuralConnection } from './NeuralTypes';
+import type { AgentInfo } from '../types/index';
 
 interface NeuralGraphProps {
   agents: AgentInfo[];
@@ -20,218 +12,145 @@ interface NeuralGraphProps {
   selectedAgent: string | null;
 }
 
-const nodeTypes: NodeTypes = {
-  agent: AgentNodeComponent as unknown as NodeTypes["agent"],
+// Maps our AgentInfo IDs to synapse-grid NeuralNode config
+const AGENT_NODE_CONFIG: Record<string, Omit<NeuralNode, 'id' | 'label' | 'status' | 'findings'>> = {
+  supply_chain: {
+    x: 50, y: 18, scale: 1.3,
+    color: { h: 205, s: 85, l: 55 },
+    glowColor: { h: 205, s: 90, l: 65 },
+    icon: 'circle',
+  },
+  tariff_calculator: {
+    x: 22, y: 45, scale: 0.95,
+    color: { h: 355, s: 75, l: 55 },
+    glowColor: { h: 355, s: 80, l: 65 },
+    icon: 'diamond',
+  },
+  geopolitical: {
+    x: 78, y: 45, scale: 0.95,
+    color: { h: 35, s: 85, l: 55 },
+    glowColor: { h: 35, s: 90, l: 65 },
+    icon: 'diamond-outline',
+  },
+  supplier_scout: {
+    x: 32, y: 75, scale: 0.9,
+    color: { h: 155, s: 65, l: 45 },
+    glowColor: { h: 155, s: 70, l: 55 },
+    icon: 'diamond-filled',
+  },
+  strategy: {
+    x: 65, y: 75, scale: 0.9,
+    color: { h: 265, s: 60, l: 58 },
+    glowColor: { h: 265, s: 65, l: 68 },
+    icon: 'target',
+  },
 };
 
-export default function NeuralGraph({ agents, onSelectAgent, selectedAgent }: NeuralGraphProps) {
-  const onSelect = useCallback(
-    (id: string) => {
-      onSelectAgent(selectedAgent === id ? null : id);
-    },
-    [onSelectAgent, selectedAgent]
-  );
+const CONNECTIONS: NeuralConnection[] = [
+  { from: 'supply_chain', to: 'tariff_calculator' },
+  { from: 'supply_chain', to: 'geopolitical' },
+  { from: 'supply_chain', to: 'supplier_scout' },
+  { from: 'supply_chain', to: 'strategy' },
+  { from: 'tariff_calculator', to: 'supplier_scout' },
+  { from: 'geopolitical', to: 'strategy' },
+  { from: 'tariff_calculator', to: 'strategy' },
+  { from: 'geopolitical', to: 'supplier_scout' },
+];
 
-  const nodes: Node[] = useMemo(() => {
-    const agentMap = Object.fromEntries(agents.map((a) => [a.id, a]));
+export default function NeuralGraph({ agents }: NeuralGraphProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [mouseOffset, setMouseOffset] = useState({ x: 0, y: 0 });
+  const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
 
-    return [
-      {
-        id: "supply_chain",
-        type: "agent",
-        position: { x: 360, y: 40 },
-        data: {
-          ...agentMap["supply_chain"],
-          label: agentMap["supply_chain"].name,
-          activity: getAgentActivity(agentMap["supply_chain"]),
-          isSelected: selectedAgent === "supply_chain",
-          onSelect,
-        },
-        draggable: false,
-      },
-      {
-        id: "tariff_calculator",
-        type: "agent",
-        position: { x: 120, y: 220 },
-        data: {
-          ...agentMap["tariff_calculator"],
-          label: agentMap["tariff_calculator"].name,
-          activity: getAgentActivity(agentMap["tariff_calculator"]),
-          isSelected: selectedAgent === "tariff_calculator",
-          onSelect,
-        },
-        draggable: false,
-      },
-      {
-        id: "geopolitical",
-        type: "agent",
-        position: { x: 600, y: 220 },
-        data: {
-          ...agentMap["geopolitical"],
-          label: agentMap["geopolitical"].name,
-          activity: getAgentActivity(agentMap["geopolitical"]),
-          isSelected: selectedAgent === "geopolitical",
-          onSelect,
-        },
-        draggable: false,
-      },
-      {
-        id: "supplier_scout",
-        type: "agent",
-        position: { x: 200, y: 440 },
-        data: {
-          ...agentMap["supplier_scout"],
-          label: agentMap["supplier_scout"].name,
-          activity: getAgentActivity(agentMap["supplier_scout"]),
-          isSelected: selectedAgent === "supplier_scout",
-          onSelect,
-        },
-        draggable: false,
-      },
-      {
-        id: "strategy",
-        type: "agent",
-        position: { x: 520, y: 440 },
-        data: {
-          ...agentMap["strategy"],
-          label: agentMap["strategy"].name,
-          activity: getAgentActivity(agentMap["strategy"]),
-          isSelected: selectedAgent === "strategy",
-          onSelect,
-        },
-        draggable: false,
-      },
-    ];
-  }, [agents, selectedAgent, onSelect]);
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    const rect = containerRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    const cx = rect.width / 2;
+    const cy = rect.height / 2;
+    setMouseOffset({
+      x: (e.clientX - rect.left - cx) / cx,
+      y: (e.clientY - rect.top - cy) / cy,
+    });
+  }, []);
 
-  const edges: Edge[] = useMemo(() => {
-    const agentMap = Object.fromEntries(agents.map((a) => [a.id, a]));
-    const ids = ["supply_chain", "tariff_calculator", "geopolitical", "supplier_scout", "strategy"];
-
-    const pairs: [string, string][] = [];
-    for (let i = 0; i < ids.length; i++) {
-      for (let j = i + 1; j < ids.length; j++) {
-        pairs.push([ids[i], ids[j]]);
+  useEffect(() => {
+    const update = () => {
+      if (containerRef.current) {
+        setDimensions({
+          width: containerRef.current.clientWidth,
+          height: containerRef.current.clientHeight,
+        });
       }
-    }
-
-    const buildEdge = (source: string, target: string): Edge => {
-      const sourceAgent = agentMap[source];
-      const targetAgent = agentMap[target];
-      const active = sourceAgent?.status === "running" || targetAgent?.status === "running";
-      const done = sourceAgent?.status === "done" && targetAgent?.status === "done";
-      const color = active
-        ? (sourceAgent?.status === "running" ? sourceAgent?.color : targetAgent?.color) || "#38bdf8"
-        : done
-          ? `${sourceAgent?.color || "#10b981"}55`
-          : "rgba(255,255,255,0.18)";
-
-      return {
-        id: `${source}-${target}`,
-        source,
-        target,
-        animated: active,
-        className: active ? "flowing" : "",
-        style: {
-          stroke: active || done ? color : "#94a3b8",
-          strokeWidth: active ? 2 : 1,
-          strokeDasharray: active ? "" : "6 10",
-          opacity: done ? 0.8 : 0.7,
-        },
-        markerEnd: {
-          type: MarkerType.ArrowClosed,
-          color,
-          width: 10,
-          height: 10,
-        },
-      };
     };
+    update();
+    const ro = new ResizeObserver(update);
+    if (containerRef.current) ro.observe(containerRef.current);
+    return () => ro.disconnect();
+  }, []);
 
-    return pairs.map(([s, t]) => buildEdge(s, t));
+  // Convert AgentInfo[] → NeuralNode[]
+  const neuralNodes: NeuralNode[] = useMemo(() => {
+    return agents
+      .filter(a => AGENT_NODE_CONFIG[a.id])
+      .map(a => ({
+        id: a.id,
+        label: a.name,
+        status: a.status === 'running' ? 'ACTIVE' : 'STANDBY',
+        findings: a.messages.slice(-3),
+        ...AGENT_NODE_CONFIG[a.id],
+      }));
   }, [agents]);
 
-  const selectedAgentInfo = agents.find((a) => a.id === selectedAgent);
+  // Pipeline stages from agents in order
+  const pipelineStages = useMemo(() => {
+    const order = ['supply_chain', 'tariff_calculator', 'geopolitical', 'supplier_scout', 'strategy'];
+    const agentMap = Object.fromEntries(agents.map(a => [a.id, a]));
+    return order.map(id => {
+      const a = agentMap[id];
+      return {
+        label: a?.name ?? id,
+        active: a?.status === 'running' || a?.status === 'done',
+      };
+    });
+  }, [agents]);
 
   return (
-    <div className="relative w-full h-full">
-      <ReactFlow
-        nodes={nodes}
-        edges={edges}
-        nodeTypes={nodeTypes}
-        fitView
-        fitViewOptions={{ padding: 0.35 }}
-        proOptions={{ hideAttribution: true }}
-        panOnDrag={false}
-        zoomOnScroll={false}
-        zoomOnPinch={false}
-        zoomOnDoubleClick={false}
-        preventScrolling={false}
-        nodesDraggable={false}
-        nodesConnectable={false}
-        elementsSelectable={false}
-      >
-        <Background variant={BackgroundVariant.Lines} gap={60} size={0.5} color="rgba(0,0,0,0.06)" />
-      </ReactFlow>
+    <div
+      ref={containerRef}
+      className="relative w-full h-full overflow-hidden"
+      style={{ background: 'hsl(var(--neural-bg))' }}
+      onMouseMove={handleMouseMove}
+    >
+      <NeuralGrid />
 
-      <AnimatePresence>
-        {selectedAgentInfo && (
-          <motion.div
-            initial={{ x: 300, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            exit={{ x: 300, opacity: 0 }}
-            transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="absolute top-3 right-3 w-72 max-h-[calc(100%-1.5rem)] overflow-hidden border border-gray-200 rounded-lg bg-white shadow-lg"
-          >
-            <div className="p-3 flex items-center justify-between border-b border-gray-200">
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full" style={{ background: selectedAgentInfo.color }} />
-                <div>
-                  <h3 className="text-[11px] font-semibold text-gray-900">{selectedAgentInfo.name}</h3>
-                  <p className="text-[9px] font-mono uppercase tracking-wider" style={{ color: selectedAgentInfo.color }}>
-                    {selectedAgentInfo.status}
-                  </p>
-                </div>
-              </div>
-              <button
-                onClick={() => onSelectAgent(null)}
-                className="text-gray-400 hover:text-gray-600 transition-colors text-xs font-mono"
-              >
-                [x]
-              </button>
-            </div>
+      {dimensions.width > 0 && (
+        <NeuralPathways
+          width={dimensions.width}
+          height={dimensions.height}
+          mouseOffset={mouseOffset}
+          nodes={neuralNodes}
+          connections={CONNECTIONS}
+        />
+      )}
 
-            <div className="p-3 overflow-y-auto max-h-80 bg-gray-50">
-              <div className="text-[9px] font-mono uppercase tracking-wider text-gray-500 mb-2">Output Log</div>
-              {selectedAgentInfo.messages.length === 0 ? (
-                <div className="text-[10px] text-gray-500 font-mono">
-                  {selectedAgentInfo.status === "idle" ? "Awaiting activation..." : "Processing..."}
-                </div>
-              ) : (
-                <div className="space-y-1">
-                  {selectedAgentInfo.messages.map((msg, i) => (
-                    <motion.div
-                      key={i}
-                      initial={{ opacity: 0, y: 3 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="text-[10px] text-gray-700 font-mono leading-relaxed flex items-start gap-1.5"
-                    >
-                      <span style={{ color: selectedAgentInfo.color }} className="shrink-0">{">"}</span>
-                      <span>{msg}</span>
-                    </motion.div>
-                  ))}
-                </div>
-              )}
-              {selectedAgentInfo.status === "running" && (
-                <div className="flex gap-0.5 mt-2 ml-3">
-                  <div className="typing-dot w-1 h-1 rounded-full" style={{ background: selectedAgentInfo.color }} />
-                  <div className="typing-dot w-1 h-1 rounded-full" style={{ background: selectedAgentInfo.color }} />
-                  <div className="typing-dot w-1 h-1 rounded-full" style={{ background: selectedAgentInfo.color }} />
-                </div>
-              )}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Ambient glow around active zone */}
+      <div
+        className="absolute pointer-events-none"
+        style={{
+          left: '50%',
+          top: '18%',
+          width: 400,
+          height: 400,
+          transform: 'translate(-50%, -50%)',
+          background: 'radial-gradient(circle, hsla(205, 85%, 55%, 0.04), transparent 70%)',
+        }}
+      />
+
+      {neuralNodes.map(node => (
+        <NeuralOrb key={node.id} node={node} mouseOffset={mouseOffset} />
+      ))}
+
+      <NeuralPipelineBar stages={pipelineStages} />
     </div>
   );
 }

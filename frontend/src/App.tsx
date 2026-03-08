@@ -11,7 +11,6 @@ import ProductSearch from "./components/ProductSearch";
 import AgentIntelligencePanel from "./components/AgentIntelligencePanel";
 import SupplyChainFlowTable from "./components/SupplyChainFlowTable";
 import RoutesMap from "./components/RoutesMap";
-import { ReactFlowProvider } from "@xyflow/react";
 import NeuralGraph from "./components/NeuralGraph";
 import LiveTelemetryStrip from "./components/LiveTelemetryStrip";
 import { useAgentState } from "./hooks/useAgentState";
@@ -232,13 +231,11 @@ export default function App() {
                 {/* LEFT — Neural Graph + Execution Steps */}
                 <div className="flex-1 relative flex flex-col bg-white border-r border-gray-200 min-w-0">
                   <div className="flex-1 relative min-h-0">
-                    <ReactFlowProvider>
-                      <NeuralGraph
-                        agents={agents}
-                        onSelectAgent={setSelectedAgent}
-                        selectedAgent={selectedAgent}
-                      />
-                    </ReactFlowProvider>
+                    <NeuralGraph
+                      agents={agents}
+                      onSelectAgent={setSelectedAgent}
+                      selectedAgent={selectedAgent}
+                    />
                   </div>
                   <div className="shrink-0 border-t border-gray-200 bg-gray-50 px-4 py-2">
                     <ExecutionSteps agents={agents} />
