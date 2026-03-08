@@ -118,6 +118,8 @@ export function computeStressTestMetrics(
 ): { marginErosionPct: number; confidenceScore: number } {
   const factor = tariffRatePct / 25;
   const marginErosionPct = Math.min(35, Math.round((baseMarginErosionAt25 * factor) * 10) / 10);
-  const confidenceScore = Math.max(0, Math.round(100 - tariffRatePct * 1.8));
+  // Confidence is an estimate, never absolute certainty.
+  const rawConfidence = 96 - tariffRatePct * 1.6;
+  const confidenceScore = Math.max(35, Math.min(92, Math.round(rawConfidence)));
   return { marginErosionPct, confidenceScore };
 }

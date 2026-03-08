@@ -17,12 +17,12 @@ export default function SupplyChainFlowTable({ profile }: SupplyChainFlowTablePr
         Supply chain flow
       </h3>
       <div className="border border-gray-200 rounded-lg overflow-hidden bg-white">
-        <table className="w-full text-left text-xs">
+        <table className="w-full table-fixed text-left text-[11px]">
           <thead>
             <tr className="bg-gray-50 border-b border-gray-200">
-              <th className="py-2 px-3 font-semibold text-gray-600 uppercase tracking-wider">Source</th>
-              <th className="py-2 px-3 font-semibold text-gray-600 uppercase tracking-wider">Transit</th>
-              <th className="py-2 px-3 font-semibold text-gray-600 uppercase tracking-wider">Business</th>
+              <th className="w-[47%] py-2 px-2.5 font-semibold text-gray-600 uppercase tracking-wider">Source</th>
+              <th className="w-[31%] py-2 px-2.5 font-semibold text-gray-600 uppercase tracking-wider">Transit</th>
+              <th className="w-[22%] py-2 px-2.5 font-semibold text-gray-600 uppercase tracking-wider">Business</th>
             </tr>
           </thead>
           <tbody>
@@ -31,15 +31,19 @@ export default function SupplyChainFlowTable({ profile }: SupplyChainFlowTablePr
                 <td colSpan={3} className="py-4 px-3 text-gray-400">Select a profile to see routes.</td>
               </tr>
             ) : (
-              routes.map((r, i) => (
+              routes.map((r) => (
                 <tr key={`${r.commodity}-${r.transitPoint}`} className="border-b border-gray-100 last:border-b-0">
-                  <td className="py-2.5 px-3">
+                  <td className="py-2.5 px-2.5 align-top">
                     <span className="inline-block w-1.5 h-1.5 rounded-full bg-red-500 mr-2 align-middle" />
-                    <span className="text-gray-800">{r.sourceCountry} - {r.commodity}</span>
+                    <span className="text-gray-800 whitespace-normal break-words leading-snug">
+                      {r.sourceCountry} - {r.commodity}
+                    </span>
                   </td>
-                  <td className="py-2.5 px-3 text-gray-700">{r.transitPoint.replace("–", "-")}</td>
-                  <td className="py-2.5 px-3 text-gray-700">
-                    {i === Math.min(1, routes.length - 1) && profile ? profile.name : ""}
+                  <td className="py-2.5 px-2.5 text-gray-700 align-top whitespace-normal break-words leading-snug">
+                    {r.transitPoint.replace("–", "-")}
+                  </td>
+                  <td className="py-2.5 px-2.5 text-gray-700 align-top whitespace-normal break-words leading-snug">
+                    {profile ? profile.name : ""}
                   </td>
                 </tr>
               ))

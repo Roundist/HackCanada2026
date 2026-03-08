@@ -178,11 +178,22 @@ export default function App() {
                   )}
                   <div>
                     <h1 className="text-lg font-semibold text-gray-900">
-                      Trade Impact Assessment
+                      War-Room Briefing Intake
                     </h1>
                     <p className="text-sm text-gray-500 mt-0.5">
-                      Select a demo profile or enter your business. The panels left and right update to show supply chain and impact preview.
+                      Build a high-fidelity business brief, then deploy five specialist agents to map exposure, classify HS codes, and generate a tactical response plan.
                     </p>
+                    <div className="mt-2 flex flex-wrap gap-1.5">
+                      <span className="text-[9px] font-mono uppercase tracking-wider px-2 py-0.5 rounded-full border border-cyan-200 bg-cyan-50 text-cyan-700">
+                        5-agent orchestration
+                      </span>
+                      <span className="text-[9px] font-mono uppercase tracking-wider px-2 py-0.5 rounded-full border border-amber-200 bg-amber-50 text-amber-700">
+                        CBSA tariff intelligence
+                      </span>
+                      <span className="text-[9px] font-mono uppercase tracking-wider px-2 py-0.5 rounded-full border border-gray-200 bg-gray-50 text-gray-600">
+                        Live telemetry + strategy output
+                      </span>
+                    </div>
                   </div>
                   <BusinessInput
                     onSubmit={handleSubmit}

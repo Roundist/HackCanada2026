@@ -1,7 +1,7 @@
 export interface NeuralNode {
   id: string;
   label: string;
-  status: 'ACTIVE' | 'STANDBY';
+  status: 'ACTIVE' | 'STANDBY' | 'DONE' | 'ERROR';
   x: number; // percentage
   y: number; // percentage
   scale: number;

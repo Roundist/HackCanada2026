@@ -194,12 +194,14 @@ class Orchestrator:
 
         # Initialize Backboard.io session thread
         self.backboard_thread_id = await create_session_thread()
+        if self.backboard_thread_id is not None:
+            self.backboard_thread_id = str(self.backboard_thread_id)
         self.shared_memory["_backboard_thread_id"] = self.backboard_thread_id
         if self.backboard_thread_id:
             await self._arch(
                 "backboard",
                 "thread_created",
-                f"Backboard session thread created ({self.backboard_thread_id[:8]}...).",
+                f"Backboard session thread created ({str(self.backboard_thread_id)[:8]}...).",
                 status="complete",
                 sponsor="Backboard.io",
             )

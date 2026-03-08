@@ -33,7 +33,7 @@ export default function RagClassificationLive({ agents, systemEvents, hsClassifi
       case "vector_search": return ragDone ? "done" : ragStarted ? "active" : supplyDone ? "active" : "queued";
       case "hs_rank": return ragDone ? "done" : ragStarted ? "active" : "queued";
       case "tariff_lookup": return ragDone ? "done" : "queued";
-      case "tariff_calc": return tariffDone ? "done" : tariffRunning ? "active" : ragDone ? "active" : "queued";
+      case "tariff_calc": return tariffDone ? "done" : tariffRunning ? "active" : "queued";
       default: return "queued";
     }
   };

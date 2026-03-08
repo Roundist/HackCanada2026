@@ -2,6 +2,7 @@
  * Horizontal bar chart: annual tariff cost by input (PRD TariffChart).
  * Controlled by TariffSimulator via simulatedRate — bars scale when slider moves.
  */
+import { useState } from "react";
 import {
   BarChart,
   Bar,
@@ -10,6 +11,8 @@ import {
   Tooltip,
   ResponsiveContainer,
   Cell,
+  LabelList,
+  CartesianGrid,
 } from "recharts";
 
 export interface TariffInput {
@@ -34,6 +37,7 @@ export default function TariffChart({
   baseRate = 25,
   variant = "dark",
 }: TariffChartProps) {
+  const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const scale = baseRate > 0 ? simulatedRate / baseRate : 1;
   const data = [...inputs]
     .sort((a, b) => (b.tariff_cost ?? 0) - (a.tariff_cost ?? 0))
@@ -51,21 +55,33 @@ export default function TariffChart({
   const sliderMaxRate = 50;
   const domainMax = Math.ceil(maxBaseCost * (sliderMaxRate / baseRate) * 1.05);
   const isLight = variant === "light";
+  const chartHeight = Math.max(220, data.length * 46);
+  const axisColor = isLight ? "#6b7280" : "rgba(255,255,255,0.45)";
 
   return (
-    <div className="w-full" style={{ height: 220 }}>
+    <div className="w-full">
+      <div className={`flex items-center justify-between mb-1 text-[9px] font-mono uppercase tracking-wider ${isLight ? "text-gray-500" : "text-white/35"}`}>
+        <span>Input category</span>
+        <span>Annual tariff cost (CAD)</span>
+      </div>
+      <div style={{ height: chartHeight }}>
       <ResponsiveContainer width="100%" height="100%">
         <BarChart
           layout="vertical"
           data={data}
-          margin={{ top: 4, right: 8, left: 4, bottom: 4 }}
+          margin={{ top: 4, right: 16, left: 4, bottom: 16 }}
         >
+          <CartesianGrid
+            strokeDasharray="3 3"
+            horizontal={false}
+            stroke={isLight ? "#e5e7eb" : "rgba(255,255,255,0.08)"}
+          />
           <XAxis
             type="number"
             domain={[0, domainMax]}
             tickFormatter={(v) => `$${(v / 1000).toFixed(0)}K`}
             stroke={isLight ? "#d1d5db" : "rgba(255,255,255,0.2)"}
-            tick={{ fill: isLight ? "#374151" : "rgba(255,255,255,0.4)", fontSize: 9 }}
+            tick={{ fill: axisColor, fontSize: 9 }}
             axisLine={false}
             tickLine={false}
           />
@@ -74,28 +90,54 @@ export default function TariffChart({
             dataKey="name"
             width={100}
             stroke={isLight ? "#d1d5db" : "rgba(255,255,255,0.2)"}
-            tick={{ fill: isLight ? "#374151" : "rgba(255,255,255,0.5)", fontSize: 10 }}
+            tick={{ fill: axisColor, fontSize: 10 }}
             axisLine={false}
             tickLine={false}
           />
           <Tooltip
+            cursor={{ fill: isLight ? "rgba(15, 23, 42, 0.06)" : "rgba(255,255,255,0.05)" }}
             contentStyle={{
-              background: isLight ? "#f9fafb" : "rgba(248,250,252,0.98)",
-              border: isLight ? "1px solid #e5e7eb" : "1px solid #e2e8f0",
+              background: isLight ? "#f9fafb" : "rgba(15, 23, 42, 0.96)",
+              border: isLight ? "1px solid #e5e7eb" : "1px solid rgba(148,163,184,0.25)",
               borderRadius: 6,
-              color: "#111827",
+              color: isLight ? "#111827" : "#e2e8f0",
             }}
-            labelStyle={{ color: "#111827", fontWeight: 600 }}
+            labelStyle={{ color: isLight ? "#111827" : "#f8fafc", fontWeight: 600 }}
             formatter={(value: number) => [`$${value.toLocaleString()}`, "Tariff cost"]}
             labelFormatter={(_, payload) => payload[0]?.payload?.fullName ?? ""}
           />
-          <Bar dataKey="cost" radius={[0, 3, 3, 0]} maxBarSize={28} isAnimationActive={true}>
+          <Bar
+            dataKey="cost"
+            radius={[0, 3, 3, 0]}
+            maxBarSize={28}
+            isAnimationActive={true}
+            onMouseEnter={(_, index) => setActiveIndex(index)}
+            onMouseLeave={() => setActiveIndex(null)}
+          >
             {data.map((_, i) => (
-              <Cell key={i} fill={BAR_COLORS[i % BAR_COLORS.length]} fillOpacity={0.85} />
+              <Cell
+                key={i}
+                fill={BAR_COLORS[i % BAR_COLORS.length]}
+                fillOpacity={activeIndex === null || activeIndex === i ? 0.9 : 0.35}
+                stroke={activeIndex === i ? (isLight ? "#1f2937" : "#f8fafc") : "none"}
+                strokeOpacity={0.3}
+              />
             ))}
+            <LabelList
+              dataKey="cost"
+              position="right"
+              offset={8}
+              formatter={(value: number) => `$${Math.round(value / 1000)}K`}
+              style={{
+                fontSize: 10,
+                fill: axisColor,
+                fontFamily: "IBM Plex Mono, ui-monospace, monospace",
+              }}
+            />
           </Bar>
         </BarChart>
       </ResponsiveContainer>
+      </div>
     </div>
   );
 }
