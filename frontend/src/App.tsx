@@ -6,7 +6,6 @@ import SurvivalPlan from "./components/SurvivalPlan";
 import AgentTerminalLog from "./components/AgentTerminalLog";
 import IntelligencePreview from "./components/IntelligencePreview";
 import RagClassificationLive from "./components/RagClassificationLive";
-import SponsorArchitecturePanel from "./components/SponsorArchitecturePanel";
 import SharedMemorySnapshot from "./components/SharedMemorySnapshot";
 import ProductSearch from "./components/ProductSearch";
 import AgentIntelligencePanel from "./components/AgentIntelligencePanel";
@@ -254,12 +253,6 @@ export default function App() {
                       log={chainOfThoughtLog}
                       isRunning={agents.some((a) => a.status === "running")}
                       isComplete={pipelineDone}
-                    />
-                  </div>
-                  <div className="shrink-0 border-t border-gray-200" style={{ height: 180 }}>
-                    <SponsorArchitecturePanel
-                      events={architectureEvents}
-                      pipelineDone={pipelineDone}
                     />
                   </div>
                   {/* RAG Pipeline — fills the rest, scrolls internally */}
