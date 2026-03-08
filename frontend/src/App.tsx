@@ -159,16 +159,7 @@ export default function App() {
               </div>
 
               {/* CENTER — Middle band + white card so three panels are obvious */}
-              <div
-                className="relative flex-1 overflow-y-auto min-w-0 min-h-full bg-gray-200"
-                style={{
-                  backgroundImage:
-                    "linear-gradient(to bottom, rgba(241,245,249,0.82), rgba(226,232,240,0.78), rgba(241,245,249,0.82)), url('/images/newspaper.jpg'), url('/images/newspaper.jpg'), url('/images/newspaper.jpg')",
-                  backgroundRepeat: "no-repeat, repeat, repeat, repeat",
-                  backgroundSize: "100% 100%, min(220px, 28vw) auto, min(280px, 35vw) auto, min(180px, 22vw) auto",
-                  backgroundPosition: "0 0, 0 0, 87px 42px, 31px 98px",
-                }}
-              >
+              <div className="relative flex-1 overflow-y-auto min-w-0 min-h-full bg-gray-100">
                 <div className="relative min-h-full flex justify-center py-6 px-6">
                 <div className="relative w-full max-w-xl rounded-xl border border-gray-200 shadow-md p-6 space-y-5 overflow-hidden bg-white">
                   {submitError && (
@@ -176,7 +167,8 @@ export default function App() {
                       {submitError}
                     </div>
                   )}
-                  <div className="text-center">
+                  <ProductSearch variant="light" />
+                  <div className="text-center font-body">
                     <h1 className="text-3xl font-semibold text-gray-900">
                       War-Room Briefing Intake
                     </h1>
@@ -184,18 +176,18 @@ export default function App() {
                       Build a high-fidelity business brief, then deploy five specialist agents to map exposure, classify HS codes, and generate a tactical response plan.
                     </p>
                     <div className="mt-2 flex flex-wrap gap-1.5 justify-center">
-                      <span className="text-[9px] font-mono uppercase tracking-wider px-2 py-0.5 rounded-full border border-cyan-200 bg-cyan-50 text-cyan-700">
+                      <span className="text-[10px] uppercase tracking-wider px-2.5 py-1 rounded-full border border-gray-200 bg-gray-50 text-gray-700">
                         5-agent orchestration
                       </span>
-                      <span className="text-[9px] font-mono uppercase tracking-wider px-2 py-0.5 rounded-full border border-amber-200 bg-amber-50 text-amber-700">
+                      <span className="text-[10px] uppercase tracking-wider px-2.5 py-1 rounded-full border border-gray-200 bg-gray-50 text-gray-700">
                         CBSA tariff intelligence
                       </span>
-                      <span className="text-[9px] font-mono uppercase tracking-wider px-2 py-0.5 rounded-full border border-gray-200 bg-gray-50 text-gray-600">
+                      <span className="text-[10px] uppercase tracking-wider px-2.5 py-1 rounded-full border border-gray-200 bg-gray-50 text-gray-700">
                         Live telemetry + strategy output
                       </span>
                     </div>
                   </div>
-                  <ProductSearch variant="light" />
+                  <div className="font-body">
                   <BusinessInput
                     onSubmit={handleSubmit}
                     onSelectProfile={setSelectedProfile}
@@ -203,6 +195,7 @@ export default function App() {
                     isRunning={false}
                     variant="light"
                   />
+                  </div>
                 </div>
                 </div>
               </div>

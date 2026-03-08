@@ -71,21 +71,21 @@ export default function ProductSearch({ variant = "dark" }: ProductSearchProps) 
 
   const isLight = variant === "light";
   const containerClass = isLight
-    ? "rounded-xl overflow-hidden shadow-md border-2 border-cyan-200/90 bg-gradient-to-br from-cyan-50/90 to-white"
+    ? "rounded-xl overflow-hidden border border-gray-200 bg-gray-50"
     : "border border-white/[0.08] rounded-lg overflow-hidden";
   const containerStyle = isLight
     ? undefined
     : { background: "rgba(15,17,23,0.7)" };
-  const headerBorder = isLight ? "border-b border-cyan-200/70" : "border-b border-white/[0.06]";
+  const headerBorder = isLight ? "border-b border-gray-200" : "border-b border-white/[0.06]";
   const titleClass = isLight
-    ? "text-xl font-bold font-sans uppercase tracking-widest text-cyan-900 mb-1"
-    : "text-[9px] font-sans uppercase tracking-widest text-white/25 mb-1";
-  const subTitleClass = isLight ? "text-sm font-medium font-sans text-cyan-700 mb-2" : "text-[8px] font-sans text-white/20 mb-2";
+    ? "text-xl font-bold font-body text-gray-900 mb-1"
+    : "text-[9px] font-body text-white/25 mb-1";
+  const subTitleClass = isLight ? "text-sm font-medium font-body text-gray-600 mb-2" : "text-[8px] font-body text-white/20 mb-2";
   const inputClass = isLight
-    ? "w-full px-3 py-2.5 pl-9 border-2 border-cyan-200/80 rounded-lg text-[13px] text-gray-900 placeholder-gray-500 focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/25 font-sans bg-white shadow-sm"
-    : "w-full px-3 py-2 pl-8 border border-white/[0.08] rounded text-[12px] text-white/70 placeholder-white/20 focus:outline-none focus:border-white/[0.2] transition-colors font-sans";
+    ? "w-full px-3 py-2.5 pl-9 border border-gray-200 rounded-lg text-[13px] text-gray-900 placeholder-gray-500 focus:outline-none focus:border-gray-400 focus:ring-1 focus:ring-gray-400 font-body bg-white"
+    : "w-full px-3 py-2 pl-8 border border-white/[0.08] rounded text-[12px] text-white/70 placeholder-white/20 focus:outline-none focus:border-white/[0.2] transition-colors font-body";
   const inputStyle = isLight ? undefined : { background: "rgba(8,10,14,0.8)" };
-  const iconClass = isLight ? "absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-cyan-500" : "absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white/20";
+  const iconClass = isLight ? "absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" : "absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white/20";
   const spinnerClass = isLight ? "absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 border-2 border-gray-200 border-t-gray-500 rounded-full animate-spin" : "absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 border border-white/20 border-t-white/60 rounded-full animate-spin";
 
   return (
@@ -120,7 +120,7 @@ export default function ProductSearch({ variant = "dark" }: ProductSearchProps) 
             exit={{ opacity: 0, height: 0 }}
             className={isLight ? "divide-y divide-gray-100" : "divide-y divide-white/[0.04]"}
           >
-            <div className={`px-4 py-2 border-b ${isLight ? "border-gray-200 text-[8px] font-sans text-gray-500" : "border-white/[0.04] text-[8px] font-sans text-white/25"}`}>
+            <div className={`px-4 py-2 border-b ${isLight ? "border-gray-200 text-[8px] font-body text-gray-500" : "border-white/[0.04] text-[8px] font-body text-white/25"}`}>
               Rates from {CBSA_ATTRIBUTION}
             </div>
             {results.map((r, i) => (
@@ -134,8 +134,8 @@ export default function ProductSearch({ variant = "dark" }: ProductSearchProps) 
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
-                      <span className={`text-[10px] font-sans shrink-0 ${isLight ? "text-gray-600" : "text-white/40"}`}>HS {r.hs_code}</span>
-                      <span className="text-[8px] font-sans uppercase tracking-wider px-1.5 py-0.5 rounded-sm border shrink-0"
+                      <span className={`text-[10px] font-body shrink-0 ${isLight ? "text-gray-600" : "text-white/40"}`}>HS {r.hs_code}</span>
+                      <span className="text-[8px] font-body uppercase tracking-wider px-1.5 py-0.5 rounded-sm border shrink-0"
                         style={{
                           color: rateColor(r.effective_rate),
                           borderColor: `${rateColor(r.effective_rate)}33`,
@@ -148,7 +148,7 @@ export default function ProductSearch({ variant = "dark" }: ProductSearchProps) 
                     <div className={`text-[11px] leading-relaxed line-clamp-2 ${isLight ? "text-gray-700" : "text-white/60"}`}>
                       {r.description}
                     </div>
-                    <div className={`text-[9px] font-sans mt-1 ${isLight ? "text-gray-500" : "text-white/20"}`}>
+                    <div className={`text-[9px] font-body mt-1 ${isLight ? "text-gray-500" : "text-white/20"}`}>
                       {r.category} · {(r.similarity * 100).toFixed(0)}% match
                     </div>
                   </div>
@@ -156,11 +156,11 @@ export default function ProductSearch({ variant = "dark" }: ProductSearchProps) 
                     <div className="text-base font-bold tabular-nums" style={{ color: rateColor(r.effective_rate) }}>
                       {r.effective_rate}%
                     </div>
-                    <div className={`text-[8px] font-sans mt-0.5 ${isLight ? "text-gray-500" : "text-white/20"}`}>
+                    <div className={`text-[8px] font-body mt-0.5 ${isLight ? "text-gray-500" : "text-white/20"}`}>
                       effective
                     </div>
                     {r.us_retaliatory_rate > 0 && (
-                      <div className="text-[9px] font-sans text-red-500 mt-1">
+                      <div className="text-[9px] font-body text-red-500 mt-1">
                         +{r.us_retaliatory_rate}% retaliatory
                       </div>
                     )}
@@ -182,12 +182,12 @@ export default function ProductSearch({ variant = "dark" }: ProductSearchProps) 
             {searchError ? (
               <>
                 <div className={`text-[11px] ${isLight ? "text-amber-600" : "text-amber-400/80"}`}>{searchError}</div>
-                <div className={`text-[9px] font-sans mt-1 ${isLight ? "text-gray-500" : "text-white/20"}`}>Rates are from CBSA when backend is running</div>
+                <div className={`text-[9px] font-body mt-1 ${isLight ? "text-gray-500" : "text-white/20"}`}>Rates are from CBSA when backend is running</div>
               </>
             ) : (
               <>
                 <div className={`text-[11px] ${isLight ? "text-gray-600" : "text-white/30"}`}>No matching products found in CBSA tariff database</div>
-                <div className={`text-[9px] font-sans mt-1 ${isLight ? "text-gray-500" : "text-white/15"}`}>Try a different search term</div>
+                <div className={`text-[9px] font-body mt-1 ${isLight ? "text-gray-500" : "text-white/15"}`}>Try a different search term</div>
               </>
             )}
           </motion.div>

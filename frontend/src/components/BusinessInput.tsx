@@ -116,7 +116,7 @@ function FormField({
   return (
     <div className="space-y-1">
       <label
-        className={`text-[10px] font-mono uppercase tracking-widest ${
+        className={`text-[10px] font-body uppercase tracking-wider ${
           variant === "light" ? "text-gray-600" : "text-white/50"
         }`}
       >
@@ -126,7 +126,7 @@ function FormField({
       {children}
       {hint && (
         <p
-          className={`text-[9px] font-mono ${
+          className={`text-[9px] font-body ${
             variant === "light" ? "text-gray-400" : "text-white/30"
           }`}
         >
@@ -149,12 +149,12 @@ function SectionTitle({
   variant: "dark" | "light";
 }) {
   return (
-    <div className="flex items-start gap-2">
+    <div className="flex items-start gap-2 font-body">
       <div
         className={`mt-0.5 h-5 w-5 rounded flex items-center justify-center ${
           variant === "light"
-            ? "bg-cyan-50 text-cyan-600 border border-cyan-200"
-            : "bg-cyan-500/10 text-cyan-300 border border-cyan-500/20"
+            ? "bg-gray-100 text-gray-600 border border-gray-200"
+            : "bg-white/10 text-white/70 border border-white/20"
         }`}
       >
         <Icon size={11} strokeWidth={2} />
@@ -213,10 +213,10 @@ export default function BusinessInput({
         : prompt
     );
 
-  const inputClass = `w-full p-2.5 border rounded-md text-[12px] transition-colors focus:outline-none focus:border-cyan-500 ${
+  const inputClass = `w-full p-2.5 border rounded-md text-[12px] font-body transition-colors focus:outline-none ${
     isLight
-      ? "bg-white border-gray-300 text-gray-900 placeholder-gray-400"
-      : "bg-[#141922] border-white/10 text-white/80 placeholder-white/25"
+      ? "bg-white border-gray-200 text-gray-900 placeholder-gray-400 focus:border-gray-400"
+      : "bg-[#141922] border-white/10 text-white/80 placeholder-white/25 focus:border-white/30"
   }`;
 
   return (
@@ -227,7 +227,7 @@ export default function BusinessInput({
             <button
               type="button"
               onClick={() => setMode("form")}
-              className={`text-[10px] font-mono uppercase tracking-widest px-2 py-1 rounded ${
+              className={`text-[10px] font-body uppercase tracking-wider px-2 py-1 rounded ${
                 mode === "form"
                   ? isLight
                     ? "bg-gray-900 text-white"
@@ -242,7 +242,7 @@ export default function BusinessInput({
             <button
               type="button"
               onClick={() => setMode("demos")}
-              className={`text-[10px] font-mono uppercase tracking-widest px-2 py-1 rounded ${
+              className={`text-[10px] font-body uppercase tracking-wider px-2 py-1 rounded ${
                 mode === "demos"
                   ? isLight
                     ? "bg-gray-900 text-white"
@@ -260,8 +260,8 @@ export default function BusinessInput({
             <div
               className={`rounded-xl border p-4 space-y-4 ${
                 isLight
-                  ? "border-gray-200 bg-[linear-gradient(180deg,#ffffff,#f8fafc)] shadow-sm"
-                  : "border-white/10 bg-[linear-gradient(180deg,rgba(15,17,23,0.88),rgba(8,12,18,0.9))]"
+                  ? "border-gray-200 bg-white"
+                  : "border-white/10 bg-[#141922]"
               }`}
             >
               <SectionTitle
@@ -410,7 +410,7 @@ export default function BusinessInput({
                 </FormField>
                 <div className="space-y-1">
                   <div
-                    className={`text-[10px] font-mono uppercase tracking-widest ${
+                    className={`text-[10px] font-body uppercase tracking-wider ${
                       isLight ? "text-gray-600" : "text-white/50"
                     }`}
                   >
@@ -422,10 +422,10 @@ export default function BusinessInput({
                         key={prompt}
                         type="button"
                         onClick={() => appendContextPrompt(prompt)}
-                        className={`text-[9px] px-2 py-1 rounded-full border ${
+                        className={`text-[9px] font-body px-2 py-1 rounded-full border ${
                           isLight
-                            ? "border-gray-300 bg-white text-gray-600 hover:border-cyan-300 hover:text-cyan-700"
-                            : "border-white/15 bg-white/[0.03] text-white/55 hover:text-cyan-200 hover:border-cyan-300/30"
+                            ? "border-gray-200 bg-gray-50 text-gray-600 hover:border-gray-300 hover:bg-gray-100"
+                            : "border-white/15 bg-white/[0.03] text-white/55 hover:border-white/25"
                         }`}
                       >
                         + {prompt}
@@ -457,7 +457,7 @@ export default function BusinessInput({
                       : "Add industry plus core trade exposure details to unlock launch."}
                   </div>
                   <div
-                    className={`inline-flex items-center gap-1.5 px-2 py-1 rounded border text-[10px] font-mono ${
+                    className={`inline-flex items-center gap-1.5 px-2 py-1 rounded border text-[10px] font-body ${
                       canRun
                         ? "border-emerald-200 bg-emerald-50 text-emerald-700"
                         : isLight
@@ -473,7 +473,7 @@ export default function BusinessInput({
                   type="button"
                   onClick={handleSubmit}
                   disabled={!canRun}
-                  className="w-full py-3 text-sm font-semibold text-white bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 disabled:opacity-40 disabled:cursor-not-allowed rounded-lg transition-all flex items-center justify-center gap-2"
+                  className="w-full py-3 text-sm font-semibold text-white bg-red-600 hover:bg-red-500 disabled:opacity-40 disabled:cursor-not-allowed rounded-lg transition-colors flex items-center justify-center gap-2"
                 >
                   Launch War-Room Analysis
                   <ArrowRight size={16} />
@@ -532,7 +532,7 @@ export default function BusinessInput({
                   <button
                     type="button"
                     onClick={() => onSubmit(selectedProfile.description, selectedProfile)}
-                    className="w-full py-3 text-sm font-semibold text-white bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 rounded-lg transition-all flex items-center justify-center gap-2"
+                    className="w-full py-3 text-sm font-semibold text-white bg-red-600 hover:bg-red-500 rounded-lg transition-colors flex items-center justify-center gap-2"
                   >
                     Launch Demo War Room
                     <ArrowRight size={16} />
@@ -549,7 +549,7 @@ export default function BusinessInput({
       )}
 
       {isRunning && (
-        <div className="text-[10px] font-mono text-white/45 uppercase tracking-[0.28em]">
+        <div className="text-[10px] font-body text-white/45 uppercase tracking-wider">
           Intake collapsed while agents execute.
         </div>
       )}
