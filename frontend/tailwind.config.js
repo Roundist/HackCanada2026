@@ -23,6 +23,8 @@ export default {
       fontFamily: {
         sans: ['"Plus Jakarta Sans"', "system-ui", "-apple-system", "sans-serif"],
         mono: ['"IBM Plex Mono"', "ui-monospace", "monospace"],
+        display: ['"Space Grotesk"', '"Plus Jakarta Sans"', "system-ui", "sans-serif"],
+        body: ['"Inter"', '"Plus Jakarta Sans"', "system-ui", "sans-serif"],
       },
     },
   },
